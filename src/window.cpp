@@ -1,31 +1,41 @@
 #include <string>
+#include <cuda_runtime_api.h>
 #include "window.hpp"
 
-Window::Window(int width, int height, std::string title)
+Window::Window(int width, int height, std::string title, bool fullscreen)
 {
+    glfwSetErrorCallback(OnError);
     glfwInit();
-    _glfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-    glfwSetWindowUserPointer(_glfwWindow, this);
-    glfwSetFramebufferSizeCallback(_glfwWindow, WindowResizeCallback);
-    glfwSetWindowRefreshCallback(_glfwWindow, WindowRefreshCallback);
-}
+
+    if(!fullscreen)
+        glfw_window_ = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    else
+        glfw_window_ = glfwCreateWindow(width, height, title.c_str(), glfwGetPrimaryMonitor(), NULL);
+
+    glfwSetWindowUserPointer(glfw_window_, this);
 
 
-auto Window::ViewportDidResize(int w, int h) -> void
-{
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+    glfwSetWindowCloseCallback(glfw_window_, input_manager_->OnWindowClosed);
+    glfwSetWindowFocusCallback(glfw_window_, input_manager_->OnWindowFocused);
+    glfwSetWindowSizeCallback(glfw_window_, input_manager_->OnWindowResized);
+    glfwSetWindowIconifyCallback(glfw_window_, input_manager_->OnWindowIconify);
+    glfwSetWindowPosCallback(glfw_window_, input_manager_->OnWindowPositionChanged);
+    glfwSetFramebufferSizeCallback(glfw_window_, input_manager_->OnWindowFramebufferResized);
+    glfwSetWindowRefreshCallback(glfw_window_, input_manager_->OnWindowRefreshed);
+    glfwSetKeyCallback(glfw_window_, input_manager_->OnKeyPressed);
+    glfwSetMouseButtonCallback(glfw_window_, input_manager_->OnMouseButton);
+    glfwSetScrollCallback(glfw_window_, input_manager_->OnScroll);
+    glfwSetCursorEnterCallback(glfw_window_, input_manager_->OnCursorEnter);
+    glfwSetCursorPosCallback(glfw_window_, input_manager_->OnCursorPositionChanged);
 }
 
-void inline Window::WindowRefreshCallback(GLFWwindow *glfwWindow) {
-    Window *window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-}
-
-void inline Window::WindowResizeCallback(GLFWwindow *glfwWindow, int w, int h) {
-    Window *window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-    window->ViewportDidResize(w, h);
-}
 
 Window::~Window()
 {
     glfwTerminate();
+}
+
+void Window::OnError(int errorcode, const char* description)
+{
+
 }
