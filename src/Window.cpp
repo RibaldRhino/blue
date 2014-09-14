@@ -7,25 +7,25 @@ Window::Window(int width, int height, std::string title, bool fullScreen)
     glfwInit();
 
     if(!fullScreen)
-        _glfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+        _glfwWindowPtr = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     else
-        _glfwWindow = glfwCreateWindow(width, height, title.c_str(), glfwGetPrimaryMonitor(), NULL);
+        _glfwWindowPtr = glfwCreateWindow(width, height, title.c_str(), glfwGetPrimaryMonitor(), NULL);
 
-    glfwSetWindowUserPointer(_glfwWindow, this);
+    glfwSetWindowUserPointer(_glfwWindowPtr, this);
 
 
-    glfwSetWindowCloseCallback(_glfwWindow, _inputManager->OnWindowClosed);
-    glfwSetWindowFocusCallback(_glfwWindow, _inputManager->OnWindowFocused);
-    glfwSetWindowSizeCallback(_glfwWindow, _inputManager->OnWindowResized);
-    glfwSetWindowIconifyCallback(_glfwWindow, _inputManager->OnWindowIconify);
-    glfwSetWindowPosCallback(_glfwWindow, _inputManager->OnWindowPositionChanged);
-    glfwSetFramebufferSizeCallback(_glfwWindow, _inputManager->OnWindowFramebufferResized);
-    glfwSetWindowRefreshCallback(_glfwWindow, _inputManager->OnWindowRefreshed);
-    glfwSetKeyCallback(_glfwWindow, _inputManager->OnKeyPressed);
-    glfwSetMouseButtonCallback(_glfwWindow, _inputManager->OnMouseButton);
-    glfwSetScrollCallback(_glfwWindow, _inputManager->OnScroll);
-    glfwSetCursorEnterCallback(_glfwWindow, _inputManager->OnCursorEnter);
-    glfwSetCursorPosCallback(_glfwWindow, _inputManager->OnCursorPositionChanged);
+    glfwSetWindowCloseCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowClosed);
+    glfwSetWindowFocusCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowFocused);
+    glfwSetWindowSizeCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowResized);
+    glfwSetWindowIconifyCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowIconify);
+    glfwSetWindowPosCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowPositionChanged);
+    glfwSetFramebufferSizeCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowFramebufferResized);
+    glfwSetWindowRefreshCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowRefreshed);
+    glfwSetKeyCallback(_glfwWindowPtr, _inputManagerUPtr->OnKeyPressed);
+    glfwSetMouseButtonCallback(_glfwWindowPtr, _inputManagerUPtr->OnMouseButton);
+    glfwSetScrollCallback(_glfwWindowPtr, _inputManagerUPtr->OnScroll);
+    glfwSetCursorEnterCallback(_glfwWindowPtr, _inputManagerUPtr->OnCursorEnter);
+    glfwSetCursorPosCallback(_glfwWindowPtr, _inputManagerUPtr->OnCursorPositionChanged);
 }
 
 

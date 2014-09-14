@@ -11,7 +11,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(SOURCE_FILES main.cpp Window.cpp Window_InputManager.cpp EventManager.cpp IEventData.cpp)
+set(SOURCE_FILES main.cpp Window.cpp Window_InputManager.cpp EventManager.cpp IEventData.cpp Game.cpp AbstractProcess.cpp
+ProcessManager.cpp)
 
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue glfw ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES})

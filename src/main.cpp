@@ -1,7 +1,7 @@
-#include "Window.hpp"
+#include "Game.hpp"
 
 int main(int argc, char** argv)
 {
-    Window window(800, 600, "ala");
-    while(true);
+    Game game;
+    game.Run();
 }

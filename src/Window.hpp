@@ -9,8 +9,8 @@ class Window : boost::noncopyable
 {
 private:
     class InputManager;
-    GLFWwindow*_glfwWindow;
-    std::unique_ptr<InputManager> _inputManager;
+    GLFWwindow*_glfwWindowPtr;
+    std::unique_ptr<InputManager> _inputManagerUPtr;
 
 public:
     Window(int width, int height, std::string title, bool fullScreen = false);
