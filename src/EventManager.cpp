@@ -1,6 +1,6 @@
 #include "EventManager.hpp"
 
-boost::signals2::connection EventManager::AddListener(EventType& eventType, std::function<void (IEventDataPtr)>& callback)
+boost::signals2::connection EventManager::AddListener(EventType& eventType, std::function<void (IEventDataPtr&)>& callback)
 {
     return std::move(_eventBinding[eventType].connect(callback));
 }

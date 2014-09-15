@@ -1,6 +1,6 @@
 #include "ProcessManager.hpp"
 
-void ProcessManager::AttachProcess(ProcessSPtr processSPtr)
+void ProcessManager::AttachProcess(ProcessSPtr& processSPtr)
 {
     _processList.push_back(processSPtr);
 
@@ -11,7 +11,7 @@ void ProcessManager::Update(double deltaTime)
     auto processIt = _processList.begin();
     while(processIt!=_processList.end())
     {
-        auto &process = *processIt;
+        auto& process = *processIt;
         if (!process->IsInitialized())
             process->VInit();
         if (process->IsAlive())
@@ -23,7 +23,7 @@ void ProcessManager::Update(double deltaTime)
                 auto successors = process->GetSuccessors();
                 for(auto& successor : successors)
                 {
-                    _processList.push_back(successor);
+                    AttachProcess(successor);
                 }
             }
             process->VEnd();

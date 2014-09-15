@@ -9,7 +9,7 @@ class Game
 {
 private:
     std::unique_ptr<Window> _windowUPtr;
-    std::shared_ptr<EventManager> _eventManagerSPtr;
+    std::unique_ptr<EventManager> _eventManagerUPtr;
     std::unique_ptr<ProcessManager> _processManagerUPtr;
 public:
     Game();

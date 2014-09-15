@@ -21,7 +21,7 @@ private:
     void switchActiveQueue();
 
 public:
-    boost::signals2::connection AddListener(EventType& eventType, std::function<void (IEventDataPtr)>& callback);
+    boost::signals2::connection AddListener(EventType& eventType, std::function<void (IEventDataPtr&)>& callback);
     void TriggerEvent(IEventDataPtr& eventData);
     void QueueEvent(IEventDataPtr& eventData);
 
