@@ -6,8 +6,9 @@
 class ProcessManager
 {
 private:
-    ProcessSPtrList _processList;
+    ProcessUPtrList _processList;
 public:
     void Update(double deltaTime);
-    void AttachProcess(ProcessSPtr& processSPtr);
+    void AttachProcess(ProcessUPtr processUPtr);
+    bool Ended();
 };

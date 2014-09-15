@@ -1,17 +1,17 @@
 #include "EventManager.hpp"
 
-boost::signals2::connection EventManager::AddListener(EventType& eventType, std::function<void (IEventDataPtr&)>& callback)
+boost::signals2::connection EventManager::AddListener(EventType& eventType, std::function<void (IEventDataSPtr &)>& callback)
 {
     return std::move(_eventBinding[eventType].connect(callback));
 }
 
-void EventManager::TriggerEvent(IEventDataPtr& eventData)
+void EventManager::TriggerEvent(IEventDataSPtr eventData)
 {
     if(_eventBinding.find(eventData->VGetEventType()) != _eventBinding.end())
         _eventBinding[eventData->VGetEventType()](eventData);
 }
 
-void EventManager::QueueEvent(IEventDataPtr& data)
+void EventManager::QueueEvent(IEventDataSPtr data)
 {
     _eventQueue[_activeQueue].push(data);
 }

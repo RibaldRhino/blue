@@ -5,12 +5,12 @@ AbstractProcess::AbstractProcess()
     _state = ProcessState::UNINITIALIZED;
 }
 
-ProcessSPtrList& AbstractProcess::GetSuccessors()
+ProcessUPtrList& AbstractProcess::GetSuccessors()
 {
     return _successors;
 }
 
-void AbstractProcess::AddSuccessor(ProcessSPtr &process)
+void AbstractProcess::AddSuccessor(ProcessUPtr process)
 {
-    _successors.push_back(process);
+    _successors.push_back(std::move(process));
 }

@@ -7,6 +7,8 @@
 class AbstractProcess;
 typedef std::shared_ptr<AbstractProcess> ProcessSPtr;
 typedef std::list<ProcessSPtr> ProcessSPtrList;
+typedef std::unique_ptr<AbstractProcess> ProcessUPtr;
+typedef std::list<ProcessUPtr> ProcessUPtrList;
 
 class AbstractProcess : boost::noncopyable
 {
@@ -20,9 +22,9 @@ public:
         ABORTED,
     };
 
-private:
+protected:
     ProcessState _state;
-    ProcessSPtrList _successors;
+    ProcessUPtrList _successors;
 
 public:
     AbstractProcess();
@@ -31,13 +33,13 @@ public:
     virtual void VInit() = 0;
     virtual void VEnd() = 0;
 
-    ProcessSPtrList& GetSuccessors();
-    void AddSuccessor(ProcessSPtr& process);
+    ProcessUPtrList& GetSuccessors();
+    void AddSuccessor(ProcessUPtr process);
 
     bool Succeeded() const { return _state == ProcessState::SUCCEEDED; }
-    bool IsInitialized() const { return _state == ProcessState::UNINITIALIZED; }
-    bool IsAlive() const { return _state == ProcessState::RUNNING; }
-    bool IsDead() const
+    bool isUninitialized() const { return _state == ProcessState::UNINITIALIZED; }
+    bool isAlive() const { return _state == ProcessState::RUNNING; }
+    bool isDead() const
     {
         return _state == ProcessState::SUCCEEDED ||
                _state == ProcessState::FAILED    ||

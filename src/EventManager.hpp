@@ -12,18 +12,18 @@ class EventManager
 {
 private:
     int _activeQueue;
-    std::queue<IEventDataPtr> _eventQueue[2];
+    std::queue<IEventDataSPtr> _eventQueue[2];
     // _event_queue[_active_queue] - new events are stored here.
     // _event_queue[(_active_queue+1)%2] - dispatching is done from this queue.
-    std::map<EventType, boost::signals2::signal<void (IEventDataPtr)>> _eventBinding;
+    std::map<EventType, boost::signals2::signal<void (IEventDataSPtr)>> _eventBinding;
 
 private:
     void switchActiveQueue();
 
 public:
-    boost::signals2::connection AddListener(EventType& eventType, std::function<void (IEventDataPtr&)>& callback);
-    void TriggerEvent(IEventDataPtr& eventData);
-    void QueueEvent(IEventDataPtr& eventData);
+    boost::signals2::connection AddListener(EventType& eventType, std::function<void (IEventDataSPtr &)>& callback);
+    void TriggerEvent(IEventDataSPtr eventData);
+    void QueueEvent(IEventDataSPtr eventData);
 
     void Update(double deltaTime);
 };

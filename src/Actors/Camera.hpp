@@ -1,6 +1,6 @@
 #pragma once
 
-class Water
+class Camera
 {
 
 };

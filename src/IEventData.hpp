@@ -11,4 +11,4 @@ public:
     virtual const char* VGetName() const = 0;
 };
 
-typedef std::shared_ptr<IEventData> IEventDataPtr;
+typedef std::shared_ptr<IEventData> IEventDataSPtr;
