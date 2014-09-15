@@ -1,6 +1,8 @@
 #include <string>
+
 #include "Window.hpp"
-#include "Game.hpp"
+
+class Game;
 
 Window::Window(int width, int height, std::string title, Game* game, bool fullScreen) :
     _gamePtr(game), _inputManagerUPtr(std::unique_ptr<InputManager>(new InputManager()))
@@ -13,9 +15,15 @@ Window::Window(int width, int height, std::string title, Game* game, bool fullSc
     else
         _glfwWindowPtr = glfwCreateWindow(width, height, title.c_str(), glfwGetPrimaryMonitor(), NULL);
 
+    glfwMakeContextCurrent(_glfwWindowPtr);
+
+    glewExperimental = GL_TRUE;
+    glewInit();
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+
     glfwSetWindowUserPointer(_glfwWindowPtr, this);
-
-
     glfwSetWindowCloseCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowClosed);
     glfwSetWindowFocusCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowFocused);
     glfwSetWindowSizeCallback(_glfwWindowPtr, _inputManagerUPtr->OnWindowResized);
@@ -36,11 +44,6 @@ Window::~Window()
     glfwTerminate();
 }
 
-void Window::OnError(int errorCode, const char* description)
-{
+void Window::OnError(int errorCode, const char* description) {
 
-}
-
-Game *Window::getGame() {
-    return _gamePtr;
 }

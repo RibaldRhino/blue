@@ -1,8 +1,8 @@
 #include "Game.hpp"
 #include "Window.hpp"
-#include "OnWindowClosedEvent.hpp"
-#include "MouseEvent.hpp"
-#include "KeyboardEvent.hpp"
+#include "Events/OnWindowClosedEvent.hpp"
+#include "Events/MouseEvent.hpp"
+#include "Events/KeyboardEvent.hpp"
 
 void Window::InputManager::OnWindowClosed(GLFWwindow *glfwWindow)
 {
@@ -31,20 +31,22 @@ void Window::InputManager::OnKeyPressed(GLFWwindow *glfwWindow, int key, int sca
 void Window::InputManager::OnMouseButton(GLFWwindow *glfwWindow, int button, int action, int mods)
 {
     Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
+    InputManager& inputManager = *windowPtr->getInputManager();
     windowPtr->getGame()->getEventManager()->QueueEvent(
-            std::make_shared<MouseEvent>(InputManager::xMousePos, InputManager::yMousePos, button, action, mods)
+            std::make_shared<MouseEvent>(inputManager.xMousePos, inputManager.yMousePos, button, action, mods)
     );
-    InputManager::mouseButton = button;
-    InputManager::mouseAction = action;
-    InputManager::mouseMods = mods;
+    inputManager.mouseButton = button;
+    inputManager.mouseAction = action;
+    inputManager.mouseMods = mods;
 }
 
 void Window::InputManager::OnCursorPositionChanged(GLFWwindow *glfwWindow, double xPos, double yPos)
 {
     Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
+    InputManager& inputManager = *windowPtr->getInputManager();
     windowPtr->getGame()->getEventManager()->QueueEvent(
-            std::make_shared<MouseEvent>(xPos, yPos, InputManager::mouseButton, InputManager::mouseAction, InputManager::mouseMods)
+            std::make_shared<MouseEvent>(xPos, yPos, inputManager.mouseButton, inputManager.mouseAction, inputManager.mouseMods)
     );
-    InputManager::xMousePos = xPos;
-    InputManager::yMousePos = yPos;
+    inputManager.xMousePos = xPos;
+    inputManager.yMousePos = yPos;
 }

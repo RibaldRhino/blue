@@ -18,15 +18,15 @@ private:
 public:
     Window(int width, int height, std::string title, Game *game, bool fullScreen = false);
     ~Window();
-    Game* getGame();
-
+    Game* getGame() { return _gamePtr; };
+    InputManager* getInputManager() { return _inputManagerUPtr.get(); }
 private:
     class InputManager
     {
-    private:
-        static double xMousePos, yMousePos;
-        static int mouseButton, mouseAction, mouseMods;
     public:
+        double xMousePos, yMousePos;
+        int mouseButton, mouseAction, mouseMods;
+
         static void OnWindowClosed(GLFWwindow *glfwWindow);
         /*
 [in]	focused	GL_TRUE if the window was focused, or GL_FALSE if it was defocused.
@@ -79,7 +79,6 @@ private:
 [in]	ypos	The new y-coordinate, in screen coordinates, of the cursor.
         */
         static void OnCursorPositionChanged(GLFWwindow *glfwWindow, double xPos, double yPos);
-
     };
     static void OnError(int errorCode, const char* description);
 };

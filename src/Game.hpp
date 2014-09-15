@@ -4,8 +4,7 @@
 #include "EventManager.hpp"
 #include "ProcessManager.hpp"
 #include "World.hpp"
-
-class Window;
+#include "Window.hpp"
 
 class Game
 {
