@@ -1,7 +1,9 @@
 #include <string>
 #include "Window.hpp"
+#include "Game.hpp"
 
-Window::Window(int width, int height, std::string title, bool fullScreen)
+Window::Window(int width, int height, std::string title, Game* game, bool fullScreen) :
+    _gamePtr(game), _inputManagerUPtr(std::unique_ptr<InputManager>(new InputManager()))
 {
     glfwSetErrorCallback(OnError);
     glfwInit();
@@ -37,4 +39,8 @@ Window::~Window()
 void Window::OnError(int errorCode, const char* description)
 {
 
+}
+
+Game *Window::getGame() {
+    return _gamePtr;
 }

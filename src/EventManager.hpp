@@ -4,9 +4,10 @@
 #include <map>
 #include <boost/signals2.hpp>
 
-#include "EventType.hpp"
 #include "IEventData.hpp"
 #include "AbstractProcess.hpp"
+
+enum class EventType;
 
 class EventManager
 {

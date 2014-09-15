@@ -1,11 +1,12 @@
 #include "Game.hpp"
+#include "Window.hpp"
 #include "GameProcesses/InitProcess.hpp"
 #include <cstdlib>
 
 Game::Game()
 {
-    _windowUPtr = std::unique_ptr<Window>(new Window(800, 600, "SPH", false));
-    _eventManagerUPtr = std::unique_ptr<EventManager>(new EventManager());
+    _eventManagerSPtr = std::unique_ptr<EventManager>(new EventManager());
+    _windowUPtr = std::unique_ptr<Window>(new Window(800, 600, "SPH", this, false));
     _processManagerUPtr = std::unique_ptr<ProcessManager>(new ProcessManager());
     _worldUPtr = std::unique_ptr<World>(new World());
 

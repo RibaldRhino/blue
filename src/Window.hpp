@@ -5,20 +5,27 @@
 #include <GLFW/glfw3.h>
 #include <boost/utility.hpp>
 
+class Game;
+
 class Window : boost::noncopyable
 {
 private:
     class InputManager;
     GLFWwindow*_glfwWindowPtr;
+    Game* _gamePtr;
     std::unique_ptr<InputManager> _inputManagerUPtr;
 
 public:
-    Window(int width, int height, std::string title, bool fullScreen = false);
+    Window(int width, int height, std::string title, Game *game, bool fullScreen = false);
     ~Window();
+    Game* getGame();
 
 private:
     class InputManager
     {
+    private:
+        static double xMousePos, yMousePos;
+        static int mouseButton, mouseAction, mouseMods;
     public:
         static void OnWindowClosed(GLFWwindow *glfwWindow);
         /*

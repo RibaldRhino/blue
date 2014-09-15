@@ -1,10 +1,11 @@
 #pragma once
 
 #include <memory>
-#include "Window.hpp"
 #include "EventManager.hpp"
 #include "ProcessManager.hpp"
 #include "World.hpp"
+
+class Window;
 
 class Game
 {
