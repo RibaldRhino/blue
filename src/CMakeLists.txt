@@ -2,7 +2,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/glew/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/glfw/include)
 include_directories(${OPENCL_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/lib/glm/glm)
+include_directories(${PROJECT_SOURCE_DIR}/lib/glm)
 
 link_directories(${GLEW_LIBRARY_DIRS})
 add_definitions(${GLEW_DEFINITIONS})
