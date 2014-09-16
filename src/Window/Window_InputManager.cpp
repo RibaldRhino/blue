@@ -1,14 +1,14 @@
-#include "Game.hpp"
+#include "../Game/Game.hpp"
 #include "Window.hpp"
-#include "Events/OnWindowClosedEvent.hpp"
-#include "Events/MouseEvent.hpp"
-#include "Events/KeyboardEvent.hpp"
-#include "EventManager.hpp"
+#include "../Game/InputEvents/OnWindowClosedEvent.hpp"
+#include "../Game/InputEvents/MouseEvent.hpp"
+#include "../Game/InputEvents/KeyboardEvent.hpp"
+#include "../Event/EventManager.hpp"
 
 void Window::InputManager::OnWindowClosed(GLFWwindow *glfwWindow)
 {
     Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
-    EventManager::getInstance().TriggerEvent(std::make_shared<OnWindowClosedEvent>());
+    Game::getInstance().getEventManager()->TriggerEvent(std::make_shared<OnWindowClosedEvent>());
 }
 
 void Window::InputManager::OnWindowFramebufferResized(GLFWwindow *glfwWindow, int width, int height)
@@ -24,7 +24,7 @@ void Window::InputManager::OnWindowResized(GLFWwindow *glfwWindow, int width, in
 void Window::InputManager::OnKeyPressed(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
 {
     Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
-    EventManager::getInstance().QueueEvent(
+    Game::getInstance().getEventManager()->QueueEvent(
             std::make_shared<KeyboardEvent>(key, scancode, action, mods)
     );
 }
@@ -33,7 +33,7 @@ void Window::InputManager::OnMouseButton(GLFWwindow *glfwWindow, int button, int
 {
     Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
     InputManager& inputManager = *windowPtr->getInputManager();
-    EventManager::getInstance().QueueEvent(
+    Game::getInstance().getEventManager()->QueueEvent(
             std::make_shared<MouseEvent>(inputManager.xMousePos, inputManager.yMousePos, button, action, mods)
     );
     inputManager.mouseButton = button;
@@ -45,7 +45,7 @@ void Window::InputManager::OnCursorPositionChanged(GLFWwindow *glfwWindow, doubl
 {
     Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
     InputManager& inputManager = *windowPtr->getInputManager();
-    EventManager::getInstance().QueueEvent(
+    Game::getInstance().getEventManager()->QueueEvent(
             std::make_shared<MouseEvent>(xPos, yPos, inputManager.mouseButton, inputManager.mouseAction, inputManager.mouseMods)
     );
     inputManager.xMousePos = xPos;

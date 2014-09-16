@@ -1,5 +1,6 @@
 #include "KeyboardEvent.hpp"
-#include "../EventType.hpp"
+
+#include "../../Event/EventType.hpp"
 
 KeyboardEvent::KeyboardEvent(int key, int code, int action, int mods) :
         key(key), code(code), action(action), mods(mods)
