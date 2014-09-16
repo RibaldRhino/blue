@@ -2,15 +2,12 @@
 #include "OutputProcess.hpp"
 #include "../Game.hpp"
 
-OutputProcess::OutputProcess(Game* game) : AbstractProcess()
-{
-    _game = game;
-}
+OutputProcess::OutputProcess() : AbstractProcess() {}
 
 void OutputProcess::VUpdate(double deltaTime)
 {
     std::cout<<"Rendering world"<<std::endl;
-    _game->getWorld()->Render();
+    Game::getInstance().getWorld()->Render();
 }
 
 void OutputProcess::VInit()

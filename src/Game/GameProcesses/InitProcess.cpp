@@ -6,11 +6,11 @@
 #include "EventDispatchProcess.hpp"
 #include "WorldUpdateProcess.hpp"
 
-InitProcess::InitProcess(Game* game)
+InitProcess::InitProcess()
 {
-    AddSuccessor(std::unique_ptr<AbstractProcess>(new WorldUpdateProcess(game)));
-    AddSuccessor(std::unique_ptr<AbstractProcess>(new OutputProcess(game)));
-    AddSuccessor(std::unique_ptr<AbstractProcess>(new EventDispatchProcess(game)));
+    AddSuccessor(std::unique_ptr<AbstractProcess>(new WorldUpdateProcess()));
+    AddSuccessor(std::unique_ptr<AbstractProcess>(new OutputProcess()));
+    AddSuccessor(std::unique_ptr<AbstractProcess>(new EventDispatchProcess()));
 }
 
 void InitProcess::VUpdate(double deltaTime)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../AbstractProcess.hpp"
+#include "../../Process/AbstractProcess.hpp"
 
 
 class Game;
@@ -8,11 +8,9 @@ class Game;
 class OutputProcess : public AbstractProcess
 {
 public:
-    OutputProcess(Game* game);
+    OutputProcess();
     void VUpdate(double deltaTime) override;
     void VInit() override;
     void VEnd() override;
 
-private:
-    Game *_game;
 };

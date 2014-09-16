@@ -2,6 +2,7 @@
 
 #include "EventType.hpp"
 #include <memory>
+#include <bits/shared_ptr.h>
 
 class IEventData
 {

@@ -4,15 +4,12 @@
 
 
 
-WorldUpdateProcess::WorldUpdateProcess(Game* game) : AbstractProcess()
-{
-    _game = game;
-}
+WorldUpdateProcess::WorldUpdateProcess() : AbstractProcess() {}
 
 void WorldUpdateProcess::VUpdate(double deltaTime)
 {
     std::cout<<"Updating world"<<std::endl;
-    _game->getWorld()->Update(deltaTime);
+    Game::getInstance().getWorld()->Update(deltaTime);
 }
 
 void WorldUpdateProcess::VInit() {

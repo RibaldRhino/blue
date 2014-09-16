@@ -3,15 +3,12 @@
 #include "EventDispatchProcess.hpp"
 #include "../Game.hpp"
 
-EventDispatchProcess::EventDispatchProcess(Game* game) : AbstractProcess()
-{
-    _game = game;
-}
+EventDispatchProcess::EventDispatchProcess() : AbstractProcess() {}
 
 void EventDispatchProcess::VUpdate(double deltaTime)
 {
     std::cout<<"Updating game event manager"<<std::endl;
-    EventManager::getInstance().Update(deltaTime);
+    Game::getInstance().getEventManager()->Update(deltaTime);
 }
 
 void EventDispatchProcess::VInit()

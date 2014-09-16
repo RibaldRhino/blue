@@ -7,7 +7,7 @@ Game::Game()
     _processManagerUPtr = std::unique_ptr<ProcessManager>(new ProcessManager());
     _worldUPtr = std::unique_ptr<World>(new World());
 
-    _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new InitProcess(this)));
+    _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new InitProcess()));
 }
 
 void Game::Run()

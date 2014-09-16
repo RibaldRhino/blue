@@ -1,5 +1,5 @@
 #include "MouseEvent.hpp"
-#include "../EventType.hpp"
+#include "../../Event/EventType.hpp"
 
 MouseEvent::MouseEvent(double xPos, double yPos, int button, int action, int mods) :
         xPos(xPos), yPos(yPos), button(button), action(action), mods(mods)

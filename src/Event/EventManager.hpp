@@ -5,7 +5,6 @@
 #include <boost/signals2.hpp>
 
 #include "IEventData.hpp"
-#include "AbstractProcess.hpp"
 
 enum class EventType;
 
@@ -24,7 +23,7 @@ private:
 
 public:
     EventManager() : _activeQueue(0) {}
-    boost::signals2::connection AddListener(EventType& eventType, std::function<void (IEventDataSPtr &)>& callback);
+    boost::signals2::connection AddListener(EventType eventType, std::function<void (IEventDataSPtr &)> callback);
     void TriggerEvent(IEventDataSPtr eventData);
     void QueueEvent(IEventDataSPtr eventData);
     void Update(double deltaTime);

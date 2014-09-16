@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../IEventData.hpp"
+#include "../../Event/IEventData.hpp"
 
 enum class EventType;
 
