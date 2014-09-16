@@ -5,6 +5,7 @@
 #include <boost/signals2.hpp>
 
 #include "IEventData.hpp"
+#include "../Process/AbstractProcess.hpp"
 
 enum class EventType;
 

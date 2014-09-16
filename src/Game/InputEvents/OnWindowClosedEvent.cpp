@@ -1,4 +1,5 @@
 #include "OnWindowClosedEvent.hpp"
+#include "../../Event/EventType.hpp"
 
 OnWindowClosedEvent::OnWindowClosedEvent()
 {

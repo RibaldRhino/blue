@@ -2,6 +2,11 @@
 
 #include <memory>
 
+#include "Graphics/Mesh.hpp"
+#include "Transform/Transform.hpp"
+#include "Physics/Physics.hpp"
+#include "../Scene/SceneNode.hpp"
+
 class World;
 
 class Actor
