@@ -2,8 +2,6 @@
 
 #include "WorldUpdateProcess.hpp"
 
-
-
 WorldUpdateProcess::WorldUpdateProcess() : AbstractProcess() {}
 
 void WorldUpdateProcess::VUpdate(double deltaTime)
