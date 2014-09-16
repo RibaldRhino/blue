@@ -47,3 +47,12 @@ Window::~Window()
 void Window::OnError(int errorCode, const char* description) {
 
 }
+
+void Window::SwapBuffers() {
+    glfwSwapBuffers(_glfwWindowPtr);
+}
+
+void Window::PollEvents()
+{
+    glfwPollEvents();
+}

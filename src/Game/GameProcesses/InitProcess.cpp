@@ -5,27 +5,30 @@
 #include "OutputProcess.hpp"
 #include "EventDispatchProcess.hpp"
 #include "WorldUpdateProcess.hpp"
+#include "InputProcess.hpp"
 
 InitProcess::InitProcess()
 {
-    AddSuccessor(std::unique_ptr<AbstractProcess>(new WorldUpdateProcess()));
+
     AddSuccessor(std::unique_ptr<AbstractProcess>(new OutputProcess()));
     AddSuccessor(std::unique_ptr<AbstractProcess>(new EventDispatchProcess()));
+    AddSuccessor(std::unique_ptr<AbstractProcess>(new WorldUpdateProcess()));
+    AddSuccessor(std::unique_ptr<AbstractProcess>(new InputProcess()));
 }
 
 void InitProcess::VUpdate(double deltaTime)
 {
-    std::cout<<"Updating init process"<<std::endl;
+    //std::cout<<"Updating init process"<<std::endl;
     _state = ProcessState::SUCCEEDED;
 }
 
 void InitProcess::VInit()
 {
-    std::cout<<"Initializing init process"<<std::endl;
+    //std::cout<<"Initializing init process"<<std::endl;
     _state = ProcessState::RUNNING;
 }
 
 void InitProcess::VEnd()
 {
-    std::cout<<"Ending init process"<<std::endl;
+    //std::cout<<"Ending init process"<<std::endl;
 }

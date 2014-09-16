@@ -18,6 +18,10 @@ private:
 public:
     Window(int width, int height, std::string title, Game *game, bool fullScreen = false);
     ~Window();
+
+    void SwapBuffers();
+    void PollEvents();
+
     Game* getGame() { return _gamePtr; };
     InputManager* getInputManager() { return _inputManagerUPtr.get(); }
 private:

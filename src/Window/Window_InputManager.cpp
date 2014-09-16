@@ -1,3 +1,4 @@
+#include <iostream>
 #include "../Game/Game.hpp"
 #include "Window.hpp"
 #include "../Game/InputEvents/OnWindowClosedEvent.hpp"
@@ -23,7 +24,6 @@ void Window::InputManager::OnWindowResized(GLFWwindow *glfwWindow, int width, in
 
 void Window::InputManager::OnKeyPressed(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
 {
-    Window* windowPtr = (Window*) glfwGetWindowUserPointer(glfwWindow);
     Game::getInstance().getEventManager()->QueueEvent(
             std::make_shared<KeyboardEvent>(key, scancode, action, mods)
     );

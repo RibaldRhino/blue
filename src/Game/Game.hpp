@@ -26,4 +26,5 @@ public:
     void Run();
     World* getWorld() { return _worldUPtr.get(); }
     EventManager* getEventManager() { return _eventManagerUPtr.get(); }
+    Window* getWindow() { return _windowUPtr.get(); }
 };

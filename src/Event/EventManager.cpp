@@ -1,8 +1,9 @@
+#include <iostream>
 #include "EventManager.hpp"
 
 boost::signals2::connection EventManager::AddListener(EventType eventType, std::function<void (IEventDataSPtr &)> callback)
 {
-    return std::move(_eventBinding[eventType].connect(callback));
+    return _eventBinding[eventType].connect(callback);
 }
 
 void EventManager::TriggerEvent(IEventDataSPtr eventData)
@@ -22,7 +23,7 @@ void EventManager::Update(double deltaTime)
     switchActiveQueue();
     while(!_eventQueue[dispatchQueue].empty())
     {
-        auto eventData = _eventQueue[dispatchQueue].front();
+        auto& eventData = _eventQueue[dispatchQueue].front();
         TriggerEvent(eventData);
         _eventQueue[dispatchQueue].pop();
     }
