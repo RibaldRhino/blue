@@ -1,16 +1,16 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <assimp/cimport.h> // C importer
+#include <assimp/scene.h> // collects data
+#include <assimp/postprocess.h> // various extra operations
+#include <stdlib.h> // memory management
 
-class Mesh {
-
-private:
-    std::vector<glm::vec3> _vertices;
-    std::vector<glm::vec3> _normals;
-    std::vector<glm::vec3> _textureCoords;
-    std::vector<int> _indices;
+class Mesh
+{
 public:
-    Mesh() {};
-    ~Mesh() {};
-
+    GLuint vao;
+    int pointCount;
+    bool LoadMesh(const char* file_name);
 };

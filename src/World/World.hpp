@@ -10,6 +10,7 @@ class World
 private:
     std::unique_ptr<ProcessManager> _processManagerUPtr;
     std::unique_ptr<Actor> _car;
+    GLuint _shader_program;
 public:
     World();
     void Render();

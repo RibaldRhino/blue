@@ -20,7 +20,11 @@ Window::Window(int width, int height, std::string title, Game* game, bool fullSc
     glewExperimental = GL_TRUE;
     glewInit();
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
+    //glClearDepth(1);
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    //glEnable(GL_CULL_FACE);
+    //glFrontFace(GL_CCW);
 
 
     glfwSetWindowUserPointer(_glfwWindowPtr, this);

@@ -3,6 +3,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/glfw/include)
 include_directories(${OPENCL_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/lib/glm)
+include_directories(${ASSIMP_INCLUDE_DIR})
 
 link_directories(${GLEW_LIBRARY_DIRS})
 add_definitions(${GLEW_DEFINITIONS})
@@ -19,5 +20,7 @@ World/Actor/Actor.cpp World/Actor/Process/CarProcess.cpp World/Actor/Transform/T
 World/Actor/Renderer/CarRenderer.cpp World/Actor/Camera.cpp)
 
 add_executable(blue ${SOURCE_FILES})
-target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES})
+target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
 
+
+file(COPY ../assets DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

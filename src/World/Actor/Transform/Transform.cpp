@@ -14,7 +14,7 @@ Transform::Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale) :
     Scale(scale);
 }
 
-glm::mat4 Transform::getMatrix()
+glm::mat4& Transform::getMatrix()
 {
     return _model;
 }

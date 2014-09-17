@@ -3,6 +3,7 @@
 #include "../../../Game/InputEvents/KeyboardEvent.hpp"
 #include <memory>
 #include <iostream>
+#include <glm/gtx/transform.hpp>
 
 CarProcess::CarProcess(Actor* actor) : AbstractProcess(), _actor(actor) {}
 
@@ -32,11 +33,12 @@ void CarProcess::VUpdate(double deltaTime)
 {
     if(_accelerationOn)
     {
-        std::cout<<"accel"<<std::endl;//_actor->getPhysics()->Accelerate(deltaTime);
+        _actor->_transformUPtr->getMatrix() = glm::translate(_actor->_transformUPtr->getMatrix(), glm::vec3(0.0f, 0.0f, 0.001f));
+        std::cout<<_actor->_transformUPtr->getMatrix()[3][0]<<" "<<_actor->_transformUPtr->getMatrix()[3][1]<<" "<<_actor->_transformUPtr->getMatrix()[3][2]<<" "<<_actor->_transformUPtr->getMatrix()[3][3]<<std::endl;
     }
     else if(_breakOn)
     {
-        std::cout<<"decel"<<std::endl;//_actor->getPhysics()->Decelerate(deltaTime);
+        _actor->_transformUPtr->getMatrix() = glm::translate(_actor->_transformUPtr->getMatrix(), glm::vec3(0.0f, 0.0f, -0.001f));
     }
 }
 

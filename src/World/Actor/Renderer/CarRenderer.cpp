@@ -1,30 +1,21 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "CarRenderer.hpp"
 
 
-void CarRenderer::Render(){
-    GLfloat points[] = {
-        0.0f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f
-    };
+void CarRenderer::Render(GLuint shader_program){
 
-    GLuint vbo = 0;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof (points), points, GL_STATIC_DRAW);
+    glBindVertexArray (_actor->_meshUPtr->vao);
 
-    GLuint vao = 0;
-    glGenVertexArrays (1, &vao);
-    glBindVertexArray (vao);
-    glEnableVertexAttribArray (0);
-    glBindBuffer (GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    int model_mat_location = glGetUniformLocation (shader_program, "model");
+    glUseProgram (shader_program);
+    glUniformMatrix4fv (model_mat_location, 1, GL_FALSE, glm::value_ptr(_actor->_transformUPtr->getMatrix()));
 
-    glBindVertexArray (vao);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, _actor->_meshUPtr->pointCount);
 };
 
 
+CarRenderer::CarRenderer(Actor *actor) {
+    _actor = actor;
+}

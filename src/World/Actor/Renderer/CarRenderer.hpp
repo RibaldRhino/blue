@@ -3,8 +3,8 @@
 class CarRenderer
 {
 private:
-    Actor* actor;
+    Actor* _actor;
 public:
-
-    void Render();
+    CarRenderer(Actor* actor);
+    void Render(GLuint shader_program);
 };
