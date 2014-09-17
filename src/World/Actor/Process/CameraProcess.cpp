@@ -37,12 +37,11 @@ void CameraProcess::VInit() {
 void CameraProcess::VUpdate(double deltaTime) {
     if(_accelerationOn)
     {
-        _camera->_transformUPtr->Translate(glm::vec3(0.0f, 0.f, 0.001f));
-        //std::cout<<_camera->_transformUPtr->getMatrix()[3][0]<<" "<<_camera->_transformUPtr->getMatrix()[3][1]<<" "<<_camera->_transformUPtr->getMatrix()[3][2]<<" "<<_camera->_transformUPtr->getMatrix()[3][3]<<std::endl;
+        _camera->_transformUPtr->Translate(glm::vec3(0.0f, 0.f, 0.005f));
     }
     else if(_breakOn)
     {
-        _camera->_transformUPtr->Translate(glm::vec3(0.0f, 0.f, -0.001f));
+        _camera->_transformUPtr->Translate(glm::vec3(0.0f, 0.f, -0.005f));
     }
     _camera->_transformUPtr->Rotate(_mouseMove.y/100, glm::vec3(0.f, 1.f, 0.f));
     _camera->_transformUPtr->Rotate(_mouseMove.x/100, glm::vec3(1.f, 0.f, 0.f));

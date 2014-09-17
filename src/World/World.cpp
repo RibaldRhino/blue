@@ -10,12 +10,16 @@ World::World()
     _processManagerUPtr = std::unique_ptr<ProcessManager>(new ProcessManager());
 
     _car = std::unique_ptr<Actor>(new Actor(this));
-    _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_car.get())));
     _car->_meshUPtr->LoadMesh("assets/autocolor3.obj");
     _car->_transformUPtr->Rotate(-M_PI_2, glm::vec3(0, 0, 1));
+    _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_car.get())));
     _camera = std::unique_ptr<Camera>(new Camera(this));
     _camera->_transformUPtr->Translate(glm::vec3(5.f, 0.f, -15.f));
     _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CameraProcess(_camera.get())));
+    _cube = std::unique_ptr<Actor>(new Actor(this));
+    _cube->_meshUPtr->LoadMesh("assets/cube.obj");
+    _cube->_transformUPtr->Translate(glm::vec3(5.f, 0.f, 5.f));
+    //_processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_cube.get())));
 
     const char* vertex_shader =
             "#version 400\n"
@@ -61,6 +65,8 @@ void World::Render()
     camRenderer.Render(_shader_program);
     CarRenderer renderer(_car.get());
     renderer.Render(_shader_program);
+    CarRenderer renderer1(_cube.get());
+    renderer1.Render(_shader_program);
 
     Game::getInstance().getWindow()->SwapBuffers();
 }

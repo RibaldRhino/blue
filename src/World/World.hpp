@@ -17,4 +17,6 @@ public:
     World();
     void Render();
     void Update(double deltaTime);
+
+    std::unique_ptr<Actor> _cube;
 };
