@@ -11,10 +11,10 @@ World::World()
 
     _car = std::unique_ptr<Actor>(new Actor(this));
     _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_car.get())));
-    _car->_meshUPtr->LoadMesh("assets/autocolor.obj");
-
+    _car->_meshUPtr->LoadMesh("assets/autocolor3.obj");
+    _car->_transformUPtr->Rotate(-M_PI_2, glm::vec3(0, 0, 1));
     _camera = std::unique_ptr<Camera>(new Camera(this));
-    _camera->_transformUPtr->Translate(glm::vec3(0.f, 0.f, -1.f));
+    _camera->_transformUPtr->Translate(glm::vec3(5.f, 0.f, -15.f));
     _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CameraProcess(_camera.get())));
 
     const char* vertex_shader =
