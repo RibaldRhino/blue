@@ -13,7 +13,7 @@ bool Mesh::LoadMesh(const char *file_name) {
         printf (" %i meshes\n", scene->mNumMeshes);
         printf (" %i textures\n", scene->mNumTextures);
 /* get first mesh in file only */
-        const aiMesh* mesh = scene->mMeshes[0];
+        const aiMesh* mesh = scene->mMeshes[1];
         printf ("%i vertices in mesh[0]\n", mesh->mNumVertices);
 /* pass back number of vertex points in mesh */
         pointCount = mesh->mNumVertices;

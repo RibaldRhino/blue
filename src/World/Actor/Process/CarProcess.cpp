@@ -1,17 +1,17 @@
 #include "CarProcess.hpp"
 #include "../../../Game/Game.hpp"
 #include "../../../Game/InputEvents/KeyboardEvent.hpp"
+#include "../../../Game/InputEvents/MouseEvent.hpp"
 #include <memory>
 #include <iostream>
 #include <glm/gtx/transform.hpp>
-
-CarProcess::CarProcess(Actor* actor) : AbstractProcess(), _actor(actor) {}
 
 void CarProcess::VInit()
 {
     _state = ProcessState::RUNNING;
     _accelerationOn = false;
     _breakOn = false;
+
     auto eventManager = Game::getInstance().getEventManager();
     _connection = eventManager->AddListener(EventType::KEYBOARD_EVENT ,
             [&](IEventDataSPtr eventData)
@@ -27,6 +27,7 @@ void CarProcess::VInit()
                     _breakOn = false;
 
             });
+
 }
 
 void CarProcess::VUpdate(double deltaTime)
@@ -34,12 +35,13 @@ void CarProcess::VUpdate(double deltaTime)
     if(_accelerationOn)
     {
         _actor->_transformUPtr->getMatrix() = glm::translate(_actor->_transformUPtr->getMatrix(), glm::vec3(0.0f, 0.0f, 0.001f));
-        std::cout<<_actor->_transformUPtr->getMatrix()[3][0]<<" "<<_actor->_transformUPtr->getMatrix()[3][1]<<" "<<_actor->_transformUPtr->getMatrix()[3][2]<<" "<<_actor->_transformUPtr->getMatrix()[3][3]<<std::endl;
+        //std::cout<<_actor->_transformUPtr->getMatrix()[3][0]<<" "<<_actor->_transformUPtr->getMatrix()[3][1]<<" "<<_actor->_transformUPtr->getMatrix()[3][2]<<" "<<_actor->_transformUPtr->getMatrix()[3][3]<<std::endl;
     }
     else if(_breakOn)
     {
         _actor->_transformUPtr->getMatrix() = glm::translate(_actor->_transformUPtr->getMatrix(), glm::vec3(0.0f, 0.0f, -0.001f));
     }
+
 }
 
 void CarProcess::VEnd()

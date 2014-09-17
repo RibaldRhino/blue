@@ -6,13 +6,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Transform::Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale) :
-    _model(glm::mat4(1.0f))
-{
-    Translate(pos);
-    Rotate(glm::angle(rot), glm::axis(rot));
-    Scale(scale);
-}
+Transform::Transform() : _model(glm::mat4(1.0f)){}
 
 glm::mat4& Transform::getMatrix()
 {
@@ -38,19 +32,19 @@ glm::vec3 Transform::getScale()
     return glm::vec3(glm::length(_model[0]),glm::length(_model[1]),glm::length(_model[2]));
 }
 
-glm::vec3 Transform::getForward()
+glm::vec3 Transform::getRight()
 {
     float *valPtr = glm::value_ptr(_model);
     return glm::vec3(valPtr[1],valPtr[5],valPtr[9]);
 }
 
-glm::vec3 Transform::getRight()
+glm::vec3 Transform::getUp()
 {
     float *valPtr = glm::value_ptr(_model);
     return glm::vec3(valPtr[0],valPtr[4],valPtr[8]);
 }
 
-glm::vec3 Transform::getUp()
+glm::vec3 Transform::getForward()
 {
     float *valPtr = glm::value_ptr(_model);
     return glm::vec3(valPtr[2],valPtr[6],valPtr[10]);

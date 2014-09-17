@@ -17,7 +17,7 @@ set(SOURCE_FILES main.cpp Window/Window.cpp Window/Window_InputManager.cpp Event
 Process/ProcessManager.cpp World/World.cpp Game/GameProcesses/OutputProcess.cpp Game/GameProcesses/EventDispatchProcess.cpp Game/InputEvents/MouseEvent.cpp
 Game/InputEvents/KeyboardEvent.cpp Game/InputEvents/OnWindowClosedEvent.cpp Game/GameProcesses/WorldUpdateProcess.cpp Game/GameProcesses/InitProcess.cpp
 World/Actor/Actor.cpp World/Actor/Process/CarProcess.cpp World/Actor/Transform/Transform.cpp World/Actor/Graphics/Mesh.cpp Game/GameProcesses/InputProcess.cpp
-World/Actor/Renderer/CarRenderer.cpp World/Actor/Camera.cpp)
+World/Actor/Renderer/CarRenderer.cpp World/Actor/Camera.cpp World/Actor/Renderer/CameraRenderer.cpp World/Actor/Process/CameraProcess.cpp)
 
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
