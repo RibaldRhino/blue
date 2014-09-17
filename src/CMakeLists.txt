@@ -15,7 +15,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(SOURCE_FILES main.cpp Window/Window.cpp Window/Window_InputManager.cpp Event/EventManager.cpp Game/Game.cpp Process/AbstractProcess.cpp
 Process/ProcessManager.cpp World/World.cpp Game/GameProcesses/OutputProcess.cpp Game/GameProcesses/EventDispatchProcess.cpp Game/InputEvents/MouseEvent.cpp
 Game/InputEvents/KeyboardEvent.cpp Game/InputEvents/OnWindowClosedEvent.cpp Game/GameProcesses/WorldUpdateProcess.cpp Game/GameProcesses/InitProcess.cpp
-World/Actor/Actor.cpp World/Actor/Process/CarProcess.cpp World/Actor/Transform/Transform.cpp World/Actor/Physics/Physics.cpp World/Actor/Graphics/Mesh.cpp Game/GameProcesses/InputProcess.cpp World/Actor/Renderer/CarRenderer.cpp)
+World/Actor/Actor.cpp World/Actor/Process/CarProcess.cpp World/Actor/Transform/Transform.cpp World/Actor/Graphics/Mesh.cpp Game/GameProcesses/InputProcess.cpp
+World/Actor/Renderer/CarRenderer.cpp World/Actor/Camera.cpp)
 
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES})

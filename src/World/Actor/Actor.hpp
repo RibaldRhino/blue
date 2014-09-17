@@ -4,17 +4,15 @@
 
 #include "Graphics/Mesh.hpp"
 #include "Transform/Transform.hpp"
-#include "Physics/Physics.hpp"
-#include "../Scene/SceneNode.hpp"
 
 class World;
 
 class Actor
 {
 public:
-    Actor(World* worldPtr);
+    Actor(World* worldPtr, Transform* transformPtr = new Transform());
 protected:
     World* _worldPtr;
     //std::unique_ptr<Model> _modelUPtr;
-    //std::unique_ptr<Transform> _transformUPtr;
+    std::unique_ptr<Transform> _transformUPtr;
 };

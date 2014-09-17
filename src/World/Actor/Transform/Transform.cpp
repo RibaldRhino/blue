@@ -9,9 +9,9 @@
 Transform::Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale) :
     _model(glm::mat4(1.0f))
 {
-    glm::translate(_model, pos);
-    glm::rotate(_model, glm::angle(rot), glm::axis(rot));
-    glm::scale(_model, scale);
+    Translate(pos);
+    Rotate(glm::angle(rot), glm::axis(rot));
+    Scale(scale);
 }
 
 glm::mat4 Transform::getMatrix()
