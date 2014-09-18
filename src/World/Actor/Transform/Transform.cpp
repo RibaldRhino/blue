@@ -34,18 +34,15 @@ glm::vec3 Transform::getScale()
 
 glm::vec3 Transform::getRight()
 {
-    float *valPtr = glm::value_ptr(_model);
-    return glm::vec3(valPtr[1],valPtr[5],valPtr[9]);
+    return glm::vec3(_model[0][0],_model[1][0],_model[2][0]);
 }
 
 glm::vec3 Transform::getUp()
 {
-    float *valPtr = glm::value_ptr(_model);
-    return glm::vec3(valPtr[0],valPtr[4],valPtr[8]);
+    return glm::vec3(_model[0][1],_model[1][1],_model[2][1]);
 }
 
 glm::vec3 Transform::getForward()
 {
-    float *valPtr = glm::value_ptr(_model);
-    return glm::vec3(valPtr[2],valPtr[6],valPtr[10]);
+    return glm::vec3(_model[0][2],_model[1][2],_model[2][2]);
 }

@@ -35,7 +35,6 @@ void CarProcess::VUpdate(double deltaTime)
     if(_accelerationOn)
     {
         _actor->_transformUPtr->Translate(glm::vec3(0.0f, 0.0f, 0.005f));
-        //std::cout<<_actor->_transformUPtr->getMatrix()[3][0]<<" "<<_actor->_transformUPtr->getMatrix()[3][1]<<" "<<_actor->_transformUPtr->getMatrix()[3][2]<<" "<<_actor->_transformUPtr->getMatrix()[3][3]<<std::endl;
     }
     else if(_breakOn)
     {

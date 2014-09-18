@@ -11,22 +11,20 @@ World::World()
 
     _car = std::unique_ptr<Actor>(new Actor(this));
     _car->_meshUPtr->LoadMesh("assets/autocolor3.obj");
-    _car->_transformUPtr->Rotate(-M_PI_2, glm::vec3(0, 0, 1));
-    _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_car.get())));
+    _car->_transformUPtr->Rotate(M_PI, glm::vec3(0, 1, 0));
+    //_processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_car.get())));
     _camera = std::unique_ptr<Camera>(new Camera(this));
     _camera->_transformUPtr->Translate(glm::vec3(5.f, 0.f, -15.f));
     _processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CameraProcess(_camera.get())));
     _cube = std::unique_ptr<Actor>(new Actor(this));
     _cube->_meshUPtr->LoadMesh("assets/cube.obj");
     _cube->_transformUPtr->Translate(glm::vec3(5.f, 0.f, 5.f));
-    //_processManagerUPtr->AttachProcess(std::unique_ptr<AbstractProcess>(new CarProcess(_cube.get())));
 
     const char* vertex_shader =
             "#version 400\n"
             "uniform mat4 model;"
             "uniform mat4 view, proj;"
-            "uniform vec3 La, Ls, Ld;"
-            "uniform vec3 Ka, Ks, Kd;"
+
             "in vec3 vertex_position;"
             "in vec3 vertex_normal;"
             "out vec3 position_eye, normal_eye;"
@@ -38,6 +36,10 @@ World::World()
 
     const char* fragment_shader =
             "#version 400\n"
+            "vec3 light_position_world = vec3 (10.0, 10.0, 10.0);"
+            "vec3 Ls = vec3 (1.0, 1.0, 1.0);"
+            "vec3 Ld = vec3 (0.7, 0.7, 0.7);"
+            "vec3 La = vec3 (0.2, 0.2, 0.2);"
             "out vec4 frag_colour;"
             "void main () {"
             " frag_colour = vec4 (0.5, 0.0, 0.5, 1.0);"

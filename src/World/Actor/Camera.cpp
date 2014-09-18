@@ -1,6 +1,9 @@
 #include <memory>
+#include <iostream>
+#include <cuda_runtime_api.h>
 
 #include "Camera.hpp"
+#define ONE_DEG_IN_RAD (2.0 * M_PI) / 360.0 // 0.017444444
 
 Camera::Camera(World* worldPtr, Transform* transformPtr, float aspectRatio, float fieldOfView, float nearClipPlane, float farClipPlane) :
     Actor(worldPtr, transformPtr),
@@ -9,21 +12,33 @@ Camera::Camera(World* worldPtr, Transform* transformPtr, float aspectRatio, floa
     _nearClipPlane(nearClipPlane),
     _farClipPlane(farClipPlane)
 {
-
+    _cam_speed = 4.0f; // 1 unit per second
+    _cam_yaw_speed = 0.5f; // 10 degrees per second
+    _cam_pos = glm::vec3(0.0f, 6.0f, 15.0f); // don't start at zero, or we will be too close
+    _cam_yaw = 0.0f; // y-rotation in degrees
 }
 
-glm::mat4* Camera::getViewMatrix()
+glm::mat4 Camera::getViewMatrix() {
+
+    glm::mat4 T = glm::translate(glm::mat4(1), -_cam_pos);
+    glm::mat4 R = glm::rotate(glm::mat4(1), -_cam_yaw, glm::vec3(0, 1, 0));
+    glm::mat4 view_mat = R * T;
+    return view_mat;
+}
+
+glm::mat4 Camera::getProjectionMatrix()
 {
-    _view =  glm::lookAt(
-            _transformUPtr->getPosition(),
-            _transformUPtr->getPosition() + _transformUPtr->getForward(),
-            _transformUPtr->getUp()
+// matrix components
+    float range = tan (_fieldOfView * 0.5f) * _nearClipPlane;
+    float Sx = (2.0f * _nearClipPlane) / (range * _aspectRatio + range * _aspectRatio);
+    float Sy = _nearClipPlane / range;
+    float Sz = -(_farClipPlane + _nearClipPlane) / (_farClipPlane - _nearClipPlane);
+    float Pz = -(2.0f * _farClipPlane * _nearClipPlane) / (_farClipPlane - _nearClipPlane);
+
+    return glm::mat4(
+            Sx, 0.0f, 0.0f, 0.0f,
+            0.0f, Sy, 0.0f, 0.0f,
+            0.0f, 0.0f, Sz, -1.0f,
+            0.0f, 0.0f, Pz, 0.0f
     );
-    return &_view;
-}
-
-glm::mat4* Camera::getProjectionMatrix()
-{
-    _projection = glm::perspective(_fieldOfView, _aspectRatio, _nearClipPlane, _farClipPlane);
-    return &_projection;
 }

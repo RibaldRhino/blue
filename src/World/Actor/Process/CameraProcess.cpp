@@ -37,16 +37,12 @@ void CameraProcess::VInit() {
 void CameraProcess::VUpdate(double deltaTime) {
     if(_accelerationOn)
     {
-        _camera->_transformUPtr->Translate(glm::vec3(0.0f, 0.f, 0.005f));
+        _camera->_cam_pos[2] -= _camera->_cam_speed * deltaTime;
     }
     else if(_breakOn)
     {
-        _camera->_transformUPtr->Translate(glm::vec3(0.0f, 0.f, -0.005f));
+        _camera->_cam_pos[2] += _camera->_cam_speed * deltaTime;
     }
-    _camera->_transformUPtr->Rotate(_mouseMove.y/100, glm::vec3(0.f, 1.f, 0.f));
-    _camera->_transformUPtr->Rotate(_mouseMove.x/100, glm::vec3(1.f, 0.f, 0.f));
-    _mouseMove.y = 0;
-    _mouseMove.x = 0;
 }
 
 void CameraProcess::VEnd() {
