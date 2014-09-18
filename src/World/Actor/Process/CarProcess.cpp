@@ -34,11 +34,11 @@ void CarProcess::VUpdate(double deltaTime)
 {
     if(_accelerationOn)
     {
-        _actor->_transformUPtr->Translate(glm::vec3(0.0f, 0.0f, 0.005f));
+        _actor->_transformUPtr->Translate(glm::vec3(0.0f, 0.0f, 4.f*deltaTime));
     }
     else if(_breakOn)
     {
-        _actor->_transformUPtr->Translate(glm::vec3(0.0f, 0.0f, -0.005f));
+        _actor->_transformUPtr->Translate(glm::vec3(0.0f, 0.0f, -4.f*deltaTime));
     }
 
 }

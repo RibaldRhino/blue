@@ -22,4 +22,6 @@ public:
     Camera *_camera;
     boost::signals2::connection _connection;
     glm::highp_vec2 _prevPos;
+    bool _pitch_up;
+    bool _pitch_down;
 };

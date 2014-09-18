@@ -19,4 +19,5 @@ public:
     void Update(double deltaTime);
 
     std::unique_ptr<Actor> _cube;
+    std::unique_ptr<Actor> _road;
 };

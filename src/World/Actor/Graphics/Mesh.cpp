@@ -106,3 +106,10 @@ i allocate some dynamic memory to do this. */
         return true;
     }
 }
+
+Mesh::Mesh() {
+    Ks = glm::vec3 (1.0, 1.0, 1.0);
+    Kd = glm::vec3 (1.0, 0.5, 0.0);
+    Ka = glm::vec3 (1.0, 1.0, 1.0);
+
+}

@@ -14,7 +14,7 @@ public:
     float _nearClipPlane;
     float _farClipPlane;
     float _cam_speed;
-    float _cam_yaw_speed;
+    float _cam_yaw_pitch_speed;
     glm::vec3 _cam_pos;
     float _cam_yaw;
 public:
@@ -23,4 +23,6 @@ public:
 
     glm::mat4 getViewMatrix();
     glm::mat4 getProjectionMatrix();
+
+    float _cam_pitch;
 };
