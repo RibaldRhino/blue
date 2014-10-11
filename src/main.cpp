@@ -1,7 +1,10 @@
 #include "Game/Game.hpp"
+#include "log.hpp"
+
+_INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char** argv)
 {
-    Game& game = Game::getInstance();
+    game::Game game;
     game.Run();
 }

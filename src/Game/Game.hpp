@@ -1,30 +1,33 @@
 #pragma once
-
 #include <memory>
 #include <boost/noncopyable.hpp>
-#include "../Event/EventManager.hpp"
-#include "../Process/ProcessManager.hpp"
-#include "../World/World.hpp"
-#include "../Window/Window.hpp"
+#include "World/World.hpp"
+#include "Window/Window.hpp"
+#include "Process/ProcessManager.hpp"
+#include "Event/EventManager.hpp"
+#include "Timer.hpp"
+namespace game {
+    class Game : public boost::noncopyable {
+    private:
+        std::unique_ptr<Window> _windowUPtr;
+        std::unique_ptr<process::ProcessManager> _processManagerUPtr;
+        std::unique_ptr<World> _worldUPtr;
+        std::unique_ptr<Timer> _timerUPtr;
 
-class Game : public boost::noncopyable
-{
-private:
-    std::unique_ptr<Window> _windowUPtr;
-    std::unique_ptr<ProcessManager> _processManagerUPtr;
-    std::unique_ptr<EventManager> _eventManagerUPtr;
-    std::unique_ptr<World> _worldUPtr;
+    public:
+        Game();
+        void Run();
 
-private:
-    Game();
+        World *getWorld() {
+            return _worldUPtr.get();
+        }
 
-public:
-    static Game& getInstance() {
-        static Game instance;
-        return instance;
-    }
-    void Run();
-    World* getWorld() { return _worldUPtr.get(); }
-    EventManager* getEventManager() { return _eventManagerUPtr.get(); }
-    Window* getWindow() { return _windowUPtr.get(); }
-};
+        Window *getWindow() {
+            return _windowUPtr.get();
+        }
+
+        Timer *getTimer() {
+            return _timerUPtr.get();
+        }
+    };
+}

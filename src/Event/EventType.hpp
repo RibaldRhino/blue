@@ -1,8 +1,24 @@
 #pragma once
 
-enum class EventType
-{
-    ON_WINDOW_CLOSED_EVENT,
-    MOUSE_EVENT,
-    KEYBOARD_EVENT
-};
+namespace event {
+    enum class EventType {
+        WINDOW_CLOSE,
+        WINDOW_RESIZED,
+
+        MOUSE_CURSOR_POS,
+        MOUSE_LMB_PRESSED,
+        MOUSE_RMB_PRESSED,
+        MOUSE_LMB_RELEASED,
+        MOUSE_RMB_RELEASED,
+
+        KEYBOARD_UP_PRESSED,
+        KEYBOARD_DOWN_PRESSED,
+        KEYBOARD_LEFT_PRESSED,
+        KEYBOARD_RIGHT_PRESSED,
+        KEYBOARD_UP_RELEASED,
+        KEYBOARD_DOWN_RELEASED,
+        KEYBOARD_LEFT_RELEASED,
+        KEYBOARD_RIGHT_RELEASED,
+
+    };
+}
