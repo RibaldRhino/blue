@@ -6,14 +6,16 @@
 #include <sstream>
 #include <string>
 #include <cerrno>
-#include <Game/World/Actor/Components/ModelComponent.hpp>
 #include <Game/World/Actor/Components/TransformComponent.hpp>
-#include <Game/World/Actor/Components/Camera/CameraComponent.hpp>
 #include <string.h>
 #include "log.hpp"
 #include <Game/World/Actor/Components/Camera/CameraLogicComponent.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <Game/World/Actor/Components/Background/BackgroundRendererComponent.hpp>
+#include <Game/World/Actor/Components/Basic/BasicModelComponent.hpp>
+#include <Game/World/Actor/Components/Camera/CameraModelComponent.hpp>
+#include <Game/World/Actor/Components/Water/WaterModelComponent.hpp>
+#include <Game/World/Actor/Components/Water/WaterRendererComponent.hpp>
 
 namespace game {
 
@@ -61,44 +63,63 @@ namespace game {
     World::World() {
         auto vert = get_file_contents("Shader/shader_vert.glsl");
         auto frag = get_file_contents("Shader/shader_frag.glsl");
-        const char* vertex_shader = vert.c_str();
-        const char* fragment_shader = frag.c_str();
+        const char* basicVertexShader = vert.c_str();
+        const char* basicFragmentShader = frag.c_str();
 
         GLuint vs = glCreateShader (GL_VERTEX_SHADER);
-        glShaderSource (vs, 1, &vertex_shader, NULL);
+        glShaderSource (vs, 1, &basicVertexShader, NULL);
         glCompileShader (vs);
         GetShaderCompileLog(vs);
         GLuint fs = glCreateShader (GL_FRAGMENT_SHADER);
-        glShaderSource (fs, 1, &fragment_shader, NULL);
+        glShaderSource (fs, 1, &basicFragmentShader, NULL);
         glCompileShader (fs);
         GetShaderCompileLog(fs);
-        GLuint shader_program = glCreateProgram ();
-        glAttachShader (shader_program, fs);
-        glAttachShader (shader_program, vs);
-        glLinkProgram (shader_program);
-        GetProgramLinkLog(shader_program);
+        GLuint basicShaderProgram = glCreateProgram ();
+        glAttachShader (basicShaderProgram, fs);
+        glAttachShader (basicShaderProgram, vs);
+        glLinkProgram (basicShaderProgram);
+        GetProgramLinkLog(basicShaderProgram);
+
+        vert = get_file_contents("Shader/watershader_vert.glsl");
+        frag = get_file_contents("Shader/watershader_frag.glsl");
+        const char* waterVertexShader = vert.c_str();
+        const char* waterFragmentShader = frag.c_str();
+
+        GLuint wvs = glCreateShader (GL_VERTEX_SHADER);
+        glShaderSource (wvs, 1, &waterVertexShader, NULL);
+        glCompileShader (wvs);
+        GetShaderCompileLog(wvs);
+        GLuint wfs = glCreateShader (GL_FRAGMENT_SHADER);
+        glShaderSource (wfs, 1, &waterFragmentShader, NULL);
+        glCompileShader (wfs);
+        GetShaderCompileLog(wfs);
+        GLuint waterShaderProgram = glCreateProgram ();
+        glAttachShader (waterShaderProgram, wfs);
+        glAttachShader (waterShaderProgram, wvs);
+        glLinkProgram (waterShaderProgram);
+        GetProgramLinkLog(waterShaderProgram);
 
 
         _cameraSPtr = std::make_shared<Actor>();
         auto cameraTransformSPtr = std::make_shared<TransformComponent>(_cameraSPtr);
         cameraTransformSPtr->MoveBy(glm::vec3(0, 0.5f, -8));
         _cameraSPtr->AddComponent(cameraTransformSPtr);
-        auto cameraSPtr = std::make_shared<CameraComponent>(_cameraSPtr);
-        cameraSPtr->Load(shader_program);
+        auto cameraSPtr = std::make_shared<CameraModelComponent>(_cameraSPtr);
+        cameraSPtr->Load(basicShaderProgram);
         _cameraSPtr->AddComponent(cameraSPtr);
         auto cameraLogicSPtr = std::make_shared<CameraLogicComponent>(_cameraSPtr);
         _cameraSPtr->AddComponent(cameraLogicSPtr);
 
 
         _backgroundSPtr = std::make_shared<Actor>();
-        auto backgroundRendererSPtr = std::make_shared<BackgroundRendererComponent>(_backgroundSPtr, shader_program);
+        auto backgroundRendererSPtr = std::make_shared<BackgroundRendererComponent>(_backgroundSPtr, basicShaderProgram);
         _backgroundSPtr->AddComponent(backgroundRendererSPtr);
 
         _floorSPtr = std::make_shared<Actor>();
         auto floorTransformSPtr = std::make_shared<TransformComponent>(_floorSPtr);
-        auto floorModelSPtr = std::make_shared<ModelComponent>(_floorSPtr);
+        auto floorModelSPtr = std::make_shared<BasicModelComponent>(_floorSPtr);
         floorModelSPtr->Load("assets/floor.obj");
-        auto floorRendererSPtr = std::make_shared<BasicRendererComponent>(_floorSPtr, shader_program);
+        auto floorRendererSPtr = std::make_shared<BasicRendererComponent>(_floorSPtr, basicShaderProgram);
         _floorSPtr->AddComponent(floorTransformSPtr);
         _floorSPtr->AddComponent(floorModelSPtr);
         _floorSPtr->AddComponent(floorRendererSPtr);
@@ -107,14 +128,21 @@ namespace game {
         _boxSPtr = std::make_shared<Actor>();
         auto boxTransformSPtr = std::make_shared<TransformComponent>(_boxSPtr);
         boxTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
-        auto boxModelSPtr = std::make_shared<ModelComponent>(_boxSPtr);
+        auto boxModelSPtr = std::make_shared<BasicModelComponent>(_boxSPtr);
         boxModelSPtr->Load("assets/box.obj");
-        auto boxRendererSPtr = std::make_shared<BasicRendererComponent>(_boxSPtr, shader_program);
+        auto boxRendererSPtr = std::make_shared<BasicRendererComponent>(_boxSPtr, basicShaderProgram);
         _boxSPtr->AddComponent(boxTransformSPtr);
         _boxSPtr->AddComponent(boxModelSPtr);
         _boxSPtr->AddComponent(boxRendererSPtr);
 
-
+        _waterSPtr = std::make_shared<Actor>();
+        auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
+        waterTransformSPtr->MoveBy(glm::vec3(3, 0.5f, 0));
+        auto waterModelSPtr = std::make_shared<WaterModelComponent>(10000, 1, 1, 1);
+        auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
+        _waterSPtr->AddComponent(waterTransformSPtr);
+        _waterSPtr->AddComponent(waterModelSPtr);
+        _waterSPtr->AddComponent(waterRendererSPtr);
     }
 
     void World::Render() {
@@ -124,6 +152,8 @@ namespace game {
         renderComponent->Render();
         renderComponent = std::dynamic_pointer_cast<BasicRendererComponent>(_floorSPtr->getComponent(ComponentType::RENDER_COMPONENT));
         renderComponent->Render();
+        auto waterRenderComponent = std::dynamic_pointer_cast<WaterRendererComponent>(_waterSPtr->getComponent(ComponentType::RENDER_COMPONENT));
+        waterRenderComponent->Render();
     }
 
     void World::Update(double deltaTime) {

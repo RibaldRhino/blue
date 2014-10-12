@@ -1,11 +1,11 @@
 #include <log.hpp>
 #include <GL/glew.h>
-#include "ModelComponent.hpp"
+#include "BasicModelComponent.hpp"
 #include <assimp/cimport.h>        // Plain-C interface
 #include <assimp/scene.h>          // Output data structure
 #include <assimp/postprocess.h>    // Post processing flags
 
-void game::ModelComponent::Load(const std::string& path) {
+void game::BasicModelComponent::Load(const std::string& path) {
     const aiScene* scene = aiImportFile( path.c_str(),
                     aiProcess_Triangulate);
 
@@ -99,7 +99,7 @@ void game::ModelComponent::Load(const std::string& path) {
     aiReleaseImport(scene);
 }
 
-game::ModelComponent::ModelComponent(ActorWPtr actorWPtr) {
+game::BasicModelComponent::BasicModelComponent(ActorWPtr actorWPtr) {
     _actorWPtr = actorWPtr;
 
 }

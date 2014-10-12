@@ -24,15 +24,16 @@ Event/Game/Window/Up/OnUpReleased.cpp Event/Game/Window/Up/OnRightReleased.cpp E
 Event/Game/Window/Up/OnLMBReleased.cpp Event/Game/Window/Up/OnRMBReleased.cpp
 
 Game/World/Actor/Components/Basic/BasicRendererComponent.cpp Game/World/Actor/Components/TransformComponentt.cpp
-Game/World/Actor/Components/ModelComponent.cpp Game/World/Actor/Components/Camera/CameraComponent.cpp Game/World/Actor/Components/IComponent.cpp
-Game/World/Actor/Components/Camera/CameraLogicComponent.cpp Game/World/Actor/Components/TransformComponent.hpp Game/World/Actor/Components/Background/BackgroundRendererComponent.cpp )
+Game/World/Actor/Components/Basic/BasicModelComponent.cpp Game/World/Actor/Components/Camera/CameraModelComponent.cpp Game/World/Actor/Components/IComponent.cpp
+Game/World/Actor/Components/Camera/CameraLogicComponent.cpp Game/World/Actor/Components/TransformComponent.hpp Game/World/Actor/Components/Background/BackgroundRendererComponent.cpp
+Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Components/Water/WaterRendererComponent.cpp Game/World/Actor/Components/Water/WaterModelComponent.cpp)
 
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
 
 
 add_custom_target(copy_shaders)
-set(SHADER_FILES shader_frag.glsl shader_vert.glsl)
+set(SHADER_FILES shader_frag.glsl shader_vert.glsl watershader_frag.glsl watershader_vert.glsl watershader_geom.glsl)
 foreach(ShaderFile ${SHADER_FILES})
   add_custom_command(TARGET copy_shaders PRE_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Shader/${ShaderFile} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Shader/${ShaderFile})

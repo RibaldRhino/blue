@@ -3,7 +3,7 @@
 #include <Event/Game/Window/OnCursorPositionChanged.hpp>
 #include <Game/World/Actor/Components/TransformComponent.hpp>
 #include "CameraLogicComponent.hpp"
-#include "CameraComponent.hpp"
+#include "CameraModelComponent.hpp"
 #include <glm/glm.hpp>
 #include <log.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -54,7 +54,7 @@ void game::CameraLogicComponent::OnWindowResized(event::IEventDataSPtr &eventDat
     auto data = std::dynamic_pointer_cast<event::OnWindowResized>(eventData);
     float aspectRatio = (float)data->getWidth()/data->getHeight();
     auto actor = _actorWPtr.lock();
-    auto cameraComponent = std::dynamic_pointer_cast<CameraComponent>(actor->getComponent(game::ComponentType::CAMERA_COMPONENT));
+    auto cameraComponent = std::dynamic_pointer_cast<CameraModelComponent>(actor->getComponent(game::ComponentType::MODEL_COMPONENT));
     cameraComponent->UpdatePerspective(aspectRatio);
 }
 
@@ -65,7 +65,7 @@ void game::CameraLogicComponent::OnCursorMoved(event::IEventDataSPtr &eventData)
         //TODO: change to event
         auto actor = _actorWPtr.lock();
         auto data = std::dynamic_pointer_cast<event::OnCursorPositionChanged>(eventData);
-        auto cameraComponent = std::dynamic_pointer_cast<CameraComponent>(actor->getComponent(game::ComponentType::CAMERA_COMPONENT));
+        auto cameraComponent = std::dynamic_pointer_cast<CameraModelComponent>(actor->getComponent(game::ComponentType::MODEL_COMPONENT));
         auto transformComponent = std::dynamic_pointer_cast<TransformComponent>(actor->getComponent(game::ComponentType::TRANSFORM_COMPONENT));
 
         transformComponent->RotateBy(-data->getVec().x, glm::vec3(0, 1, 0));
@@ -77,7 +77,7 @@ void game::CameraLogicComponent::OnCursorMoved(event::IEventDataSPtr &eventData)
 void game::CameraLogicComponent::Update(double deltaTime) {
     auto actor = _actorWPtr.lock();
     auto transformComponent = std::dynamic_pointer_cast<TransformComponent>(actor->getComponent(game::ComponentType::TRANSFORM_COMPONENT));
-    auto cameraComponent = std::dynamic_pointer_cast<CameraComponent>(actor->getComponent(game::ComponentType::CAMERA_COMPONENT));
+    auto cameraComponent = std::dynamic_pointer_cast<CameraModelComponent>(actor->getComponent(game::ComponentType::MODEL_COMPONENT));
     float factor = 2;
     if(_moveForward)
         transformComponent->MoveBy(factor*(float)deltaTime*transformComponent->getForward());

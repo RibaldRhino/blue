@@ -1,16 +1,16 @@
 
-#include "CameraComponent.hpp"
+#include "CameraModelComponent.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <Game/World/Actor/Components/TransformComponent.hpp>
 #include <log.hpp>
 
-game::CameraComponent::CameraComponent(ActorWPtr actorWPtr) {
+game::CameraModelComponent::CameraModelComponent(ActorWPtr actorWPtr) {
     _actorWPtr = actorWPtr;
     _index = 0;
 }
 
-void game::CameraComponent::Load(GLuint program) {
+void game::CameraModelComponent::Load(GLuint program) {
     auto uniformBlockIndex = glGetUniformBlockIndex(program, "Camera");
     glGenBuffers(1, &_cameraUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, _cameraUBO);
@@ -27,14 +27,14 @@ void game::CameraComponent::Load(GLuint program) {
 }
 
 
-void game::CameraComponent::UpdatePerspective(float aspectRatio) {
+void game::CameraModelComponent::UpdatePerspective(float aspectRatio) {
     cameraToPerspective = (glm::mat4)glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
     glBindBuffer(GL_UNIFORM_BUFFER, _cameraUBO);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(cameraToPerspective));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void game::CameraComponent::UpdateView() {
+void game::CameraModelComponent::UpdateView() {
     auto actor = _actorWPtr.lock();
     auto transformComponent = std::dynamic_pointer_cast<TransformComponent>(actor->getComponent(game::ComponentType::TRANSFORM_COMPONENT));
     auto pos = transformComponent->getPosition();
