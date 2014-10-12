@@ -15,17 +15,21 @@ game::WaterModelComponent::WaterModelComponent(int resolution, float width, floa
         points.push_back(rand()*width/2);
         points.push_back(rand()*height/2);
         points.push_back(rand()*depth/2);
+        points.push_back(0.05f);
     }
     glGenVertexArrays(1, &vao);
     glBindVertexArray (vao);
+
     glGenBuffers (1, &vbo);
     glBindBuffer (GL_ARRAY_BUFFER, vbo);
     glBufferData (
             GL_ARRAY_BUFFER,
             points.size() * sizeof (GLfloat),
             &points[0],
-            GL_DYNAMIC_DRAW
+            GL_STREAM_DRAW
     );
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glEnableVertexAttribArray (0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(12));
 }

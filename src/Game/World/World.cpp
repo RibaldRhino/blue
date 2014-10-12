@@ -84,19 +84,29 @@ namespace game {
 
         vert = get_file_contents("Shader/watershader_vert.glsl");
         frag = get_file_contents("Shader/watershader_frag.glsl");
+        auto geom = get_file_contents("Shader/watershader_geom.glsl");
         const char* waterVertexShader = vert.c_str();
         const char* waterFragmentShader = frag.c_str();
+        const char* waterGeometryShader = geom.c_str();
 
         GLuint wvs = glCreateShader (GL_VERTEX_SHADER);
         glShaderSource (wvs, 1, &waterVertexShader, NULL);
         glCompileShader (wvs);
         GetShaderCompileLog(wvs);
+
+        GLuint wgs = glCreateShader (GL_GEOMETRY_SHADER);
+        glShaderSource (wgs, 1, &waterGeometryShader, NULL);
+        glCompileShader (wgs);
+        GetShaderCompileLog(wgs);
+
         GLuint wfs = glCreateShader (GL_FRAGMENT_SHADER);
         glShaderSource (wfs, 1, &waterFragmentShader, NULL);
         glCompileShader (wfs);
         GetShaderCompileLog(wfs);
+
         GLuint waterShaderProgram = glCreateProgram ();
         glAttachShader (waterShaderProgram, wfs);
+        glAttachShader (waterShaderProgram, wgs);
         glAttachShader (waterShaderProgram, wvs);
         glLinkProgram (waterShaderProgram);
         GetProgramLinkLog(waterShaderProgram);
@@ -143,7 +153,7 @@ namespace game {
         _waterSPtr = std::make_shared<Actor>();
         auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
         waterTransformSPtr->MoveBy(glm::vec3(3, 0.5f, 0));
-        auto waterModelSPtr = std::make_shared<WaterModelComponent>(10000, 1, 1, 1);
+        auto waterModelSPtr = std::make_shared<WaterModelComponent>(1000, 1, 1, 1);
         auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
         _waterSPtr->AddComponent(waterTransformSPtr);
         _waterSPtr->AddComponent(waterModelSPtr);
