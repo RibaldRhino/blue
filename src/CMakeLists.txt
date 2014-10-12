@@ -46,3 +46,10 @@ foreach(Asset ${ASSETS})
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/assets/${Asset} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/${Asset})
 endforeach()
 add_dependencies(blue copy_assets)
+
+if(WIN32)
+add_custom_target(copy_assimp_dll)
+add_custom_command(TARGET copy_assimp_dll PRE_BUILD
+                 COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/assets/libassimp.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libassimp.dll)
+add_dependencies(blue copy_assimp_dll)
+endif()
