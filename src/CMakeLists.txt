@@ -2,6 +2,9 @@ include_directories(${OPENCL_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${ASSIMP_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/lib/glfw/include)
+include_directories(${PROJECT_SOURCE_DIR}/lib/glew/include)
+include_directories(${PROJECT_SOURCE_DIR}/lib/glm)
 
 link_directories(${GLEW_LIBRARY_DIRS})
 add_definitions(${GLEW_DEFINITIONS})
@@ -25,7 +28,7 @@ Game/World/Actor/Components/ModelComponent.cpp Game/World/Actor/Components/Camer
 Game/World/Actor/Components/Camera/CameraLogicComponent.cpp Game/World/Actor/Components/TransformComponent.hpp Game/World/Actor/Components/Background/BackgroundRendererComponent.cpp )
 
 add_executable(blue ${SOURCE_FILES})
-target_link_libraries(blue ${GLEW_LIBRARY} ${GLFW_STATIC_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
+target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
 
 
 add_custom_target(copy_shaders)
@@ -37,8 +40,6 @@ endforeach()
 add_dependencies(blue copy_shaders)
 
 
-add_custom_target(copy_assets)
-set(ASSETS box.obj floor.obj)
 foreach(Asset ${ASSETS})
   add_custom_command(TARGET copy_assets PRE_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/assets/${Asset} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/${Asset})
