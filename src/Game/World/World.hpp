@@ -4,6 +4,10 @@
 #include "Game/Process/ProcessManager.hpp"
 #include "Game/World/Actor/Actor.hpp"
 
+#ifndef M_PI
+#define M_PI 3.1415
+#endif
+
 namespace game {
 
     class World {

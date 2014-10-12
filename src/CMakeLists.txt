@@ -31,7 +31,6 @@ Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Compo
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
 
-
 add_custom_target(copy_shaders)
 set(SHADER_FILES shader_frag.glsl shader_vert.glsl watershader_frag.glsl watershader_vert.glsl watershader_geom.glsl)
 foreach(ShaderFile ${SHADER_FILES})
@@ -40,7 +39,8 @@ foreach(ShaderFile ${SHADER_FILES})
 endforeach()
 add_dependencies(blue copy_shaders)
 
-
+add_custom_target(copy_assets)
+set(ASSETS box.obj floor.obj)
 foreach(Asset ${ASSETS})
   add_custom_command(TARGET copy_assets PRE_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/assets/${Asset} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/${Asset})

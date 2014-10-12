@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <Game/World/Actor/Components/TransformComponent.hpp>
 #include <log.hpp>
+#include <math.h>
 
 game::CameraModelComponent::CameraModelComponent(ActorWPtr actorWPtr) {
     _actorWPtr = actorWPtr;
@@ -25,7 +26,7 @@ void game::CameraModelComponent::Load(GLuint program) {
 
 
 void game::CameraModelComponent::UpdatePerspective(float aspectRatio) {
-    cameraToPerspective = (glm::mat4)glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
+    cameraToPerspective = (glm::mat4)glm::perspective(3.1415f/4, aspectRatio, 0.1f, 100.0f);
     glBindBuffer(GL_UNIFORM_BUFFER, _cameraUBO);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(cameraToPerspective));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);

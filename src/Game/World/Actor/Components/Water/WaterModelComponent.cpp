@@ -1,5 +1,6 @@
 #include <functional>
 #include <random>
+#include <time.h>
 #include "WaterModelComponent.hpp"
 
 game::WaterModelComponent::WaterModelComponent(int resolution, float width, float height, float depth)
