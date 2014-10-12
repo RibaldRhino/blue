@@ -16,6 +16,8 @@
 #include <Game/World/Actor/Components/Camera/CameraModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterRendererComponent.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace game {
 
@@ -102,10 +104,13 @@ namespace game {
 
         _cameraSPtr = std::make_shared<Actor>();
         auto cameraTransformSPtr = std::make_shared<TransformComponent>(_cameraSPtr);
-        cameraTransformSPtr->MoveBy(glm::vec3(0, 0.5f, -8));
+        cameraTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 8));
+        cameraTransformSPtr->SetRotation(glm::angleAxis(0.0f, glm::vec3(0, 1, 0)));
+        cameraTransformSPtr->RotateBy(M_PI, glm::vec3(0, 1, 0));
         _cameraSPtr->AddComponent(cameraTransformSPtr);
         auto cameraSPtr = std::make_shared<CameraModelComponent>(_cameraSPtr);
         cameraSPtr->Load(basicShaderProgram);
+        cameraSPtr->Load(waterShaderProgram);
         _cameraSPtr->AddComponent(cameraSPtr);
         auto cameraLogicSPtr = std::make_shared<CameraLogicComponent>(_cameraSPtr);
         _cameraSPtr->AddComponent(cameraLogicSPtr);

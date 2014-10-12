@@ -25,7 +25,7 @@ namespace game {
 
         void SetRotation(glm::quat rotation) {_rotation = rotation;}
         void MoveBy(glm::vec3 vector);
-        void RotateBy(float angleInDeg, glm::vec3 axis);
+        void RotateBy(float angle, glm::vec3 axis);
 
         virtual ComponentType VGetComponentType() { return ComponentType::TRANSFORM_COMPONENT; }
 

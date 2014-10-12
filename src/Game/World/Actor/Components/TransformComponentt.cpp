@@ -19,7 +19,7 @@ const glm::vec3 game::TransformComponent::getPosition() const {
 }
 
 const glm::vec3 game::TransformComponent::getRight() const {
-    return glm::normalize(glm::vec3(_rotation * glm::vec4(1, 0, 0, 0)));
+    return glm::normalize(glm::vec3(_rotation * glm::vec4(-1, 0, 0, 0)));
 }
 
 const glm::vec3 game::TransformComponent::getUp() const {
@@ -33,7 +33,7 @@ void game::TransformComponent::MoveBy(glm::vec3 vector) {
     _translation+= vector;
 }
 
-void game::TransformComponent::RotateBy(float angleInDeg, glm::vec3 axis) {
-        _rotation = glm::normalize(glm::angleAxis(angleInDeg, axis)) * _rotation;
+void game::TransformComponent::RotateBy(float angle, glm::vec3 axis) {
+        _rotation = glm::normalize(glm::angleAxis(angle, axis)) * _rotation;
 }
 
