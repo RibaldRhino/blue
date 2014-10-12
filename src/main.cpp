@@ -3,6 +3,7 @@
 
 _INITIALIZE_EASYLOGGINGPP
 
+#define GLM_FORCE_RADIANS
 int main(int argc, char** argv)
 {
     game::Game game;

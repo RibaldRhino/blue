@@ -69,7 +69,7 @@ void game::CameraLogicComponent::OnCursorMoved(event::IEventDataSPtr &eventData)
         auto transformComponent = std::dynamic_pointer_cast<TransformComponent>(actor->getComponent(game::ComponentType::TRANSFORM_COMPONENT));
 
         transformComponent->RotateBy(-data->getVec().x, glm::vec3(0, 1, 0));
-        transformComponent->RotateBy(-data->getVec().y, transformComponent->getRight());
+        transformComponent->RotateBy(data->getVec().y, transformComponent->getRight());
         cameraComponent->UpdateView();
     }
 }
@@ -84,10 +84,13 @@ void game::CameraLogicComponent::Update(double deltaTime) {
     if(_moveBack)
         transformComponent->MoveBy(factor*-(float)deltaTime*transformComponent->getForward());
     if(_moveRight)
-        transformComponent->MoveBy(factor*-(float)deltaTime*transformComponent->getRight());
-    if(_moveLeft)
         transformComponent->MoveBy(factor*(float)deltaTime*transformComponent->getRight());
+    if(_moveLeft)
+        transformComponent->MoveBy(factor*-(float)deltaTime*transformComponent->getRight());
 
+    auto pos = transformComponent->getPosition();
+    auto right = transformComponent->getRight();
+    LOG(INFO)<<right.x<<" "<<right.y<<" "<<right.z;
     cameraComponent->UpdateView();
 
 }

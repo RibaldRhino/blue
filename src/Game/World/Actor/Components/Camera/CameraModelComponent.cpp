@@ -8,22 +8,19 @@
 game::CameraModelComponent::CameraModelComponent(ActorWPtr actorWPtr) {
     _actorWPtr = actorWPtr;
     _index = 0;
-}
-
-void game::CameraModelComponent::Load(GLuint program) {
-    auto uniformBlockIndex = glGetUniformBlockIndex(program, "Camera");
     glGenBuffers(1, &_cameraUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, _cameraUBO);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, NULL, GL_STREAM_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-
     UpdateView();
     UpdatePerspective(4.0f / 3.0f);
-
-    glUniformBlockBinding(program, uniformBlockIndex, _index);
     glBindBufferRange(GL_UNIFORM_BUFFER, _index, _cameraUBO, 0, sizeof(glm::mat4) * 2);
 
+}
+
+void game::CameraModelComponent::Load(GLuint program) {
+    auto uniformBlockIndex = glGetUniformBlockIndex(program, "Camera");
+    glUniformBlockBinding(program, uniformBlockIndex, _index);
 }
 
 
