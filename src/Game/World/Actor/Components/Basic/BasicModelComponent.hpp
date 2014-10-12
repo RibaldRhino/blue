@@ -4,11 +4,10 @@
 #include <GL/glew.h>
 #include <vector>
 #include <Game/World/Actor/Actor.hpp>
-#include "IComponent.hpp"
 
 namespace game {
 
-    class ModelComponent : public IComponent {
+    class BasicModelComponent : public IComponent {
     public:
         GLuint vertexArrayObject;
         std::vector<GLfloat> vertices;
@@ -19,11 +18,11 @@ namespace game {
         GLuint textureCoordsBufferObject;
         ActorWPtr _actorWPtr;
     public:
-        ModelComponent(ActorWPtr actorWPtr);
+        BasicModelComponent(ActorWPtr actorWPtr);
         void Load(const std::string& path);
         virtual ComponentType VGetComponentType() { return ComponentType::MODEL_COMPONENT; }
 
     };
 
-    typedef std::shared_ptr<ModelComponent> ModelSPtr;
+    typedef std::shared_ptr<BasicModelComponent> ModelSPtr;
 }

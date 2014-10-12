@@ -14,6 +14,7 @@ namespace game {
         std::shared_ptr<Actor> _floorSPtr;
         std::shared_ptr<Actor> _boxSPtr;
         std::shared_ptr<Actor> _backgroundSPtr;
+        std::shared_ptr<Actor> _waterSPtr;
     public:
         World();
 
