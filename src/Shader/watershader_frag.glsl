@@ -38,11 +38,7 @@ void Impostor(out vec3 fragmentPos_camera, out vec3 fragmentNormal_camera)
 }
 
 void main () {
-    if(sphereRadius==0)
-            frag_color = vec4(0, 0, 1, 1);
-    else
-            frag_color = vec4(1, 0, 0, 1);
-    /*vec3 fragmentPos_camera;
+    vec3 fragmentPos_camera;
     vec3 fragmentNormal_camera;
     Impostor(fragmentPos_camera, fragmentNormal_camera);
 
@@ -50,6 +46,6 @@ void main () {
     float ndcDepth = fragmentPos_clip.z / fragmentPos_clip.w;
     gl_FragDepth = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
 
-    frag_color = vec4(0, 0, 1, 1);*/
+    frag_color = vec4(0, 0, 1, 1);
 
 }

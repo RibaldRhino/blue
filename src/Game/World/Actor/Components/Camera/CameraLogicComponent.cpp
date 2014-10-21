@@ -90,7 +90,7 @@ void game::CameraLogicComponent::Update(double deltaTime) {
 
     auto pos = transformComponent->getPosition();
     auto right = transformComponent->getRight();
-    LOG(INFO)<<right.x<<" "<<right.y<<" "<<right.z;
+    //LOG(INFO)<<right.x<<" "<<right.y<<" "<<right.z;
     cameraComponent->UpdateView();
 
 }

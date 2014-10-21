@@ -31,6 +31,14 @@ Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Compo
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
 
+add_custom_target(copy_kernels)
+set(KERNEL_FILES test.cl)
+foreach(KernelFile ${KERNEL_FILES})
+  add_custom_command(TARGET copy_kernels PRE_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Kernel/${KernelFile} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Kernel/${KernelFile})
+endforeach()
+add_dependencies(blue copy_kernels)
+
 add_custom_target(copy_shaders)
 set(SHADER_FILES shader_frag.glsl shader_vert.glsl watershader_frag.glsl watershader_vert.glsl watershader_geom.glsl)
 foreach(ShaderFile ${SHADER_FILES})

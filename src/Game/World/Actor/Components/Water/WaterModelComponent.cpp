@@ -26,7 +26,7 @@ game::WaterModelComponent::WaterModelComponent(int resolution, float width, floa
             GL_ARRAY_BUFFER,
             points.size() * sizeof (GLfloat),
             &points[0],
-            GL_STREAM_DRAW
+            GL_DYNAMIC_DRAW
     );
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));

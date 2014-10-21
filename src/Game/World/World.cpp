@@ -16,6 +16,7 @@
 #include <Game/World/Actor/Components/Camera/CameraModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterRendererComponent.hpp>
+#include <Game/World/Actor/Components/Water/WaterLogicComponent.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -111,7 +112,6 @@ namespace game {
         glLinkProgram (waterShaderProgram);
         GetProgramLinkLog(waterShaderProgram);
 
-
         _cameraSPtr = std::make_shared<Actor>();
         auto cameraTransformSPtr = std::make_shared<TransformComponent>(_cameraSPtr);
         cameraTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 8));
@@ -130,6 +130,7 @@ namespace game {
         auto backgroundRendererSPtr = std::make_shared<BackgroundRendererComponent>(_backgroundSPtr, basicShaderProgram);
         _backgroundSPtr->AddComponent(backgroundRendererSPtr);
 
+
         _floorSPtr = std::make_shared<Actor>();
         auto floorTransformSPtr = std::make_shared<TransformComponent>(_floorSPtr);
         auto floorModelSPtr = std::make_shared<BasicModelComponent>(_floorSPtr);
@@ -138,7 +139,6 @@ namespace game {
         _floorSPtr->AddComponent(floorTransformSPtr);
         _floorSPtr->AddComponent(floorModelSPtr);
         _floorSPtr->AddComponent(floorRendererSPtr);
-
 
         _boxSPtr = std::make_shared<Actor>();
         auto boxTransformSPtr = std::make_shared<TransformComponent>(_boxSPtr);
@@ -152,12 +152,14 @@ namespace game {
 
         _waterSPtr = std::make_shared<Actor>();
         auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
-        waterTransformSPtr->MoveBy(glm::vec3(3, 0.5f, 0));
-        auto waterModelSPtr = std::make_shared<WaterModelComponent>(1000, 1, 1, 1);
+        waterTransformSPtr->MoveBy(glm::vec3(3, 1.5f, 0));
+        auto waterModelSPtr = std::make_shared<WaterModelComponent>(100, 50, 50, 50);
         auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
         _waterSPtr->AddComponent(waterTransformSPtr);
         _waterSPtr->AddComponent(waterModelSPtr);
         _waterSPtr->AddComponent(waterRendererSPtr);
+        auto waterLogicSPtr = std::make_shared<WaterLogicComponent>(_waterSPtr, waterModelSPtr->vbo);
+        _waterSPtr->AddComponent(waterLogicSPtr);
     }
 
     void World::Render() {
@@ -174,5 +176,7 @@ namespace game {
     void World::Update(double deltaTime) {
         auto cameraLogicComponent = std::dynamic_pointer_cast<CameraLogicComponent>(_cameraSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
         cameraLogicComponent->Update(deltaTime);
+        auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
+        waterLogicComponent->Update(deltaTime);
     }
 }
