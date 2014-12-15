@@ -2,11 +2,11 @@
 
 event::OnWindowResized::OnWindowResized(const int width, const int height) : _width(width), _height(height){}
 
-event::EventType const event::OnWindowResized::VGetEventType() const {
+event::EventType event::OnWindowResized::VGetEventType() const {
     return event::EventType::WINDOW_RESIZED ;
 }
 
-const double event::OnWindowResized::VGetTimeStamp() const {
+double event::OnWindowResized::VGetTimeStamp() const {
     return 0;
 }
 

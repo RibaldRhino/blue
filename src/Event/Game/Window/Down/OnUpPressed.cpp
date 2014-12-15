@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnUpPressed::VGetEventType() const {
+    EventType OnUpPressed::VGetEventType() const {
         return EventType::KEYBOARD_UP_PRESSED;
     }
 
-    const double OnUpPressed::VGetTimeStamp() const {
+    double OnUpPressed::VGetTimeStamp() const {
         return 0;
     }
 

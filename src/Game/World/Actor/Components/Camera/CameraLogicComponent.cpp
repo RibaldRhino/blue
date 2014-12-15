@@ -18,7 +18,7 @@ game::CameraLogicComponent::CameraLogicComponent(game::ActorWPtr actorWPtr) {
     _cameraLocked = true;
     _actorWPtr = actorWPtr;
     using std::placeholders::_1;
-    event::EventManager& eventManager = event::EventManager::get();
+    event::EventManager& eventManager = event::EventManager::getInstance();
     _connections[event::EventType::WINDOW_RESIZED] =
         eventManager.AddListener(event::EventType::WINDOW_RESIZED, std::bind(&game::CameraLogicComponent::OnWindowResized, this, _1));
 

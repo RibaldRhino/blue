@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnLeftReleased::VGetEventType() const {
+    EventType OnLeftReleased::VGetEventType() const {
         return EventType::KEYBOARD_LEFT_RELEASED;
     }
 
-    const double OnLeftReleased::VGetTimeStamp() const {
+    double OnLeftReleased::VGetTimeStamp() const {
         return 0;
     }
 

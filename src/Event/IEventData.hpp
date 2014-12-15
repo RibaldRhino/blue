@@ -7,9 +7,9 @@
 namespace event {
     class IEventData {
     public:
-        virtual const EventType VGetEventType() const = 0;
+        virtual EventType VGetEventType() const = 0;
 
-        virtual const double VGetTimeStamp() const = 0;
+        virtual double VGetTimeStamp() const = 0;
 
         virtual const char *VGetName() const = 0;
     };

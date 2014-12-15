@@ -8,10 +8,10 @@ namespace process {
     EventDispatchProcess::EventDispatchProcess(game::Game *game) : AbstractProcess() {
         _game = game;
         using std::placeholders::_1;
-        event::EventManager::get().AddListener(event::EventType::WINDOW_CLOSE, std::bind(&EventDispatchProcess::OnWindowClose, this, _1));
+        event::EventManager::getInstance().AddListener(event::EventType::WINDOW_CLOSE, std::bind(&EventDispatchProcess::OnWindowClose, this, _1));
     }
     void EventDispatchProcess::VUpdate(double deltaTime) {
-        auto& eventManager = event::EventManager::get();
+        auto& eventManager = event::EventManager::getInstance();
         eventManager.Update(deltaTime);
     }
 

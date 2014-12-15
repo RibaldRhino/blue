@@ -14,11 +14,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(SOURCE_FILES main.cpp Game/Window/Window.cpp Game/Window/Window_InputManager.cpp Event/EventManager.cpp Game/Game.cpp Game/Process/AbstractProcess.cpp
+set(SOURCE_FILES main.cpp System/Window/Window.cpp System/Window/Window_InputManager.cpp Event/EventManager.cpp Game/Game.cpp Game/Process/AbstractProcess.cpp
 Game/Process/ProcessManager.cpp Game/World/World.cpp Game/Process/Game/OutputProcess.cpp Game/Process/Game/EventDispatchProcess.cpp Event/Game/Window/OnWindowClose.cpp
 Game/Process/Game/WorldUpdateProcess.cpp Game/Process/Game/InputProcess.cpp Event/Game/Window/OnWindowResized.cpp Event/Game/Window/OnCursorPositionChanged.cpp
 Game/Timer.cpp Event/Game/Window/Down/OnDownPressed.cpp Event/Game/Window/Down/OnRightPressed.cpp Event/Game/Window/Down/OnUpPressed.cpp Event/Game/Window/Down/OnLeftPressed.cpp
 Event/Game/Window/Down/OnLMBPressed.cpp Event/Game/Window/Down/OnRMBPressed.cpp Game/World/Actor/Actor.cpp
+
+System/OpenCLSystem.cpp System/OpenGLSystem.cpp
 
 Event/Game/Window/Up/OnUpReleased.cpp Event/Game/Window/Up/OnRightReleased.cpp Event/Game/Window/Up/OnDownReleased.cpp Event/Game/Window/Up/OnLeftReleased.cpp
 Event/Game/Window/Up/OnLMBReleased.cpp Event/Game/Window/Up/OnRMBReleased.cpp

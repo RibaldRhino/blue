@@ -3,7 +3,7 @@
 #include "Window.hpp"
 #include "Event/Game/Window/WindowEvents.hpp"
 
-namespace game {
+namespace gamesystem {
 
 
     void Window::InputManager::OnWindowClosed(GLFWwindow *glfwWindow) {
@@ -11,7 +11,7 @@ namespace game {
 
     void Window::InputManager::OnWindowFramebufferResized(GLFWwindow *glfwWindow, int width, int height) {
         glViewport(0, 0, width, height);
-        event::EventManager::get().QueueEvent(std::make_shared<event::OnWindowResized>(width, height));
+        event::EventManager::getInstance().QueueEvent(std::make_shared<event::OnWindowResized>(width, height));
     }
 
     void Window::InputManager::OnWindowResized(GLFWwindow *glfwWindow, int width, int height) {
@@ -58,7 +58,7 @@ namespace game {
             }
         }
         if(eventDataSPtr!= nullptr)
-            event::EventManager::get().QueueEvent(eventDataSPtr);
+            event::EventManager::getInstance().QueueEvent(eventDataSPtr);
     }
 
     void Window::InputManager::OnMouseButton(GLFWwindow *glfwWindow, int button, int action, int mods) {
@@ -79,7 +79,7 @@ namespace game {
         }
 
         if(eventDataSPtr!= nullptr)
-            event::EventManager::get().QueueEvent(eventDataSPtr);
+            event::EventManager::getInstance().QueueEvent(eventDataSPtr);
     }
 
     void Window::InputManager::OnCursorPositionChanged(GLFWwindow *glfwWindow, double xPos, double yPos) {
@@ -89,6 +89,6 @@ namespace game {
         event::IEventDataSPtr eventDataSPtr = std::make_shared<event::OnCursorPositionChanged>(glm::vec2((xPos - centerX)/(width), (centerY - yPos)/(height)));
         glfwSetCursorPos(glfwWindow, centerX, centerY);
 
-        event::EventManager::get().QueueEvent(eventDataSPtr);
+        event::EventManager::getInstance().QueueEvent(eventDataSPtr);
     }
 }

@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnRightReleased::VGetEventType() const {
+    EventType OnRightReleased::VGetEventType() const {
         return EventType::KEYBOARD_RIGHT_RELEASED;
     }
 
-    const double OnRightReleased::VGetTimeStamp() const {
+    double OnRightReleased::VGetTimeStamp() const {
         return 0;
     }
 

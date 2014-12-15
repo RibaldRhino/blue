@@ -11,9 +11,9 @@ namespace event {
     public:
         OnCursorPositionChanged(glm::vec2 vec);
 
-        virtual const EventType VGetEventType() const;
+        virtual EventType VGetEventType() const;
 
-        virtual const double VGetTimeStamp() const;
+        virtual double VGetTimeStamp() const;
 
         virtual const char *VGetName() const;
 

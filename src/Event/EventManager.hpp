@@ -26,7 +26,7 @@ namespace event {
 
     public:
 
-        static EventManager& get() {
+        static EventManager&getInstance() {
             static EventManager eventManager;
             return eventManager;
         }

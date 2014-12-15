@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnRMBPressed::VGetEventType() const {
+    EventType OnRMBPressed::VGetEventType() const {
         return EventType::MOUSE_RMB_PRESSED;
     }
 
-    const double OnRMBPressed::VGetTimeStamp() const {
+    double OnRMBPressed::VGetTimeStamp() const {
         return 0;
     }
 

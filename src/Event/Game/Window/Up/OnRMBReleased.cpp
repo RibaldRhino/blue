@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnRMBReleased::VGetEventType() const {
+    EventType OnRMBReleased::VGetEventType() const {
         return EventType::MOUSE_RMB_RELEASED;
     }
 
-    const double OnRMBReleased::VGetTimeStamp() const {
+    double OnRMBReleased::VGetTimeStamp() const {
         return 0;
     }
 

@@ -11,14 +11,14 @@ namespace event {
     public:
         OnWindowResized(int width, int height);
 
-        virtual const EventType VGetEventType() const;
+        virtual EventType VGetEventType() const;
 
-        virtual const double VGetTimeStamp() const;
+        virtual double VGetTimeStamp() const;
 
         virtual const char *VGetName() const;
 
-        const int getWidth() const { return _width; }
-        const int getHeight() const { return _height; }
+        int getWidth() const { return _width; }
+        int getHeight() const { return _height; }
 
     };
 }

@@ -7,7 +7,7 @@ namespace process {
         _game = game;
 
         using std::placeholders::_1;
-        event::EventManager::get().AddListener(event::EventType::WINDOW_CLOSE, std::bind(&InputProcess::OnWindowClose, this, _1));
+        event::EventManager::getInstance().AddListener(event::EventType::WINDOW_CLOSE, std::bind(&InputProcess::OnWindowClose, this, _1));
     }
 
     void InputProcess::VUpdate(double deltaTime) {

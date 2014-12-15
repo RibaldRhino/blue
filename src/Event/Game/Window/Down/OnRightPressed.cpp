@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnRightPressed::VGetEventType() const {
+    EventType OnRightPressed::VGetEventType() const {
         return EventType::KEYBOARD_RIGHT_PRESSED;
     }
 
-    const double OnRightPressed::VGetTimeStamp() const {
+    double OnRightPressed::VGetTimeStamp() const {
         return 0;
     }
 

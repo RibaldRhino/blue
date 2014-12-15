@@ -6,7 +6,7 @@ namespace process {
     WorldUpdateProcess::WorldUpdateProcess(game::Game* game) : AbstractProcess() {
         _game = game;
         using std::placeholders::_1;
-        event::EventManager::get().AddListener(event::EventType::WINDOW_CLOSE, std::bind(&WorldUpdateProcess::OnWindowClose, this, _1));
+        event::EventManager::getInstance().AddListener(event::EventType::WINDOW_CLOSE, std::bind(&WorldUpdateProcess::OnWindowClose, this, _1));
     }
 
     void WorldUpdateProcess::VUpdate(double deltaTime) {

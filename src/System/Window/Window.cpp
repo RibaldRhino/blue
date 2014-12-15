@@ -3,12 +3,12 @@
 #include "log.hpp"
 #include "Window.hpp"
 
-namespace game {
+namespace gamesystem {
 
     class Game;
 
-    Window::Window(int width, int height, std::string title, Game *game, bool fullScreen) :
-            _gamePtr(game), _inputManagerUPtr(std::unique_ptr<InputManager>(new InputManager())) {
+    Window::Window(int width, int height, std::string title, bool fullScreen) :
+            _inputManagerUPtr(std::unique_ptr<InputManager>(new InputManager())) {
         glfwSetErrorCallback(OnError);
         glfwInit();
         glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -41,7 +41,6 @@ namespace game {
         glfwSetScrollCallback(_glfwWindowPtr, _inputManagerUPtr->OnScroll);
         glfwSetCursorEnterCallback(_glfwWindowPtr, _inputManagerUPtr->OnCursorEnter);
         glfwSetCursorPosCallback(_glfwWindowPtr, _inputManagerUPtr->OnCursorPositionChanged);
-
 
         _inputManagerUPtr->OnWindowResized(_glfwWindowPtr, width, height);
 

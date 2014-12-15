@@ -3,25 +3,24 @@
 #include <time.h>
 #include "WaterModelComponent.hpp"
 
-game::WaterModelComponent::WaterModelComponent(int resolution, float width, float height, float depth)
+game::WaterModelComponent::WaterModelComponent(int resolution, float width, float height, float depth) :
+        _width(width), _height(height), _depth(depth)
 {
     std::mt19937::result_type seed = time(0);
-    auto rand = std::bind(std::uniform_real_distribution<float>(-1, 1), std::mt19937(seed));
-    //auto rand_y= std::bind(std::uniform_real_distribution<float>(-height/2, height/2), std::mt19937(seed));
-    //auto rand_z = std::bind(std::uniform_real_distribution<float>(-depth/2, depth/2), std::mt19937(seed));
+    auto rand = std::bind(std::uniform_real_distribution<float>(0, 1), std::mt19937(seed));
     _resolution = resolution;
     points.reserve(resolution*3);
     while(resolution--) {
-        points.push_back(rand()*width/2);
-        points.push_back(rand()*height/2);
-        points.push_back(rand()*depth/2);
+        points.push_back(rand()*width);
+        points.push_back(rand()*height);
+        points.push_back(rand()*depth);
         points.push_back(0.05f);
     }
     glGenVertexArrays(1, &vao);
     glBindVertexArray (vao);
 
-    glGenBuffers (1, &vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, vbo);
+    glGenBuffers (1, &position_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, position_vbo);
     glBufferData (
             GL_ARRAY_BUFFER,
             points.size() * sizeof (GLfloat),

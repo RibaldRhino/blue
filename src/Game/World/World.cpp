@@ -153,12 +153,12 @@ namespace game {
         _waterSPtr = std::make_shared<Actor>();
         auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
         waterTransformSPtr->MoveBy(glm::vec3(3, 1.5f, 0));
-        auto waterModelSPtr = std::make_shared<WaterModelComponent>(100, 50, 50, 50);
+        auto waterModelSPtr = std::make_shared<WaterModelComponent>(100, 1, 1, 1);
         auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
         _waterSPtr->AddComponent(waterTransformSPtr);
         _waterSPtr->AddComponent(waterModelSPtr);
         _waterSPtr->AddComponent(waterRendererSPtr);
-        auto waterLogicSPtr = std::make_shared<WaterLogicComponent>(_waterSPtr, waterModelSPtr->vbo);
+        auto waterLogicSPtr = std::make_shared<WaterLogicComponent>(_waterSPtr);
         _waterSPtr->AddComponent(waterLogicSPtr);
     }
 

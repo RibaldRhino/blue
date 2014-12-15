@@ -1,3 +1,4 @@
+#include <System/OpenGLSystem.hpp>
 #include "Game.hpp"
 #include "Process/Game/OutputProcess.hpp"
 #include "Process/Game/EventDispatchProcess.hpp"
@@ -5,8 +6,7 @@
 #include "Process/Game/WorldUpdateProcess.hpp"
 
 namespace game {
-    Game::Game() {
-        _windowUPtr = std::unique_ptr<Window>(new Window(800, 600, "SPH", this, false));
+    Game::Game() : _windowPtr(gamesystem::OpenGLSystem::getInstance().getWindow()) {
         _processManagerUPtr = std::unique_ptr<process::ProcessManager>(new process::ProcessManager());
         _worldUPtr = std::unique_ptr<World>(new World());
         _timerUPtr = std::unique_ptr<Timer>(new Timer());

@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnDownPressed::VGetEventType() const {
+    EventType OnDownPressed::VGetEventType() const {
         return EventType::KEYBOARD_DOWN_PRESSED;
     }
 
-    const double OnDownPressed::VGetTimeStamp() const {
+    double OnDownPressed::VGetTimeStamp() const {
         return 0;
     }
 

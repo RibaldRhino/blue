@@ -13,7 +13,6 @@
 //
 #ifndef EASYLOGGINGPP_H  // NOLINT
 #define EASYLOGGINGPP_H
-
 // Compilers and C++0x/C++11 Evaluation
 #if defined(__GNUC__)
 #   define _ELPP_COMPILER_GCC 1
@@ -6343,9 +6342,4 @@ static T* checkNotNull(T* ptr, const char* name, const char* loggers, ...) {
 #endif  // defined(_ELPP_UNICODE)
 // For minimal backward compatibility
 namespace easyloggingpp = el;
-
-
-/*#include <iostream>
-#define _INITIALIZE_EASYLOGGINGPP using namespace std;
-#define LOG(INFO) std::cout*/
 #endif // EASYLOGGINGPP_H  // NOLINT

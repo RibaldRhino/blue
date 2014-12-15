@@ -1,10 +1,10 @@
 #include "OnCursorPositionChanged.hpp"
 
-event::EventType const event::OnCursorPositionChanged::VGetEventType() const {
+event::EventType event::OnCursorPositionChanged::VGetEventType() const {
     return event::EventType::MOUSE_CURSOR_POS;
 }
 
-const double event::OnCursorPositionChanged::VGetTimeStamp() const {
+double event::OnCursorPositionChanged::VGetTimeStamp() const {
     return 0;
 }
 

@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnWindowClose::VGetEventType() const {
+    EventType OnWindowClose::VGetEventType() const {
         return EventType::WINDOW_CLOSE;
     }
 
-    const double OnWindowClose::VGetTimeStamp() const {
+    double OnWindowClose::VGetTimeStamp() const {
         return 0;
     }
 

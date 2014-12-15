@@ -6,5 +6,5 @@ game::BackgroundRendererComponent::BackgroundRendererComponent(ActorWPtr actorWP
 }
 
 void game::BackgroundRendererComponent::Render() {
-    glClearColor(0.2f, 0.2f, 0.4f, 1.0f);
+    glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 }

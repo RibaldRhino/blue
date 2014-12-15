@@ -5,11 +5,11 @@ namespace event {
 
     }
 
-    const EventType OnDownReleased::VGetEventType() const {
+    EventType OnDownReleased::VGetEventType() const {
         return EventType::KEYBOARD_DOWN_RELEASED;
     }
 
-    const double OnDownReleased::VGetTimeStamp() const {
+    double OnDownReleased::VGetTimeStamp() const {
         return 0;
     }
 
