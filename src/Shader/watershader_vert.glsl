@@ -1,6 +1,6 @@
 #version 330
 
-layout(location = 0) in vec3 sphereCenter;
+layout(location = 0) in vec4 sphereCenter;
 layout(location = 1) in float sphereRadius;
 
 uniform mat4 modelToWorld;
@@ -19,7 +19,7 @@ out VertexData
 
 
 void main () {
-    vec4 sphereCenter_camera = worldToCamera * modelToWorld * vec4(sphereCenter, 1.0);
+    vec4 sphereCenter_camera = worldToCamera * modelToWorld * vec4(vec3(sphereCenter), 1.0);
     outData.sphereCenter_camera = vec3(sphereCenter_camera);
     outData.sphereRadius = sphereRadius;
 

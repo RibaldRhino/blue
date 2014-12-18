@@ -13,70 +13,78 @@
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
 #include <System/OpenCLSystem.hpp>
+#include <CL/cl_platform.h>
 
 
 game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     auto &&model = std::dynamic_pointer_cast<WaterModelComponent>(actorWPtr.lock()->getComponent(ComponentType::MODEL_COMPONENT));
     auto &openCLSystem = gamesystem::OpenCLSystem::getInstance();
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "calculate_density", _calculate_density_kernel)) {
-        LOG(ERROR) << "Failed to load calculate_density kernel";
+    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "hash_particles", _hash_particles_kernel)) {
+        LOG(ERROR) << "Failed to load hash_particles kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-
+    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "histogram", _histogram_kernel)) {
+        LOG(ERROR) << "Failed to load histogram kernel";
+        event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
+    }
+    
     auto context = openCLSystem.getContext();
     cl_int errNum = 0;
-    _position_buffer_cl = clCreateFromGLBuffer(context, CL_MEM_WRITE_ONLY, model->position_vbo, &errNum);
-    if (errNum != CL_SUCCESS) {
-        LOG(ERROR) << "clCreateFromGLBuffer error " << errNum;
-    }
-    _density_buffer.resize(model->resolution());
-    _density_buffer_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, _density_buffer.size() * sizeof(float), &_density_buffer[0], &errNum);
-    _pressure_buffer.resize(model->resolution());
-    _pressure_buffer_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, _pressure_buffer.size() * sizeof(float), &_pressure_buffer[0], &errNum);
-    _velocity_buffer.resize(model->resolution() * 3);
-    _velocity_buffer_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, _velocity_buffer.size() * sizeof(float), &_velocity_buffer[0], &errNum);
-    _acceleration_buffer.resize(model->resolution() * 3);
-    _acceleration_buffer_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, _acceleration_buffer.size() * sizeof(float), &_acceleration_buffer[0], &errNum);
 
-    int a = 10;
-    int mass = model->particle_mass();
-    errNum = clSetKernelArg(_calculate_density_kernel, 0, sizeof(cl_mem), &_position_buffer_cl);
-    errNum = clSetKernelArg(_calculate_density_kernel, 1, sizeof(cl_mem), &_density_buffer_cl);
-    errNum = clSetKernelArg(_calculate_density_kernel, 2, sizeof(cl_mem), &_pressure_buffer_cl);
-    errNum = clSetKernelArg(_calculate_density_kernel, 3, sizeof(cl_mem), &_velocity_buffer_cl);
-    errNum = clSetKernelArg(_calculate_density_kernel, 4, sizeof(cl_mem), &_acceleration_buffer_cl);
-    errNum = clSetKernelArg(_calculate_density_kernel, 5, sizeof(float), &mass);
-    errNum = clSetKernelArg(_calculate_density_kernel, 6, sizeof(unsigned int), &a);
-    errNum = clSetKernelArg(_calculate_density_kernel, 7, sizeof(unsigned int), &a);
+    _particle_count = model->particle_count();
 
-    offset = 0.0f;
+
+    _positions.resize(_particle_count);
+    _position_cl = clCreateFromGLBuffer(context, CL_MEM_READ_WRITE, model->position_vbo, &errNum);
+    _voxel_positions.resize(_particle_count);
+    _voxel_positions_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_int2)*_voxel_positions.size(), NULL, &errNum);
+    _histogram.resize(1<< _radix_bits);
+    _histogram_cl = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(cl_int)*_histogram.size(), NULL, &errNum);
+
+    cl_float4 blf{0,0,0,0};
+    cl_float4 trb{1,2,1,0};
+    cl_float h = 0.037;
+
+    errNum = clSetKernelArg(_hash_particles_kernel, 0, sizeof(cl_mem), &_position_cl);
+    errNum = clSetKernelArg(_hash_particles_kernel, 1, sizeof(cl_mem), &_voxel_positions_cl);
+    errNum = clSetKernelArg(_hash_particles_kernel, 2, sizeof(cl_float4), &blf);
+    errNum = clSetKernelArg(_hash_particles_kernel, 3, sizeof(cl_float4), &trb);
+    errNum = clSetKernelArg(_hash_particles_kernel, 4, sizeof(cl_float), &h);
+
+    errNum = clSetKernelArg(_histogram_kernel, 0, sizeof(cl_mem), &_voxel_positions_cl);
+    errNum = clSetKernelArg(_histogram_kernel, 1, sizeof(cl_mem), &_histogram_cl);
+    errNum = clSetKernelArg(_histogram_kernel, 2, sizeof(cl_int), &_radix_bits);
 }
 
 void game::WaterLogicComponent::Update(double deltaTime)
 {
     cl_int errNum = CL_SUCCESS;
-
-    glFinish();
     cl_command_queue commandQueue = gamesystem::OpenCLSystem::getInstance().getCommandQueue();
-    errNum = clEnqueueAcquireGLObjects(commandQueue, 1, &_position_buffer_cl, 0,0,0);
+    glFinish();
+    errNum = clEnqueueAcquireGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
 
-    // Set arg 3 and execute the kernel
-    float f = deltaTime;
-    errNum = clSetKernelArg(_calculate_density_kernel, 8, sizeof(float), &f);
-    size_t globalWorkSize = 100;
-    errNum |= clEnqueueNDRangeKernel(commandQueue, _calculate_density_kernel, 1, NULL, &globalWorkSize, NULL, 0,0,0 );
+    //hash particles
+    size_t hashParticlesWorkSize = _particle_count;
+    errNum = clEnqueueNDRangeKernel(commandQueue, _hash_particles_kernel, 1, NULL, &hashParticlesWorkSize, NULL, 0,0,0 );
+    errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4),
+            &_positions[0], 0, 0, NULL);
+    errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2),
+            &_voxel_positions[0], 0, 0, NULL);
+    for(int i =0;i< _positions.size();i++)
+        std::cout<< _positions[i].s[0]<<" "<< _positions[i].s[1]<<" "<< _positions[i].s[2]<<" "<< _positions[i].s[3]<<std::endl;
+    for(int i=0;i<_voxel_positions.size();i++)
+        std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;
 
-    std::vector<float> positions;
-    positions.resize(400);
-    errNum |= clEnqueueReadBuffer(commandQueue, _position_buffer_cl, CL_TRUE, 0, 400 * sizeof(float), &positions[0], 0, 0, NULL);
-    errNum |= clEnqueueReadBuffer(commandQueue, _density_buffer_cl, CL_TRUE, 0, 100 * sizeof(float), &_density_buffer[0], 0, 0, NULL);
+    //histogram
+    size_t histogramWorkSize = _particle_count;
+    cl_int it = 0;
+    errNum = clSetKernelArg(_histogram_kernel, 3, sizeof(cl_int), &it);
+    errNum = clEnqueueNDRangeKernel(commandQueue, _histogram_kernel, 1, NULL, &histogramWorkSize, NULL, 0,0,0 );
+    errNum = clEnqueueReadBuffer(commandQueue, _histogram_cl, CL_TRUE, 0, _histogram.size()*sizeof(cl_int),
+            &_histogram[0], 0, 0, NULL);
+    for(auto& hist : _histogram)
+        std::cout<<hist<<std::endl;
 
-    for(int i =0;i<positions.size();i+=4)
-        std::cout<<positions[i]<<" "<<positions[i+1]<<" "<<positions[i+2]<<" "<<positions[i+3]<<std::endl;
-    for(int i=0;i<_density_buffer.size();i++)
-        std::cout<<_density_buffer[i]<<" ";
-    std::cout<<std::endl;
-
-    errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_buffer_cl, 0,0,0);
+    errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);
 };

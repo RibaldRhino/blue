@@ -7,13 +7,13 @@ namespace game {
     class WaterModelComponent : public IComponent {
     private:
 
-        int _resolution;
+        uint _resolution;
         float _width;
         float _height;
         float _depth;
 
     public:
-        WaterModelComponent(int resolution, float width, float height, float depth);
+        WaterModelComponent(uint resolution, float width, float height, float depth);
         GLuint position_vbo;
         GLuint radius_vbo;
         GLuint vao;
@@ -25,7 +25,7 @@ namespace game {
         float width() const { return _width; }
         float height() const { return _height; }
         float depth() const { return _depth; }
-        int resolution() const { return _resolution; }
+        uint particle_count() const { return _resolution*_resolution*_resolution; }
         float particle_mass() const { return (_width * _height * _depth * 1000) / _resolution; }
 
 

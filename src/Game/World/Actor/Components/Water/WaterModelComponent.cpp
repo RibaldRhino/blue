@@ -3,18 +3,21 @@
 #include <time.h>
 #include "WaterModelComponent.hpp"
 
-game::WaterModelComponent::WaterModelComponent(int resolution, float width, float height, float depth) :
+game::WaterModelComponent::WaterModelComponent(uint resolution, float width, float height, float depth) :
         _width(width), _height(height), _depth(depth)
 {
-    std::mt19937::result_type seed = time(0);
-    auto rand = std::bind(std::uniform_real_distribution<float>(0, 1), std::mt19937(seed));
     _resolution = resolution;
-    points.reserve(resolution*3);
-    while(resolution--) {
-        points.push_back(rand()*width);
-        points.push_back(rand()*height);
-        points.push_back(rand()*depth);
-        points.push_back(0.05f);
+    points.reserve(resolution*resolution*resolution);
+    for(int i=0;i<resolution;i++) {
+        for(int j=0;j<resolution;j++) {
+            for(int k = 0; k< resolution;k++) {
+                points.push_back((i*width)/resolution);
+                points.push_back((j*width)/resolution);
+                points.push_back((k*width)/resolution);
+                points.push_back(0);
+                radius.push_back(std::min(width, std::min(height, depth))/resolution/3);
+            }
+        }
     }
     glGenVertexArrays(1, &vao);
     glBindVertexArray (vao);
@@ -28,7 +31,16 @@ game::WaterModelComponent::WaterModelComponent(int resolution, float width, floa
             GL_DYNAMIC_DRAW
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    glGenBuffers (1, &radius_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, radius_vbo);
+    glBufferData (
+            GL_ARRAY_BUFFER,
+            radius.size() * sizeof (GLfloat),
+            &radius[0],
+            GL_STATIC_DRAW
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(12));
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 }

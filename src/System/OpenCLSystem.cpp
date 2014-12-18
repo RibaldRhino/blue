@@ -33,6 +33,18 @@ namespace gamesystem {
         return true;
     }
 
+    bool OpenCLSystem::TryGetDevices(cl_platform_id platform, std::vector<cl_device_id> &devices)
+    {
+        cl_int errNum;
+        cl_uint device_count;
+        errNum = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &device_count);
+        if(errNum != CL_SUCCESS || device_count==0)
+            return false;
+        devices.resize(device_count);
+        errNum = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, device_count, &devices[0], NULL);
+        return errNum == CL_SUCCESS;
+    }
+
     bool OpenCLSystem::TryCreateContext() {
         std::vector<cl_platform_id> platforms;
         auto& glSystem = OpenGLSystem::getInstance();
@@ -46,35 +58,35 @@ namespace gamesystem {
         {
             for(auto& platform : platforms)
             {
-                cl_context_properties props[] =
+                std::vector<cl_device_id> devices;
+                if(TryGetDevices(platform, devices))
                 {
-                        CL_GL_CONTEXT_KHR,
-                        (cl_context_properties) glSystem.getCurrentContext(),
-                        #ifdef _WIN32   // Windows version
-                        CL_WGL_HDC_KHR,
-                        #else
-                        CL_GLX_DISPLAY_KHR,
-                        #endif
-                        (cl_context_properties) glSystem.getCurrentDisplay(),
-                        CL_CONTEXT_PLATFORM,
-                        (cl_context_properties)platform, 0
-                };
-
-                size_t size;
-                errNum = clGetGLContextInfoKHR(props, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR, sizeof(cl_device_id), &_deviceId, NULL);
-                if (errNum != CL_SUCCESS) {
-                    LOG(ERROR) << "Platform: "<<platform<<", Error:" << errNum << " in clGetGLContextInfoKHR Call";
-                    continue;
-                } else {
-                    LOG(INFO) << "Platform: "<<platform<<", clGetGLContextInfoKHR succeeded";
-                }
-                _context = clCreateContext(props, 1, &_deviceId, NULL, NULL, &errNum);
-                if (errNum != CL_SUCCESS) {
-                    LOG(ERROR) << "Platform: "<<platform<<", Error:" << errNum << " clCreateContext Call";
-                    continue;
-                } else {
-                    LOG(INFO) << "Platform: "<<platform<<", clCreateContext succeeded";
-                    break;
+                    for(cl_device_id& device : devices)
+                    {
+                        cl_context_properties props[] =
+                        {
+                            CL_GL_CONTEXT_KHR,
+                            (cl_context_properties) glSystem.getCurrentContext(),
+                            #ifdef _WIN32   // Windows version
+                            CL_WGL_HDC_KHR,
+                            #else
+                            CL_GLX_DISPLAY_KHR,
+                            #endif
+                            (cl_context_properties) glSystem.getCurrentDisplay(),
+                            CL_CONTEXT_PLATFORM,
+                            (cl_context_properties)platform, 0
+                        };
+                        _context = clCreateContext(props, 1, &device, NULL, NULL, &errNum);
+                        if (errNum != CL_SUCCESS) {
+                            LOG(ERROR) << "Platform: "<<platform<<", Error:" << errNum << " clCreateContext Call";
+                            continue;
+                        } else {
+                            _deviceId = device;
+                            _platformId = platform;
+                            LOG(INFO) << "Platform: "<<platform<<", clCreateContext succeeded";
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -117,6 +129,12 @@ namespace gamesystem {
         if (errNum != CL_SUCCESS)
         {
             LOG(ERROR) << "Kernel program build error " << errNum;
+            size_t len;
+            clGetProgramBuildInfo(program, _deviceId, CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
+            std::vector<char> info;
+            info.resize(len);
+            clGetProgramBuildInfo(program, _deviceId, CL_PROGRAM_BUILD_LOG, len, &info[0], 0);
+            LOG(ERROR) << std::string(info.begin(), info.end());
         }
 
         // create the kernel

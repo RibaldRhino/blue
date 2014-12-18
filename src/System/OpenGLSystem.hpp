@@ -4,11 +4,11 @@
 
 #include <memory>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
-#endif
+#else
 #include <GL/glx.h>
-
+#endif
 namespace gamesystem
 {
 
@@ -30,14 +30,14 @@ namespace gamesystem
             return _windowUPtr.get();
         };
         const void* getCurrentDisplay() {
-            #ifdef WIN32
+            #ifdef _WIN32
             return wglGetCurrentDC();
             #else
             return glXGetCurrentDisplay();
             #endif
         }
         const void* getCurrentContext() {
-            #ifdef WIN32
+            #ifdef _WIN32
             return wglGetCurrentContext();
             #else
             return glXGetCurrentContext();

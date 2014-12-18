@@ -3,12 +3,13 @@
 #include <boost/noncopyable.hpp>
 #include "OpenGLSystem.hpp"
 
-#ifdef _WIN32   // Windows version
+#ifdef WIN32
 #include <windows.h>
+#else
+#include <GL/glx.h>
 #endif
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
-#include <GL/glx.h>
 
 namespace gamesystem
 {
@@ -22,6 +23,7 @@ private:
 private:
     cl_context _context;
     cl_device_id _deviceId;
+    cl_platform_id _platformId;
     cl_command_queue _commandQueue;
     bool TryCreateContext();
     bool TryGetPlatforms(std::vector<cl_platform_id> &platforms);
@@ -41,6 +43,9 @@ public:
     }
     bool TryLoadKernel(std::string filePath, std::string kernelName, cl_kernel& kernel);
 
+    bool TryGetDevices(std::vector < cl_device_id > &devices);
+
+    bool TryGetDevices(cl_platform_id platform, std::vector <cl_device_id> &devices);
 };
 
 }

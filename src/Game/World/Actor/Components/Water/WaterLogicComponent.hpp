@@ -13,19 +13,19 @@ namespace game {
     class WaterLogicComponent : public IComponent {
         private:
         ActorWPtr _actorWPtr;
-        cl_kernel _calculate_density_kernel;
+        cl_kernel _hash_particles_kernel;
+        cl_kernel _histogram_kernel;
 
-        cl_mem _position_buffer_cl;
-        cl_mem _pressure_buffer_cl;
-        std::vector<float> _pressure_buffer;
-        cl_mem _density_buffer_cl;
-        std::vector<float> _density_buffer;
-        cl_mem _velocity_buffer_cl;
-        std::vector<float> _velocity_buffer;
-        cl_mem _acceleration_buffer_cl;
-        std::vector<float> _acceleration_buffer;
+        std::vector<cl_float4> _positions;
+        cl_mem _position_cl;
+        std::vector<cl_int2> _voxel_positions;
+        cl_mem _voxel_positions_cl;
+        std::vector<cl_int> _histogram;
+        cl_mem _histogram_cl;
 
-        float offset;
+        uint _particle_count;
+
+        const uint _radix_bits = 8;
 
         public:
         WaterLogicComponent(game::ActorWPtr actorWPtr);

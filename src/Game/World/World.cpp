@@ -140,7 +140,7 @@ namespace game {
         _floorSPtr->AddComponent(floorModelSPtr);
         _floorSPtr->AddComponent(floorRendererSPtr);
 
-        _boxSPtr = std::make_shared<Actor>();
+        /*_boxSPtr = std::make_shared<Actor>();
         auto boxTransformSPtr = std::make_shared<TransformComponent>(_boxSPtr);
         boxTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
         auto boxModelSPtr = std::make_shared<BasicModelComponent>(_boxSPtr);
@@ -148,11 +148,11 @@ namespace game {
         auto boxRendererSPtr = std::make_shared<BasicRendererComponent>(_boxSPtr, basicShaderProgram);
         _boxSPtr->AddComponent(boxTransformSPtr);
         _boxSPtr->AddComponent(boxModelSPtr);
-        _boxSPtr->AddComponent(boxRendererSPtr);
+        _boxSPtr->AddComponent(boxRendererSPtr);*/
 
         _waterSPtr = std::make_shared<Actor>();
         auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
-        waterTransformSPtr->MoveBy(glm::vec3(3, 1.5f, 0));
+        waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
         auto waterModelSPtr = std::make_shared<WaterModelComponent>(100, 1, 1, 1);
         auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
         _waterSPtr->AddComponent(waterTransformSPtr);
@@ -165,9 +165,9 @@ namespace game {
     void World::Render() {
         auto backgroundRenderComponent = std::dynamic_pointer_cast<BackgroundRendererComponent>(_backgroundSPtr->getComponent(ComponentType::RENDER_COMPONENT));
         backgroundRenderComponent->Render();
-        auto  renderComponent = std::dynamic_pointer_cast<BasicRendererComponent>(_boxSPtr->getComponent(ComponentType::RENDER_COMPONENT));
-        renderComponent->Render();
-        renderComponent = std::dynamic_pointer_cast<BasicRendererComponent>(_floorSPtr->getComponent(ComponentType::RENDER_COMPONENT));
+        /*  renderComponent = std::dynamic_pointer_cast<BasicRendererComponent>(_boxSPtr->getComponent(ComponentType::RENDER_COMPONENT));
+        renderComponent->Render();*/
+        auto renderComponent = std::dynamic_pointer_cast<BasicRendererComponent>(_floorSPtr->getComponent(ComponentType::RENDER_COMPONENT));
         renderComponent->Render();
         auto waterRenderComponent = std::dynamic_pointer_cast<WaterRendererComponent>(_waterSPtr->getComponent(ComponentType::RENDER_COMPONENT));
         waterRenderComponent->Render();
