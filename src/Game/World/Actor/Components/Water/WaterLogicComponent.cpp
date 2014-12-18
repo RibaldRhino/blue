@@ -13,7 +13,8 @@
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
 #include <System/OpenCLSystem.hpp>
-#include <CL/cl_platform.h>
+#include "clpp.h"
+
 
 
 game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
@@ -59,7 +60,8 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 void game::WaterLogicComponent::Update(double deltaTime)
 {
     cl_int errNum = CL_SUCCESS;
-    cl_command_queue commandQueue = gamesystem::OpenCLSystem::getInstance().getCommandQueue();
+    auto& clSystem = gamesystem::OpenCLSystem::getInstance();
+    cl_command_queue commandQueue = clSystem.getCommandQueue();
     glFinish();
     errNum = clEnqueueAcquireGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
 
@@ -76,14 +78,31 @@ void game::WaterLogicComponent::Update(double deltaTime)
         std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;
 
     //histogram
-    size_t histogramWorkSize = _particle_count;
+    /*size_t histogramWorkSize = _particle_count;
     cl_int it = 0;
     errNum = clSetKernelArg(_histogram_kernel, 3, sizeof(cl_int), &it);
     errNum = clEnqueueNDRangeKernel(commandQueue, _histogram_kernel, 1, NULL, &histogramWorkSize, NULL, 0,0,0 );
     errNum = clEnqueueReadBuffer(commandQueue, _histogram_cl, CL_TRUE, 0, _histogram.size()*sizeof(cl_int),
             &_histogram[0], 0, 0, NULL);
     for(auto& hist : _histogram)
-        std::cout<<hist<<std::endl;
+        std::cout<<hist<<std::endl;*/
+
+    clppProgram::setBasePath("Kernel");
+    clppContext context;
+    context.clContext = clSystem.getContext();
+    context.clDevice = clSystem.getDevice();
+    context.clPlatform =clSystem.getPlatform();
+    context.clQueue = clSystem.getCommandQueue();
+
+    clppSort* sort = clpp::createBestSortKV(&context, _voxel_positions.size(), 32);
+    sort->pushCLDatas(_voxel_positions_cl, _voxel_positions.size());
+    sort->sort();
+
+    errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2),
+            &_voxel_positions[0], 0, 0, NULL);
+    for(int i=0;i<_voxel_positions.size();i++)
+        std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;
+
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);

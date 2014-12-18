@@ -35,15 +35,16 @@ public:
     cl_context getContext() const {
         return _context;
     }
-    cl_device_id getDeviceId() const {
+    cl_device_id getDevice() const {
         return _deviceId;
     }
     cl_command_queue getCommandQueue() const {
         return _commandQueue;
     }
+    cl_platform_id getPlatform() const {
+        return _platformId;
+    }
     bool TryLoadKernel(std::string filePath, std::string kernelName, cl_kernel& kernel);
-
-    bool TryGetDevices(std::vector < cl_device_id > &devices);
 
     bool TryGetDevices(cl_platform_id platform, std::vector <cl_device_id> &devices);
 };
