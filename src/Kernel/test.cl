@@ -21,6 +21,66 @@ __kernel void hash_particles(
     voxelparticle[id] = (int2)(voxelId, id);
 }
 
+__kernel void sort_post_pass(
+    __global float4* position,
+    __global float4* velocity,
+    __global float4* sortedPosition,
+    __global float4* sortedVelocity,
+    __global int2* voxelparticle
+    )
+{
+    unsigned int id = get_global_id(0);
+    sortedPosition[id] = position[voxelparticle[id].y];
+    sortedVelocity[id] = velocity[voxelparticle[id].y];
+}
+
+unsigned int binsearch(
+    const unsigned int voxelId,
+    const int2* array,
+    const unsigned int length
+    )
+{
+    int l = 0, r = length - 1, s;
+    while(l <= r)
+    {
+        s = (l + r) / 2;
+        if(array[s].x >= voxelId)
+            p = s - 1;
+        else
+            l = s + 1;
+    }
+    return l;
+}
+
+__kernel void indexx(
+    __global uint* gridVoxelIndex,
+    __global int2* voxelparticle,
+    const unsigned int length
+    )
+{
+    unsigned int id = get_global_id(0);
+    unsigned int lowestParticle = binsearch(id, voxelparticle, length);
+    if(voxelparticle[lowestParticle].x == id)
+        gridVoxelIndex[id] = lowestParticle;
+    else
+        gridVoxelIndex[id] = -1;
+}
+
+__kernel void index_post_pass(
+    __global uint* gridVoxelIndex,
+    const unsigned int length
+    )
+{
+    unsigned int id = get_global_id(0);
+    if(gridVoxelIndex[id] = -1)
+    {
+        int i;
+        for(i = id + 1; i < length && gridVoxelIndex[i] == -1; ++i);
+        if(i < length)
+            gridVoxelIndex[id] = gridVoxelIndex[i];
+    }
+}
+
 __kernel void histogram(
     __global int2* voxelparticle,
     __global int* histogram,

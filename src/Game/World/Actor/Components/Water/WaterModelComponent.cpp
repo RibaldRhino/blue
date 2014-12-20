@@ -3,7 +3,7 @@
 #include <time.h>
 #include "WaterModelComponent.hpp"
 
-game::WaterModelComponent::WaterModelComponent(uint resolution, float width, float height, float depth) :
+game::WaterModelComponent::WaterModelComponent(GLuint resolution, float width, float height, float depth) :
         _width(width), _height(height), _depth(depth)
 {
     _resolution = resolution;

@@ -70,10 +70,6 @@ void game::WaterLogicComponent::Update(double deltaTime)
             &_positions[0], 0, 0, NULL);
     errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2),
             &_voxel_positions[0], 0, 0, NULL);
-    for(int i =0;i< _positions.size();i++)
-        std::cout<< _positions[i].s[0]<<" "<< _positions[i].s[1]<<" "<< _positions[i].s[2]<<" "<< _positions[i].s[3]<<std::endl;
-    for(int i=0;i<_voxel_positions.size();i++)
-        std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;
 
     //histogram
     size_t histogramWorkSize = _particle_count;
@@ -82,8 +78,6 @@ void game::WaterLogicComponent::Update(double deltaTime)
     errNum = clEnqueueNDRangeKernel(commandQueue, _histogram_kernel, 1, NULL, &histogramWorkSize, NULL, 0,0,0 );
     errNum = clEnqueueReadBuffer(commandQueue, _histogram_cl, CL_TRUE, 0, _histogram.size()*sizeof(cl_int),
             &_histogram[0], 0, 0, NULL);
-    for(auto& hist : _histogram)
-        std::cout<<hist<<std::endl;
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);
