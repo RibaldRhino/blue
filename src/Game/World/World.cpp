@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <cerrno>
 #include <Game/World/Actor/Components/TransformComponent.hpp>
 #include <string.h>
 #include "log.hpp"
@@ -153,7 +152,7 @@ namespace game {
         _waterSPtr = std::make_shared<Actor>();
         auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
         waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
-        auto waterModelSPtr = std::make_shared<WaterModelComponent>(100, 1, 1, 1);
+        auto waterModelSPtr = std::make_shared<WaterModelComponent>(16, 1, 1, 1);
         auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
         _waterSPtr->AddComponent(waterTransformSPtr);
         _waterSPtr->AddComponent(waterModelSPtr);

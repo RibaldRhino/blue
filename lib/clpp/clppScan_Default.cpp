@@ -1,4 +1,5 @@
 #include "clppScan_Default.h"
+#include "clppScan_Default_CLKernel.h"
 
 // Next :
 // 1 - Allow templating
@@ -12,8 +13,11 @@ clppScan_Default::clppScan_Default(clppContext* context, size_t valueSize, unsig
 	_clBuffer_values = 0;
 	_clBuffer_BlockSums = 0;
 
-	if (!compile(context, "clppScan_Default.cl"))
+	if (!compile(context, clCode_clppScan_Default))
 		return;
+
+	//if (!compile(context, string("clppScan_Default.cl")))
+	//	return;
 
 	//---- Prepare all the kernels
 	cl_int clStatus;
@@ -148,7 +152,7 @@ void clppScan_Default::pushDatas(void* values, size_t datasetSize)
 		clEnqueueWriteBuffer(_context->clQueue, _clBuffer_values, CL_FALSE, 0, _valueSize * _datasetSize, _values, 0, 0, 0);
 }
 
-void clppScan_Default::pushDatas(cl_mem clBuffer_values, size_t datasetSize)
+void clppScan_Default::pushCLDatas(cl_mem clBuffer_values, size_t datasetSize)
 {
 	_values = 0;
 	_clBuffer_values = clBuffer_values;
@@ -188,6 +192,12 @@ void clppScan_Default::pushDatas(cl_mem clBuffer_values, size_t datasetSize)
 void clppScan_Default::popDatas()
 {
 	cl_int clStatus = clEnqueueReadBuffer(_context->clQueue, _clBuffer_values, CL_TRUE, 0, _valueSize * _datasetSize, _values, 0, NULL, NULL);
+	checkCLStatus(clStatus);
+}
+
+void clppScan_Default::popDatas(void* dataSet)
+{
+	cl_int clStatus = clEnqueueReadBuffer(_context->clQueue, _clBuffer_values, CL_TRUE, 0, _valueSize * _datasetSize, dataSet, 0, NULL, NULL);
 	checkCLStatus(clStatus);
 }
 

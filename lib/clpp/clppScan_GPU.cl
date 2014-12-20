@@ -35,7 +35,8 @@
 
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
-#define T int
+#define T uint
+#define OPERATOR_INDEXOF(I) I
 #define OPERATOR_APPLY(A,B) A+B
 #define OPERATOR_IDENTITY 0
 
@@ -50,22 +51,22 @@
 
 inline T scan_simt_exclusive(__local VOLATILE T* input, size_t idx, const uint lane)
 {
-	if (lane > 0 ) input[idx] = OPERATOR_APPLY(input[idx - 1] , input[idx]);
-	if (lane > 1 ) input[idx] = OPERATOR_APPLY(input[idx - 2] , input[idx]);
-	if (lane > 3 ) input[idx] = OPERATOR_APPLY(input[idx - 4] , input[idx]);
-	if (lane > 7 ) input[idx] = OPERATOR_APPLY(input[idx - 8] , input[idx]);
-	if (lane > 15) input[idx] = OPERATOR_APPLY(input[idx - 16], input[idx]);
+	if (lane > 0 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 1)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 1 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 2)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 3 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 4)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 7 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 8)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 15) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 16)], input[OPERATOR_INDEXOF(idx)]);
 		
 	return (lane > 0) ? input[idx-1] : OPERATOR_IDENTITY;
 }
 
 inline T scan_simt_inclusive(__local VOLATILE T* input, size_t idx, const uint lane)
 {	
-	if (lane > 0 ) input[idx] = OPERATOR_APPLY(input[idx - 1] , input[idx]);
-	if (lane > 1 ) input[idx] = OPERATOR_APPLY(input[idx - 2] , input[idx]);
-	if (lane > 3 ) input[idx] = OPERATOR_APPLY(input[idx - 4] , input[idx]);
-	if (lane > 7 ) input[idx] = OPERATOR_APPLY(input[idx - 8] , input[idx]);
-	if (lane > 15) input[idx] = OPERATOR_APPLY(input[idx - 16], input[idx]);
+	if (lane > 0 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 1)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 1 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 2)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 3 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 4)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 7 ) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 8)] , input[OPERATOR_INDEXOF(idx)]);
+	if (lane > 15) input[idx] = OPERATOR_APPLY(input[OPERATOR_INDEXOF(idx - 16)], input[OPERATOR_INDEXOF(idx)]);
 		
 	return input[idx];
 }
@@ -119,8 +120,25 @@ void kernel__scan_block_anylength(
 		const uint offset = i * TC + (bidx * B);
 		const uint offsetIdx = offset + idx;
 		
+#ifdef OCL_PLATFORM_AMD
+		if (offsetIdx > size-1)
+		{
+			// To avoid to lock !
+			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
+			
+			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
+			continue;
+		}
+#else
 		if (offsetIdx > size-1) return;
-		
+#endif
+
 		// Step 1: Read TC elements from global (off-chip) memory to local memory (on-chip)
 		T input = localBuf[idx] = dataSet[offsetIdx];		
 		

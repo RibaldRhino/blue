@@ -13,6 +13,7 @@
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
 #include <System/OpenCLSystem.hpp>
+#include <clppSort_BitonicSortGPU.h>
 #include "clpp.h"
 
 
@@ -68,14 +69,12 @@ void game::WaterLogicComponent::Update(double deltaTime)
     //hash particles
     size_t hashParticlesWorkSize = _particle_count;
     errNum = clEnqueueNDRangeKernel(commandQueue, _hash_particles_kernel, 1, NULL, &hashParticlesWorkSize, NULL, 0,0,0 );
-    errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4),
-            &_positions[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2),
-            &_voxel_positions[0], 0, 0, NULL);
-    for(int i =0;i< _positions.size();i++)
-        std::cout<< _positions[i].s[0]<<" "<< _positions[i].s[1]<<" "<< _positions[i].s[2]<<" "<< _positions[i].s[3]<<std::endl;
-    for(int i=0;i<_voxel_positions.size();i++)
-        std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;
+    //errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4),
+     //       &_positions[0], 0, 0, NULL);
+    //for(int i =0;i< _positions.size();i++)
+     //   std::cout<< _positions[i].s[0]<<" "<< _positions[i].s[1]<<" "<< _positions[i].s[2]<<" "<< _positions[i].s[3]<<std::endl;
+    //for(int i=0;i<_voxel_positions.size();i++)
+     //   std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;
 
     //histogram
     /*size_t histogramWorkSize = _particle_count;
@@ -86,19 +85,19 @@ void game::WaterLogicComponent::Update(double deltaTime)
             &_histogram[0], 0, 0, NULL);
     for(auto& hist : _histogram)
         std::cout<<hist<<std::endl;*/
-
-    clppProgram::setBasePath("Kernel");
+    
+    clppProgram::setBasePath("Kernel/");
     clppContext context;
     context.clContext = clSystem.getContext();
     context.clDevice = clSystem.getDevice();
     context.clPlatform =clSystem.getPlatform();
     context.clQueue = clSystem.getCommandQueue();
 
-    clppSort* sort = clpp::createBestSortKV(&context, _voxel_positions.size(), 32);
+    clppSort* sort = clpp::createBestSortKV(&context, _voxel_positions.size(), false);
     sort->pushCLDatas(_voxel_positions_cl, _voxel_positions.size());
     sort->sort();
-
-    errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2),
+    sort->waitCompletion();
+    errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_int2),
             &_voxel_positions[0], 0, 0, NULL);
     for(int i=0;i<_voxel_positions.size();i++)
         std::cout<<_voxel_positions[i].s[0]<<" "<<_voxel_positions[i].s[1]<<std::endl;

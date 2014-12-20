@@ -1,5 +1,5 @@
 // In order to test that no value has been loosed ! Can take time to check !
-#define PARAM_CHECK_HASLOOSEDVALUES 0
+#define PARAM_CHECK_HASLOOSEDVALUES 1
 #define PARAM_BENCHMARK_LOOPS 20
 
 // The number of bits to sort
@@ -13,35 +13,47 @@
 #include "clppScan_Default.h"
 #include "clppScan_GPU.h"
 
-#include "clppSort_Blelloch.h"
 #include "clppSort_CPU.h"
 #include "clppSort_RadixSort.h"
 #include "clppSort_RadixSortGPU.h"
+#include "clppSort_BitonicSort.h"
+#include "clppSort_BitonicSortGPU.h"
+
+#include "clppCount.h"
 
 #include <string.h>
 
 using namespace std;
 
 void makeOneVector(unsigned int* a, unsigned int numElements);
-void makeRandomUint16Vector(unsigned short *a, unsigned int numElements, unsigned int keybits);
-void makeRandomUint32Vector(unsigned int *a, unsigned int numElements, unsigned int keybits);
-void makeRandomUint32Vector_KV(unsigned int *a, unsigned int numElements, unsigned int keybits);
-void makeRandomUint32Vector_i(unsigned int *a, unsigned int numElements, unsigned int keybits);
+void makeRandomInt32Vector(unsigned int *a, unsigned int numElements, unsigned int keybits, bool keysOnly);
 
 void benchmark_scan(clppContext* context, clppScan* scan, int datasetSize);
-void benchmark_sort(clppContext context, clppSort* sort, unsigned int datasetSize);
+void benchmark_sort(clppContext context, clppSort* sort, unsigned int datasetSize, unsigned int bits);
 void benchmark_sort_KV(clppContext context, clppSort* sort, unsigned int datasetSize, unsigned int bits);
 
-bool checkIsSorted(unsigned int* tocheck, size_t datasetSize, string algorithmName, bool keysOnly);
+bool checkIsSorted(unsigned int* tocheck, size_t datasetSize, string algorithmName, bool keysOnly, int sortId);
 bool checkHasLooseDatasKV(unsigned int* unsorted, unsigned int* sorted, size_t datasetSize, string algorithmName);
 
 void test_Scan(clppContext* context);
 void test_Sort(clppContext* context);
 void test_Sort_KV(clppContext* context);
+void test_Count(clppContext* context);
 
 //unsigned int datasetSizes[8] = {262144, 128000, 256000, 512000, 1024000, 2048000, 4096000, 8196000};
-unsigned int datasetSizes[8] = {16000, 128000, 256000, 512000, 1024000, 2048000, 4096000, 8196000};
-unsigned int datasetSizesCount = 6;
+//unsigned int datasetSizes[8] = {16000, 128000, 256000, 512000, 1024000, 2048000, 4096000, 8196000};
+
+// Small problems
+//unsigned int datasetSizes[10] = {100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000};
+
+unsigned int datasetSizes[10] = {1<<10, 1<<12, 1<<13, 1<<14, 1<<15, 1<<16, 1<<17, 1<<18, 1<<19, 1<<20};
+//unsigned int datasetSizes[10] = {40960, 1<<12, 1<<13, 1<<14, 1<<15, 1<<16, 1<<17, 1<<18, 1<<19, 1<<20};
+//unsigned int datasetSizes[10] = {256*256, 1<<12, 1<<13, 1<<14, 1<<15, 1<<16, 1<<17, 1<<18, 1<<19, 1<<20};
+
+// Big problems
+//unsigned int datasetSizes[10] = {16000000, 32000000, 48000000, 64000000, 80000000, 96000000, 112000000, 128000000, 144000000, 160000000};
+
+unsigned int datasetSizesCount = 10;
 
 StopWatch* stopWatcher = new StopWatch();
 
@@ -51,16 +63,20 @@ int main(int argc, const char** argv)
 
 	//---- Prepare a clpp Context
 	clppContext context;
-	context.setup(0, 0);
+	context.setup(1, 0);
+	context.printInformation();
 
 	// Scan
 	//test_Scan(&context);
 
 	// Sorting : key
-	test_Sort(&context);
+	//test_Sort(&context);
 
 	// Sorting : key + value
-	//test_Sort_KV(&context);
+	test_Sort_KV(&context);
+
+	// Count
+	//test_Count(&context);
 }
 
 #pragma region test_Scan
@@ -68,21 +84,27 @@ int main(int argc, const char** argv)
 void test_Scan(clppContext* context)
 {
 	//---- Default scan
-	cout << "--------------- Scan : Default scan" << endl;
-	for(unsigned int i = 0; i < datasetSizesCount; i++)
+	if (context->isCPU)
 	{
-		clppScan* scan = new clppScan_Default(context, sizeof(int), datasetSizes[i]);
-		benchmark_scan(context, scan, datasetSizes[i]);
-		delete scan;
+		cout << "--------------- Scan : CPU scan" << endl;
+		for(unsigned int i = 0; i < datasetSizesCount; i++)
+		{
+			clppScan* scan = new clppScan_Default(context, sizeof(int), datasetSizes[i]);
+			benchmark_scan(context, scan, datasetSizes[i]);
+			delete scan;
+		}
 	}
 
 	//---- GPU scan
-	cout << "--------------- Scan : GPU scan" << endl;
-	for(unsigned int i = 0; i < datasetSizesCount; i++)
+	if (context->isGPU)
 	{
-		clppScan* scan = new clppScan_GPU(context, sizeof(int), datasetSizes[i]);
-		benchmark_scan(context, scan, datasetSizes[i]);
-		delete scan;
+		cout << "--------------- Scan : GPU scan" << endl;
+		for(unsigned int i = 0; i < datasetSizesCount; i++)
+		{
+			clppScan* scan = new clppScan_GPU(context, sizeof(int), datasetSizes[i]);
+			benchmark_scan(context, scan, datasetSizes[i]);
+			delete scan;
+		}
 	}
 
 	//scan = new clppScan_Merrill(context, datasetSize);
@@ -96,39 +118,46 @@ void test_Scan(clppContext* context)
 void test_Sort(clppContext* context)
 {
 	//---- Brute force
-	//cout << "--------------- Brute force sort" << endl;
-	//for(unsigned int i = 0; i < datasetSizesCount; i++)
+	/*cout << "--------------- Brute force sort" << endl;
+	for(unsigned int i = 0; i < datasetSizesCount; i++)
+	{
+		clppSort* clppsort = new clppSort_CPU(context);
+		benchmark_sort(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
+		delete clppsort;
+	}*/
+
+	//---- Radix-sort : CPU : generic version
+	//if (context->isCPU)
 	//{
-	//	clppSort* clppsort = new clppSort_CPU(context);
-	//	benchmark_sort(*context, clppsort, datasetSizes[i]);
-	//	delete clppsort;
+	//	cout << "--------------- CPU : Key : Radix sort" << endl;
+	//	for(unsigned int i = 0; i < datasetSizesCount; i++)
+	//	{
+	//		clppSort* clppsort = new clppSort_RadixSort(context, datasetSizes[i], PARAM_SORT_BITS, true);
+	//		benchmark_sort(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
+	//		delete clppsort;
+	//	}
 	//}
 
-	//---- Blelloch
-	//cout << "--------------- Blelloch sort" << endl;
-	//for(unsigned int i = 0; i < datasetSizesCount; i++)
-	//{
-	//	clppSort* clppsort = new clppSort_Blelloch(context, datasetSizes[i]);
-	//	benchmark_sort(*context, clppsort, datasetSizes[i]);	
-	//}
-
-	//---- Radix-sort : generic version
-	//cout << "--------------- Radix sort Key" << endl;
-	//for(unsigned int i = 0; i < datasetSizesCount; i++)
-	//{
-	//	clppSort* clppsort = new clppSort_RadixSort(context, datasetSizes[i], PARAM_SORT_BITS, true);
-	//	benchmark_sort(*context, clppsort, datasetSizes[i]);
-	//	delete clppsort;
-	//}
-
-	//---- Radix-sort : Satish version
+	//---- Radix-sort : GPU : Satish version
 	if (context->isGPU)
 	{
-		cout << "--------------- Satish radix sort Key" << endl;
+		cout << "--------------- GPU : Key : Satish radix sort" << endl;
 		for(unsigned int i = 0; i < datasetSizesCount; i++)
 		{
 			clppSort* clppsort = new clppSort_RadixSortGPU(context, datasetSizes[i], PARAM_SORT_BITS, true);
-			benchmark_sort(*context, clppsort, datasetSizes[i]);
+			benchmark_sort(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
+			delete clppsort;
+		}
+	}
+
+	//---- Bitonic-sort : GPU
+	if (context->isGPU)
+	{
+		cout << "--------------- GPU : Key : Bitonic sort" << endl;
+		for(unsigned int i = 0; i < datasetSizesCount; i++)
+		{
+			clppSort* clppsort = new clppSort_BitonicSortGPU(context, datasetSizes[i], true);
+			benchmark_sort(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
 			delete clppsort;
 		}
 	}
@@ -145,17 +174,74 @@ void test_Sort(clppContext* context)
 
 void test_Sort_KV(clppContext* context)
 {
-	//---- Satish Radix-sort
+	////---- Satish Radix-sort : CPU
+	//if (context->isCPU)
+	//{
+	//	cout << "--------------- CPU : Key-Value : Satish sort" << endl;
+	//	for(unsigned int i = 0; i < datasetSizesCount; i++)
+	//	{
+	//		clppSort* clppsort = new clppSort_RadixSort(context, datasetSizes[i], PARAM_SORT_BITS, false);
+	//		benchmark_sort_KV(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
+	//		delete clppsort;
+	//	}
+	//}
+
+	////---- Bitonic-sort : CPU
+	//cout << "--------------- CPU : Key-Value : Bitonic sort" << endl;
+	//for(unsigned int i = 0; i < datasetSizesCount; i++)
+	//{
+	//	clppSort* clppsort = new clppSort_BitonicSortGPU(context, datasetSizes[i], false);
+	//	benchmark_sort_KV(*context, clppsort, datasetSizes[i], 32);
+	//	delete clppsort;
+	//}
+
+	//---- Satish Radix-sort : GPU
+	//if (context->isGPU)
+	//{
+	//	cout << "--------------- GPU : Key-Value : Satish sort" << endl;
+	//	for(unsigned int i = 0; i < datasetSizesCount; i++)
+	//	{
+	//		clppSort* clppsort = new clppSort_RadixSortGPU(context, datasetSizes[i], PARAM_SORT_BITS, false);
+	//		benchmark_sort_KV(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
+	//		delete clppsort;
+	//	}
+	//}
+
+	//---- Bitonic-sort : GPU
 	if (context->isGPU)
 	{
-		cout << "--------------- Satish sort Key-Value" << endl;
+		cout << "--------------- GPU : Key-Value : Bitonic sort" << endl;
 		for(unsigned int i = 0; i < datasetSizesCount; i++)
 		{
-			clppSort* clppsort = new clppSort_RadixSortGPU(context, datasetSizes[i], PARAM_SORT_BITS, false);
+			clppSort* clppsort = new clppSort_BitonicSortGPU(context, datasetSizes[i], false);
 			benchmark_sort_KV(*context, clppsort, datasetSizes[i], PARAM_SORT_BITS);
 			delete clppsort;
 		}
 	}
+}
+
+#pragma endregion
+
+#pragma region test_Count
+
+void test_Count(clppContext* context)
+{
+	int datasetSize = 100000;
+
+	clppCount* counter = new clppCount(context, sizeof(int), 4, datasetSize);
+
+	//---- Prepare the datas-set
+	int* values = (int*)malloc(datasetSize * sizeof(int));
+	int possiblesValues[] = {1, 2, 4, 8, 16};
+	for(int i = 0; i < datasetSize; i++)
+	{
+		values[i] = possiblesValues[(rand() % 5)];
+	}
+
+	counter->pushDatas(values, datasetSize);
+	counter->count();
+
+	//---- Check the results
 }
 
 #pragma endregion
@@ -166,8 +252,8 @@ void benchmark_scan(clppContext* context, clppScan* scan, int datasetSize)
 {
 	//---- Create a set of data
 	unsigned int* values = (unsigned int*)malloc(datasetSize * sizeof(int));
-	makeOneVector(values, datasetSize);
-	//makeRandomUint32Vector(values, datasetSize, 32);
+	//makeOneVector(values, datasetSize);
+	makeRandomInt32Vector(values, datasetSize, 8, true);
 
 	//---- Scan : default
 	unsigned int* cpuScanValues = (unsigned int*)malloc(datasetSize * sizeof(int));
@@ -205,30 +291,34 @@ void benchmark_scan(clppContext* context, clppScan* scan, int datasetSize)
 
 #pragma region benchmark_sort
 
-void benchmark_sort(clppContext context, clppSort* sort, unsigned int datasetSize)
+void benchmark_sort(clppContext context, clppSort* sort, unsigned int datasetSize, unsigned int bits)
 {
 	//---- Create a new set of random datas
 	unsigned int* keys = (unsigned int*)malloc(datasetSize * sizeof(int));
-	//makeRandomUint32Vector_i(keys, datasetSize, 16);
-	makeRandomUint32Vector(keys, datasetSize, 32);  
 
-	//---- Push the datas
- 	sort->pushDatas(keys, datasetSize);
-
-	//---- Sort
-	stopWatcher->StartTimer();
-	for(int i = 0; i < PARAM_BENCHMARK_LOOPS; i++)
+	float time = 0;
+	for(unsigned int i = 0; i < PARAM_BENCHMARK_LOOPS; i++)
 	{
+		makeRandomInt32Vector(keys, datasetSize, bits, true);  
+
+		//---- Push the datas
+ 		sort->pushDatas(keys, datasetSize);
+
+		//---- Sort
+		stopWatcher->StartTimer();
+		
 		sort->sort();
 		sort->waitCompletion();	
+		
+		stopWatcher->StopTimer();
+		time += stopWatcher->GetElapsedTime();
+
+		//---- Check if it is sorted
+		sort->popDatas();
+		checkIsSorted(keys, datasetSize, sort->getName(), true, i);
 	}
-	stopWatcher->StopTimer();
 
-	//---- Check if it is sorted
-	sort->popDatas();
-	checkIsSorted(keys, datasetSize, sort->getName(), true);
-
-	float time = stopWatcher->GetElapsedTime() / PARAM_BENCHMARK_LOOPS;
+	time /= PARAM_BENCHMARK_LOOPS;
 	float kps = (1000 / time) * datasetSize;
 	cout << "Performance for data-set size[" << datasetSize << "] time (ms): " << time << " KPS[" << (int)kps << "]" << endl;
 
@@ -243,36 +333,45 @@ void benchmark_sort(clppContext context, clppSort* sort, unsigned int datasetSiz
 void benchmark_sort_KV(clppContext context, clppSort* sort, unsigned int datasetSize, unsigned int bits)
 {
 	unsigned int* unsortedDatas = (unsigned int*)malloc(2 * datasetSize * sizeof(int));
-	unsigned int* sortedDatas = (unsigned int*)malloc(2 * datasetSize * sizeof(int));
-	makeRandomUint32Vector_KV(unsortedDatas, datasetSize, bits);
-	memcpy(sortedDatas, unsortedDatas, sizeof(int) * 2 * datasetSize);
+	unsigned int* unsortedDatasCopy = (unsigned int*)malloc(2 * datasetSize * sizeof(int));
 
-	//---- Push the datas
- 	sort->pushDatas(sortedDatas, datasetSize);
-
-	//---- Sort
-	stopWatcher->StartTimer();
-
-	for(int i = 0; i < PARAM_BENCHMARK_LOOPS; i++)
+	float time = 0;
+	for(unsigned int i = 0; i < PARAM_BENCHMARK_LOOPS; i++)
 	{
-		sort->sort();
-		sort->waitCompletion();
-	}
-	stopWatcher->StopTimer();
+		makeRandomInt32Vector(unsortedDatas, datasetSize, bits, false);
+		memcpy(unsortedDatasCopy, unsortedDatas, 2 * datasetSize * sizeof(int));
 
-	float time = stopWatcher->GetElapsedTime() / PARAM_BENCHMARK_LOOPS;
+		//---- Push the datas
+ 		sort->pushDatas(unsortedDatas, datasetSize);
+
+		//---- Sort
+		stopWatcher->StartTimer();
+
+		sort->sort();
+
+		sort->waitCompletion();
+
+		stopWatcher->StopTimer();
+		time += stopWatcher->GetElapsedTime();
+
+		//---- Check if it is sorted
+		sort->popDatas();
+		cout<<"-------------------------------"<<std::endl;
+		for(int i=0;i<datasetSize*2;i+=2)
+		{
+			cout<<unsortedDatas[i]<<" "<<unsortedDatas[i+1]<<std::endl;
+		}
+		//checkIsSorted(unsortedDatas, datasetSize, sort->getName(), false, i);
+#if PARAM_CHECK_HASLOOSEDVALUES
+		//checkHasLooseDatasKV(unsortedDatasCopy, unsortedDatas, datasetSize, sort->getName());
+#endif
+	}
+
+	time /= PARAM_BENCHMARK_LOOPS;
 	float kps = (1000 / time) * datasetSize;
 	cout << "Performance for data-set size[" << datasetSize << "] time (ms): " << time << " KPS[" << (int)kps << "]" << endl;
 
-	//---- Check if it is sorted
-	sort->popDatas();
-	checkIsSorted(sortedDatas, datasetSize, sort->getName(), false);
-#if PARAM_CHECK_HASLOOSEDVALUES
-	checkHasLooseDatasKV(unsortedDatas, sortedDatas, datasetSize, sort->getName());
-#endif
-
 	//---- Free
-	free(sortedDatas);
 	free(unsortedDatas);
 }
 
@@ -285,73 +384,142 @@ void makeOneVector(unsigned int* a, unsigned int numElements)
     for(unsigned int i = 0; i < numElements; ++i)   
         a[i] = 1; 
 }
+//
+//void makeRandomInt16Vector(unsigned short *a, unsigned int numElements, unsigned int keybits)
+//{
+//    // Fill up with some random data
+//    int keyshiftmask = 0;
+//    if (keybits > 16) keyshiftmask = (1 << (keybits - 16)) - 1;
+//    int keymask = 0xffff;
+//    if (keybits < 16) keymask = (1 << keybits) - 1;
+//
+//    srand(0);
+//    for(unsigned int i = 0; i < numElements; ++i)   
+//        a[i] = ((rand() & keyshiftmask)<<16); 
+//}
+//
+//void makeRandomInt32Vector_i(unsigned int* a, unsigned int numElements, unsigned int keybits)
+//{
+//    for(unsigned int i = 0; i < numElements; ++i)   
+//        a[i] = numElements - i; 
+//}
 
-void makeRandomUint16Vector(unsigned short *a, unsigned int numElements, unsigned int keybits)
+//void makeRandomInt32Vector(unsigned int* a, unsigned int numElements, unsigned int keybits)
+//{
+//    // Fill up with some random data
+//    //int keyshiftmask = 0;
+//    //if (keybits > 16) keyshiftmask = (1 << (keybits - 16)) - 1;
+//    //int keymask = 0xffff;
+//    //if (keybits < 16) keymask = (1 << keybits) - 1;
+//
+//    srand(95123);
+//    //cout << "Warning, max int = "<< (1<<_TOTALBITS)<<endl;
+//	unsigned int max = (1<<keybits-2) - 1; // Max 'signed' value
+//	for(unsigned int i=0; i < numElements; ++i)  { 
+//		//a[i] = ((rand() & keyshiftmask)<<16) | (rand() & keymask); 
+//		a[i] = rand() % max;
+//		//a[i] = i+1;
+//		//a[i] = 1;
+//    }
+//}
+
+template <class T>
+void makeShuffleVector(T* a, size_t numElements, unsigned int keybits, bool keysOnly){
+
+	int mult = keysOnly ? 1:2;
+
+	T swap;
+
+	srand(0);
+	for(size_t i=0;i< mult*numElements; i++){
+		a[i]=i;
+	}
+	for(size_t i=0;i< mult*numElements; i++){
+
+			swap = a[i];
+			size_t j= rand()% (mult*numElements-i);
+			a[i]=a[j];
+			a[j]=swap;
+		}
+};
+
+void makeRandomInt32Vector(unsigned int* a, unsigned int numElements, unsigned int keybits, bool keysOnly)
 {
-    // Fill up with some random data
-    int keyshiftmask = 0;
-    if (keybits > 16) keyshiftmask = (1 << (keybits - 16)) - 1;
-    int keymask = 0xffff;
-    if (keybits < 16) keymask = (1 << keybits) - 1;
+	int mult = keysOnly ? 1 : 2;
 
-    srand(0);
-    for(unsigned int i = 0; i < numElements; ++i)   
-        a[i] = ((rand() & keyshiftmask)<<16); 
-}
+	unsigned int possiblesValues[] = {1, 2, 4, 8, 16};
 
-void makeRandomUint32Vector(unsigned int* a, unsigned int numElements, unsigned int keybits)
-{
-    // Fill up with some random data
-    // int keyshiftmask = 0;
-    // if (keybits > 16) keyshiftmask = (1 << (keybits - 16)) - 1;
-    // int keymask = 0xffff;
-    // if (keybits < 16) keymask = (1 << keybits) - 1;
+	//keybits -= 8;
 
-    srand(95123);
-    //cout << "Warning, max int = "<< (1<<_TOTALBITS)<<endl;
-	for(unsigned int i=0; i < numElements; ++i)  { 
-		// a[i] = ((rand() & keyshiftmask)<<16) | (rand() & keymask); 
-		a[i] = (rand()%(1<<_TOTALBITS));
-		//a[i] = i+1;
-		//a[i] = 1;
-    }
-}
+	srand(0);
+	unsigned int max = ( 1 << (keybits-1) ) - 1; // Max 'signed' value	
 
-void makeRandomUint32Vector_KV(unsigned int* a, unsigned int numElements, const unsigned int keybits)
-{
-    srand(95123);
-	unsigned int max = (1<<keybits-1) - 1; // Max 'signed' value
+	//max = ( 1 << (24) ) - 1;
     for(unsigned int i = 0; i < numElements; i++)
 	{
-		a[i * 2 + 0] = rand() % max;
-		//a[i * 2 + 0] = 1;
-		//a[i * 2 + 1] = i;
+		//float rnd = ((double)rand() / (double)RAND_MAX);
+		a[i * mult + 0] =  ((double)rand() / (double)RAND_MAX) * (max - 1);
+		//a[i * mult + 0] = i;
+		//a[i * mult + 0] = numElements+1-i;
+		//a[i * mult + 0] = possiblesValues[(rand() % 5)];
+		
+		//a[i * mult + 0] = 512-i%512; // to test local sort
+
+		//a[i * mult + 0] &= 0x7FFFFFFF; // To insure it is a signed value
+
+		if (a[i * mult + 0] >= max)
+			cout << "Error, max int = " << max << endl;
+
+		if (!keysOnly)
+			a[i * mult + 1] = i;
     }
+	for(int i=0;i<numElements;i++)
+	{
+		cout<<a[i*mult]<<" "<<a[i*mult+1]<<std::endl;
+	}
 }
 
-void makeRandomUint32Vector_i(unsigned int* a, unsigned int numElements, unsigned int keybits)
-{
-    for(unsigned int i = 0; i < numElements; ++i)   
-        a[i] = numElements - i; 
-}
+// NVidia version
+//void makeRandomInt32Vector(unsigned int *a, unsigned int numElements, unsigned int keybits, bool keysOnly)
+//{
+//	int mult = keysOnly ? 1 : 2;
+//
+//    // Fill up with some random data
+//    int keyshiftmask = 0;
+//    if (keybits > 16) keyshiftmask = (1 << (keybits - 16)) - 1;
+//    int keymask = 0xffff;
+//    if (keybits < 16) keymask = (1 << keybits) - 1;
+//
+//    srand(95123);
+//    for(unsigned int i=0; i < numElements; ++i)   
+//    { 
+//        a[i * mult + 0] = ((rand() & keyshiftmask)<<16) | (rand() & keymask);
+//		a[i * mult + 0] &= 0x7FFFFFFF; // To insure it is a signed value
+//
+//		if (!keysOnly)
+//			a[i * mult + 1] = i;
+//    }
+//}
 
 #pragma endregion
 
 #pragma region checkIsSorted
 
-bool checkIsSorted(unsigned int* tocheck, size_t datasetSize, string algorithmName, bool keysOnly)
+bool checkIsSorted(unsigned int* tocheck, size_t datasetSize, string algorithmName, bool keysOnly, int sortId)
 {
 	int mult = keysOnly ? 1 : 2;
-	int previous = 0;
+	unsigned int previous = 0;
 	for(size_t i = 0; i < datasetSize; i++)
 	{
 		if (previous > tocheck[i*mult])
 		{
-			cout << "Algorithm FAILED : " << algorithmName << endl;
+			cout << "Algorithm FAILED : LoopId[" << sortId << "] " << algorithmName << endl;
 			return false;
 		}
 		previous = tocheck[i*mult];
 	}
+
+	//cout << "SUCCESS : " << algorithmName << endl;
 
 	return true;
 }
@@ -365,8 +533,8 @@ bool checkHasLooseDatasKV(unsigned int* unsorted, unsigned int* sorted, size_t d
 		bool hasFound = false;
 		for(size_t j = 0; j < datasetSize; j++)
 		{
-			unsigned int sortedKey = sorted[j * 2];
-			unsigned int sortedValue = sorted[j * 2 + 1];			
+			int sortedKey = sorted[j * 2];
+			int sortedValue = sorted[j * 2 + 1];			
 
 			hasFound = (key == sortedKey && value == sortedValue);
 			if (hasFound)	

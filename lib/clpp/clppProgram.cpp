@@ -39,11 +39,18 @@ void clppProgram::setBasePath(string basePath)
 
 bool clppProgram::compile(clppContext* context, string fileName)
 {
+	string programSource = loadSource(_basePath + fileName);
+
+	return compile(context, (char*)programSource.c_str());
+}
+
+bool clppProgram::compile(clppContext* context, char* kernelCode)
+{
 	cl_int clStatus;
 
 	_context = context;
 
-	string programSource = loadSource(_basePath + fileName);
+	string programSource = string(kernelCode);
 
 	//---- Some preprocessing
 	programSource = compilePreprocess(programSource);
@@ -55,10 +62,11 @@ bool clppProgram::compile(clppContext* context, string fileName)
 	checkCLStatus(clStatus);
 
 #ifdef __APPLE__
-    const char* buildOptions = "-DMAC -cl-fast-relaxed-math";
+    //const char* buildOptions = "-DMAC -cl-fast-relaxed-math";
+	const char* buildOptions = "";
 #else
-    const char* buildOptions = "-cl-fast-relaxed-math";
-	//const char* buildOptions = "";
+    //const char* buildOptions = "-cl-fast-relaxed-math";
+	const char* buildOptions = "";
 #endif
 
 	clStatus = clBuildProgram(_clProgram, 0, NULL, buildOptions, NULL, NULL);
@@ -66,7 +74,7 @@ bool clppProgram::compile(clppContext* context, string fileName)
 	if (clStatus != CL_SUCCESS)
 	{
 		size_t len;
-		char buffer[5000];
+		char buffer[50000];
 		printf("Error: Failed to build program executable!\n");
 		clGetProgramBuildInfo(_clProgram, context->clDevice, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
 
@@ -183,4 +191,7 @@ void clppProgram::checkCLStatus(cl_int clStatus)
 void clppProgram::waitCompletion()
 {
 	clFinish(_context->clQueue);
+
+	//cl_int clStatus = clFinish(_context->clQueue);
+	//checkCLStatus(clStatus);
 }

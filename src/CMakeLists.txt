@@ -29,7 +29,10 @@ Event/Game/Window/Up/OnLMBReleased.cpp Event/Game/Window/Up/OnRMBReleased.cpp
 Game/World/Actor/Components/Basic/BasicRendererComponent.cpp Game/World/Actor/Components/TransformComponentt.cpp
 Game/World/Actor/Components/Basic/BasicModelComponent.cpp Game/World/Actor/Components/Camera/CameraModelComponent.cpp Game/World/Actor/Components/IComponent.cpp
 Game/World/Actor/Components/Camera/CameraLogicComponent.cpp Game/World/Actor/Components/TransformComponent.hpp Game/World/Actor/Components/Background/BackgroundRendererComponent.cpp
-Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Components/Water/WaterRendererComponent.cpp Game/World/Actor/Components/Water/WaterModelComponent.cpp)
+Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Components/Water/WaterRendererComponent.cpp Game/World/Actor/Components/Water/WaterModelComponent.cpp
+../lib/clpp/clpp.cpp ../lib/clpp/clppContext.cpp ../lib/clpp/clppScan_Default.cpp ../lib/clpp/clppScan_GPU.cpp ../lib/clpp/clppProgram.cpp ../lib/clpp/clppSort_BitonicSort.cpp
+../lib/clpp/clppSort_BitonicSortGPU.cpp
+../lib/clpp/clppSort_CPU.cpp ../lib/clpp/clppSort_RadixSort.cpp ../lib/clpp/clppSort_RadixSortGPU.cpp ../lib/clpp/clppSort.cpp ../lib/clpp/StopWatch.cpp)
 
 add_executable(blue ${SOURCE_FILES})
 target_link_libraries(blue libglew_shared glfw ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE})
@@ -41,8 +44,9 @@ foreach(KernelFile ${KERNEL_FILES})
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Kernel/${KernelFile} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Kernel/${KernelFile})
 endforeach()
 add_dependencies(blue copy_kernels)
+
 add_custom_target(copy_clpp_kernels)
-set(CLPP_KERNEL_FILES clppScan_Default.cl clppSort_Blelloch.cl clppSort_RadixSort.cl clppSort_RadixSortGPU.cl)
+set(CLPP_KERNEL_FILES clppScan_Default.cl clppSort_RadixSort.cl clppSort_RadixSortGPU.cl clppScan_GPU.cl clppCount.cl clppSort_BitonicSort.cl clppSort_BitonicSortGPU.cl)
 foreach(KernelFile ${CLPP_KERNEL_FILES})
   add_custom_command(TARGET copy_clpp_kernels PRE_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/lib/clpp/${KernelFile} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Kernel/${KernelFile})
