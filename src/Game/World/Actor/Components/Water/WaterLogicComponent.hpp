@@ -23,9 +23,9 @@ namespace game {
         std::vector<cl_int> _histogram;
         cl_mem _histogram_cl;
 
-        uint _particle_count;
+        GLuint _particle_count;
 
-        const uint _radix_bits = 8;
+        const GLuint _radix_bits = 8;
 
         public:
         WaterLogicComponent(game::ActorWPtr actorWPtr);
