@@ -297,6 +297,7 @@ __kernel void integrate(
     __global float4* velocities,
     __global float4* accelerations,
     __global int2* voxelParticle,
+    float3* boundary,
     float deltaTime
     )
 {
@@ -304,4 +305,11 @@ __kernel void integrate(
     int mappedId = voxelParticle[id].y;
     velocity[mappedId] += acceleration[id] * deltaTime;
     position[mappedId] += velocity[mappedId] * deltaTime;
+
+    if( position[mappedId].x < boundary[0].x ) position[mappedId].x += 2.0f * (boundary[0].x - position[mappedId].x);
+    if( boundary[1].x < position[mappedId].x ) position[mappedId].x += 2.0f * (position[mappedId].x - boundary[1].x);
+    if( position[mappedId].y < boundary[0].y ) position[mappedId].y += 2.0f * (boundary[0].y - position[mappedId].y);
+    if( boundary[1].y < position[mappedId].y ) position[mappedId].y += 2.0f * (position[mappedId].y - boundary[1].y);
+    if( position[mappedId].z < boundary[0].z ) position[mappedId].z += 2.0f * (boundary[0].z - position[mappedId].z);
+    if( boundary[1].z < position[mappedId].z ) position[mappedId].z += 2.0f * (position[mappedId].z - boundary[1].z);
 }
