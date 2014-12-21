@@ -79,7 +79,7 @@ __kernel void index_post_pass(
         if(i < length)
             gridVoxelIndex[id] = gridVoxelIndex[i];
         else
-            gridVoxelIndex[Id] = length;
+            gridVoxelIndex[id] = length;
     }
 }
 
@@ -106,14 +106,15 @@ __kernel void find_neighbours(
     __local uint found_count;
     //__local uint skip;
     //__local uint prime;
-    __local search_voxels[8];
+    __local int search_voxels[8];
     if(lid==0)
     {
+        int i=0;
         /*uint A = 5293;
         uint B = 2345;
         uint C = 3665;
         skip = A*particle_count*particle_count + B*particle_count + C;
-        int i=0;
+
         for(i=6;i>=0;i--)
         {
             if(primes[i] > particle_count)
@@ -134,9 +135,9 @@ __kernel void find_neighbours(
         int voxelX = voxelId % voxelsX;
 
         int part = 0;
-        if(voxelX * 2h + h < positions[id].x) part+=4;
-        if(voxelY * 2h + h < positions[id].y) part+=2;
-        if(voxelZ * 2h + h < positions[id].z) part+=1;
+        if(voxelX * 2*h + h < positions[id].x) part+=4;
+        if(voxelY * 2*h + h < positions[id].y) part+=2;
+        if(voxelZ * 2*h + h < positions[id].z) part+=1;
 
         int maxVal = voxelsX*voxelsY*voxelsZ-1;
 
@@ -227,19 +228,19 @@ __kernel void find_neighbours(
         {
             if(search_voxels[i] > maxVal || search_voxels[i] < 0) search_voxels[i]=-1;
         }
-        neighbourMap[neightboursToFind*id+0] = h;
-        neighbourMap[neightboursToFind*id+1] = voxelsX;
-        neighbourMap[neightboursToFind*id+2] = voxelsY;
-        neighbourMap[neightboursToFind*id+3] = voxelsZ;
-        neighbourMap[neightboursToFind*id+4] = voxelId;
-        neighbourMap[neightboursToFind*id+5] = search_voxels[0];
-        neighbourMap[neightboursToFind*id+6] = search_voxels[1];
-        neighbourMap[neightboursToFind*id+7] = search_voxels[2];
-        neighbourMap[neightboursToFind*id+8] = search_voxels[3];
-        neighbourMap[neightboursToFind*id+9] = search_voxels[4];
-        neighbourMap[neightboursToFind*id+10] = search_voxels[5];
-        neighbourMap[neightboursToFind*id+11] = search_voxels[6];
-        neighbourMap[neightboursToFind*id+12] = search_voxels[7];
+        neighbourMap[neighboursToFind*id+0] = h;
+        neighbourMap[neighboursToFind*id+1] = voxelsX;
+        neighbourMap[neighboursToFind*id+2] = voxelsY;
+        neighbourMap[neighboursToFind*id+3] = voxelsZ;
+        neighbourMap[neighboursToFind*id+4] = voxelId;
+        neighbourMap[neighboursToFind*id+5] = search_voxels[0];
+        neighbourMap[neighboursToFind*id+6] = search_voxels[1];
+        neighbourMap[neighboursToFind*id+7] = search_voxels[2];
+        neighbourMap[neighboursToFind*id+8] = search_voxels[3];
+        neighbourMap[neighboursToFind*id+9] = search_voxels[4];
+        neighbourMap[neighboursToFind*id+10] = search_voxels[5];
+        neighbourMap[neighboursToFind*id+11] = search_voxels[6];
+        neighbourMap[neighboursToFind*id+12] = search_voxels[7];
     }
     barrier(CLK_LOCAL_MEM_FENCE);
 

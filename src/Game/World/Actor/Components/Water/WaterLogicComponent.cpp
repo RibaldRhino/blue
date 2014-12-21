@@ -118,6 +118,9 @@ void game::WaterLogicComponent::Update(double deltaTime)
     sort->sort();
     sort->waitCompletion();
 
+    
+
+
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);
 };
