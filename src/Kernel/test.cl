@@ -260,3 +260,75 @@ __kernel void neighbour_map(
         qq = (qq + skip)%count;
     }
 }
+
+__kernel void compute_density_pressure(
+    __global float4* sortedPositions,
+    __global int* neighbourMap,
+    __global float2* densityAndPressure,
+    int neighboursToFind,
+    float m,
+    float h,
+    float k,
+    float ro0
+    )
+{
+    unsigned int id = get_global_id(0);
+    densityAndPressure[id].x = 0;
+    int i;
+    for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind; ++i) {
+        float dist = distance(sortedPositions[id], sortedPositions[neighbourMap[i]]);
+        densityAndPressure[id].x += m * 315 * pow( pow(h, 2) - pow(dist, 2), 3) / ( 64 * M_PI * pow(h, 9) );
+    }
+    densityAndPressure[id].y = k * (densityAndPressure[id].x - ro0);
+}
+
+__kernel void compute_acceleration(
+    __global float4* sortedPositions,
+    __global float4* sortedVelocities,
+    __global float4* accelerations,
+    __global float2* densityAndPressure,
+    __global int* neighbourMap,
+    float g,
+    float m,
+    float h,
+    float mi
+{
+    unsigned int id = get_global_id(0);
+    float pressureGrad = 0;
+    float viscousTerm = 0;
+    for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind; ++i) {
+        int neighbourId = neighbourMap[i];
+        float dist = distance(sortedPositions[id], sortedPositions[neighbourId]);
+        float firstBracket = densityPressure[id].y / pow(densityPressure[id].x, 2)
+                            + densityPressure[neighbourId].y / pow(densityPressure[neighbourId].x, 2);
+        float secondBracket = -45 / (M_PI * pow(h, 6));
+        float thirdBracket = pow( h - dist, 2);
+        float fourthBracket = normalize(dist);
+        pressureGrad += m * firstBracket * secondBracket * thirdBracket * fourthBracket;
+        viscousTerm += m * (distance(sortedVelocities[neighbourId], sortedVelocities[id]) / densityPressure[neighbourId].x)
+                            * (45 / (M_PI * pow(h, 6))) * (h - dist);
+    }
+    acceleration[id] = g - pressureGrad + viscousTerm;
+}
+
+__kernel void integrate(
+    __global float4* positions,
+    __global float4* velocities,
+    __global float4* accelerations,
+    __global int2* voxelParticle,
+    float3* boundary,
+    float deltaTime
+    )
+{
+    unsigned int id = get_global_id(0);
+    int mappedId = voxelParticle[id].y;
+    velocity[mappedId] += acceleration[id] * deltaTime;
+    position[mappedId] += velocity[mappedId] * deltaTime;
+
+    if( position[mappedId].x < boundary[0].x ) position[mappedId].x += 2.0f * (boundary[0].x - position[mappedId].x);
+    if( boundary[1].x < position[mappedId].x ) position[mappedId].x += 2.0f * (position[mappedId].x - boundary[1].x);
+    if( position[mappedId].y < boundary[0].y ) position[mappedId].y += 2.0f * (boundary[0].y - position[mappedId].y);
+    if( boundary[1].y < position[mappedId].y ) position[mappedId].y += 2.0f * (position[mappedId].y - boundary[1].y);
+    if( position[mappedId].z < boundary[0].z ) position[mappedId].z += 2.0f * (boundary[0].z - position[mappedId].z);
+    if( boundary[1].z < position[mappedId].z ) position[mappedId].z += 2.0f * (position[mappedId].z - boundary[1].z);
+}

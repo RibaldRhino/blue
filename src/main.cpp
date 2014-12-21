@@ -8,11 +8,13 @@ _INITIALIZE_EASYLOGGINGPP
 
 #include <string>
 #include <vector>
+
 #include <boost/algorithm/string.hpp>
 
 #define GLM_FORCE_RADIANS
 int main(int argc, char** argv)
 {
+
     auto& glSystem = gamesystem::OpenGLSystem::getInstance();
     auto& clSystem = gamesystem::OpenCLSystem::getInstance();
     auto& configSystem = gamesystem::ConfigSystem::getInstance();

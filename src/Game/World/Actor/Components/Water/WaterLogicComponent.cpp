@@ -45,7 +45,19 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
 
-    
+    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "compute_density_pressure", _compute_density_pressure_kernel)) {
+        LOG(ERROR) << "Failed to load compute_density_pressure kernel";
+        event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
+    }
+    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "compute_acceleration", _compute_acceleration_kernel)) {
+        LOG(ERROR) << "Failed to load ompute_acceleration kernel";
+        event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
+    }
+    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "integrate", _integrate_kernel)) {
+        LOG(ERROR) << "Failed to load integrate kernel";
+        event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
+    }
+
     auto context = openCLSystem.getContext();
     cl_int errNum = 0;
 
@@ -54,7 +66,14 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
     cl_float4 lbf{0,0,0,0};
     cl_float4 rtb{2,1,1,0};
+
     cl_float h{0.25};
+
+    cl_float m{1};
+    cl_float g{9.81};
+    cl_float mi{1};
+    cl_float k{1};
+    cl_float ro0{1};
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
     unsigned int voxelsY = (unsigned int) (fabs((float)((rtb.s[1] - lbf.s[1])/(2*h))) + 0.5);
@@ -86,7 +105,8 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     _voxel_positions_cl = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_int2) * _voxel_positions.size(), &_voxel_positions[0], &errNum);
     _voxel_neighbours.resize(64*voxelCount);
     _voxel_neighbours_cl = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_int) * _voxel_neighbours.size(), &_voxel_neighbours[0], &errNum);
-
+    _density_pressure.resize(_particle_count);
+    _density_pressure_cl = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_float2) * _density_pressure.size(), &_density_pressure[0], &errNum);
 
     sort = clpp::createBestSortKV(&cont, _voxel_positions.size(), false);
     sort->pushCLDatas(_voxel_positions_cl, _voxel_positions.size());
@@ -148,6 +168,36 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
                     <<_voxel_neighbours[i*64+j*8+4] << " " << _voxel_neighbours[i*64+j*8+5] << " " << _voxel_neighbours[i*64+j*8+6] << " " << _voxel_neighbours[i*64+j*8+7] << std::endl;
         }
     }
+    errNum = clSetKernelArg(_neighbour_map_kernel, 2, sizeof(cl_mem), &_sorted_position_cl);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 3, sizeof(cl_mem), &_neighbour_map);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 4, sizeof(cl_int), &neighbour_count);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 5, sizeof(cl_float4), &lbf);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 6, sizeof(cl_float4), &rtb);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 7, sizeof(cl_float), &h);
+
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 0, sizeof(cl_mem), &_sorted_position_cl);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 1, sizeof(cl_mem), &_neighbour_map_cl);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 2, sizeof(cl_mem), &_density_pressure_cl);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 3, sizeof(cl_mem), &neighbour_count);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 4, sizeof(cl_float), &m);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 5, sizeof(cl_float), &h);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 6, sizeof(cl_float), &k);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 7, sizeof(cl_float), &ro0);
+
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 0, sizeof(cl_mem), &_sorted_position_cl);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 1, sizeof(cl_mem), &_sorted_velocity_cl);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 2, sizeof(cl_mem), &_acceleration_cl);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 3, sizeof(cl_mem), &_density_pressure_cl);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 4, sizeof(cl_mem), &_neighbour_map_cl);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 5, sizeof(cl_float), &g);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 6, sizeof(cl_float), &m);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 7, sizeof(cl_float), &h);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 8, sizeof(cl_float), &mi);
+
+    errNum = clSetKernelArg(_integrate_kernel, 0, sizeof(cl_mem), &_position_cl);
+    errNum = clSetKernelArg(_integrate_kernel, 1, sizeof(cl_mem), &_velocity_cl);
+    errNum = clSetKernelArg(_integrate_kernel, 2, sizeof(cl_mem), &_acceleration_cl);
+    errNum = clSetKernelArg(_integrate_kernel, 3, sizeof(cl_mem), &_voxel_positions_cl);
 }
 
 void game::WaterLogicComponent::Update(double deltaTime)
@@ -196,6 +246,7 @@ void game::WaterLogicComponent::Update(double deltaTime)
     cout<<"====================="<<endl;
     errNum = clEnqueueNDRangeKernel(commandQueue, _neighbour_map_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
+
     errNum = clEnqueueReadBuffer(commandQueue, _neighbour_map_cl, CL_TRUE, 0, _neighbour_map.size() * sizeof(cl_int), &_neighbour_map[0], 0, 0, NULL);
     for(int i=0;i<_neighbour_map.size()/neighbour_count;i++) {
         cout<<i<<endl;
@@ -206,25 +257,16 @@ void game::WaterLogicComponent::Update(double deltaTime)
     }
     cout<<"====================="<<endl;
 
+    errNum = clEnqueueNDRangeKernel(commandQueue, _compute_density_pressure_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
+    clFinish(commandQueue);
+
+    errNum = clEnqueueNDRangeKernel(commandQueue, _compute_acceleration_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
+    clFinish(commandQueue);
+
+    errNum = clSetKernelArg(_integrate_kernel, 4, sizeof(cl_float), &deltaTime);
+    errNum = clEnqueueNDRangeKernel(commandQueue, _integrate_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
+    clFinish(commandQueue);
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);
 };
-
-void game::WaterLogicComponent::LogAsynch() {
-    cl_int errNum = 0;
-    auto& clSystem = gamesystem::OpenCLSystem::getInstance();
-    cl_command_queue commandQueue = clSystem.getCommandQueue();
-    auto& config = gamesystem::ConfigSystem::getInstance();
-
-    if(config["LOG_POSITIONS"] && config["LOG_POSITIONS"].get() == "T") {
-        errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4), &_positions[0], 0, 0, NULL);
-    }
-    errNum = clEnqueueReadBuffer(commandQueue, _velocity_cl, CL_TRUE, 0, _velocities.size() * sizeof(cl_float4), &_velocities[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _sorted_position_cl, CL_TRUE, 0, _sorted_positions.size() * sizeof(cl_float4), &_sorted_positions[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _sorted_velocity_cl, CL_TRUE, 0, _sorted_velocities.size() * sizeof(cl_float4), &_sorted_velocities[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _grid_voxel_index_cl, CL_TRUE, 0, _grid_voxel_indices.size() * sizeof(cl_uint), &_grid_voxel_indices[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _neighbour_map_cl, CL_TRUE, 0, _grid_voxel_indices.size() * sizeof(cl_uint), &_neighbour_map[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2), &_voxel_positions[0], 0, 0, NULL);
-}
