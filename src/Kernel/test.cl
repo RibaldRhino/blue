@@ -1,20 +1,20 @@
 __kernel void hash_particles(
     __global float4* position,
     __global int2* voxelparticle,
-    float4 blf, //bottom left front
-    float4 trb, //top right back
+    float4 lbf, //left bottom front
+    float4 rtb, //right top back
     float h
     )
 {
     unsigned int id = get_global_id(0);
 
-    int voxelsX = fabs((float)((trb.x - blf.x)/(2*h))) + 0.5;
-    int voxelsY = fabs((float)((trb.y - blf.y)/(2*h))) + 0.5;
-    int voxelsZ = fabs((float)((trb.z - blf.z)/(2*h))) + 0.5;
+    int voxelsX = fabs((float)((rtb.x - lbf.x)/(2*h))) + 0.5;
+    int voxelsY = fabs((float)((rtb.y - lbf.y)/(2*h))) + 0.5;
+    int voxelsZ = fabs((float)((rtb.z - lbf.z)/(2*h))) + 0.5;
 
-    int voxelX = min((int)((position[id].x-blf.x)/(2*h)), voxelsX-1);
-    int voxelY = min((int)((position[id].y-blf.y)/(2*h)), voxelsY-1);
-    int voxelZ = min((int)((position[id].z-blf.z)/(2*h)), voxelsZ-1);
+    int voxelX = min((int)((position[id].x-lbf.x)/(2*h)), voxelsX-1);
+    int voxelY = min((int)((position[id].y-lbf.y)/(2*h)), voxelsY-1);
+    int voxelZ = min((int)((position[id].z-lbf.z)/(2*h)), voxelsZ-1);
 
     int voxelId = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
     position[id].w = voxelId;
@@ -41,11 +41,11 @@ unsigned int binsearch(
     )
 {
     int l = 0, r = length - 1, s;
-    while(l <= r)
+    while(l < r)
     {
         s = (l + r) / 2;
         if(array[s].x >= voxelId)
-            r = s - 1;
+            r = s;
         else
             l = s + 1;
     }
@@ -67,32 +67,28 @@ __kernel void indexx(
 }
 
 __kernel void index_post_pass(
-    __global int* gridVoxelIndex,
-    const unsigned int length
+    __global int* gridVoxelIndex
     )
 {
     unsigned int id = get_global_id(0);
     if(gridVoxelIndex[id] == -1)
     {
         int i;
-        for(i = id + 1; i < length && gridVoxelIndex[i] == -1; ++i);
-        if(i < length)
-            gridVoxelIndex[id] = gridVoxelIndex[i];
-        else
-            gridVoxelIndex[id] = length;
+        for(i = id + 1; gridVoxelIndex[i] == -1; ++i);
+        gridVoxelIndex[id] = gridVoxelIndex[i];
     }
 }
 
 __constant int primes[7] = {67, 521, 4099, 32771, 262147, 2097169, 16777259};
 
-__kernel void find_neighbours(
+__kernel void neighbour_map(
     __global int* gridVoxelIndex,
     __global int2* voxelParticle,
     __global float4* positions,
     __global int* neighbourMap,
     int neighboursToFind,
-    float4 blf,
-    float4 trb,
+    float4 lbf,
+    float4 rtb,
     float h
     )
 {
@@ -126,9 +122,9 @@ __kernel void find_neighbours(
 
         int voxelId = voxelParticle[id].x;
 
-        int voxelsX = fabs((float)((trb.x - blf.x)/(2*h))) + 0.5;
-        int voxelsY = fabs((float)((trb.y - blf.y)/(2*h))) + 0.5;
-        int voxelsZ = fabs((float)((trb.z - blf.z)/(2*h))) + 0.5;
+        int voxelsX = fabs((float)((rtb.x - lbf.x)/(2*h))) + 0.5;
+        int voxelsY = fabs((float)((rtb.y - lbf.y)/(2*h))) + 0.5;
+        int voxelsZ = fabs((float)((rtb.z - lbf.z)/(2*h))) + 0.5;
 
         int voxelZ =  voxelId / (voxelsX*voxelsY);
         int voxelY =  voxelId / voxelsX % (voxelsX*voxelsY);
