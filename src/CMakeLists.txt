@@ -74,7 +74,7 @@ add_dependencies(blue copy_assimp_dll)
 
 add_custom_target(copy_clpp_dll)
 add_custom_command(TARGET copy_clpp_dll PRE_BUILD
-                 COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/lib/clpp/libaclpp.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libclpp.dll)
+                 COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/lib/clpp/libclpp.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libclpp.dll)
 add_dependencies(blue copy_clpp_dll)
 endif()
 
