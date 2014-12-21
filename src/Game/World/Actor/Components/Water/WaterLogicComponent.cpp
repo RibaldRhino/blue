@@ -55,6 +55,13 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     unsigned int voxelsY = (unsigned int) (fabs((float)((trb.s[1] - blf.s[1])/(2*h))) + 0.5);
     unsigned int voxelsZ = (unsigned int) (fabs((float)((trb.s[2] - blf.s[2])/(2*h))) + 0.5);
 
+
+    clppProgram::setBasePath("Kernel");
+    cont.clContext = openCLSystem.getContext();
+    cont.clDevice = openCLSystem.getDevice();
+    cont.clPlatform = openCLSystem.getPlatform();
+    cont.clQueue = openCLSystem.getCommandQueue();
+
     _positions.resize(_particle_count);
     _position_cl = clCreateFromGLBuffer(context, CL_MEM_READ_WRITE, model->position_vbo, &errNum);
     _velocities.resize(_particle_count);
@@ -71,6 +78,9 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     _neighbour_map_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_uint) * _neighbour_map.size(), NULL, &errNum);
     _voxel_positions.resize(_particle_count);
     _voxel_positions_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_int2) * _voxel_positions.size(), NULL, &errNum);
+
+    sort = clpp::createBestSortKV(&cont, _voxel_positions.size(), false);
+    sort->pushCLDatas(_voxel_positions_cl, _voxel_positions.size());
 
     errNum = clSetKernelArg(_hash_particles_kernel, 0, sizeof(cl_mem), &_position_cl);
     errNum = clSetKernelArg(_hash_particles_kernel, 1, sizeof(cl_mem), &_voxel_positions_cl);
@@ -91,34 +101,33 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     errNum = clSetKernelArg(_index_post_pass_kernel, 0, sizeof(cl_mem), &_grid_voxel_index_cl);
     errNum = clSetKernelArg(_index_post_pass_kernel, 1, sizeof(cl_float), &_particle_count);
 
-    //errNum = clSetKernelArg(_neighbour_map_kernel, <#(cl_uint)#>, <#(size_t)#>, <#(void const *)#>)
+    errNum = clSetKernelArg(_neighbour_map_kernel, 0, sizeof(cl_mem), &_grid_voxel_index_cl);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 1, sizeof(cl_mem), &_voxel_positions_cl);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 2, sizeof(cl_mem), &_sorted_position_cl);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 3, sizeof(cl_mem), &_neighbour_map);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 4, sizeof(cl_int), &neighbour_count);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 5, sizeof(cl_float4), &blf);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 6, sizeof(cl_float4), &trb);
+    errNum = clSetKernelArg(_neighbour_map_kernel, 7, sizeof(cl_float), &h);
 }
 
 void game::WaterLogicComponent::Update(double deltaTime)
 {
+    glFinish();
+
     cl_int errNum = CL_SUCCESS;
     auto& clSystem = gamesystem::OpenCLSystem::getInstance();
     cl_command_queue commandQueue = clSystem.getCommandQueue();
-    glFinish();
     errNum = clEnqueueAcquireGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
 
     //hash particles
     size_t hashParticlesWorkSize = _particle_count;
     errNum = clEnqueueNDRangeKernel(commandQueue, _hash_particles_kernel, 1, NULL, &hashParticlesWorkSize, NULL, 0,0,0 );
-
-    clppProgram::setBasePath("Kernel");
-    clppContext context;
-    context.clContext = clSystem.getContext();
-    context.clDevice = clSystem.getDevice();
-    context.clPlatform =clSystem.getPlatform();
-    context.clQueue = clSystem.getCommandQueue();
-
-    clppSort* sort = clpp::createBestSortKV(&context, _voxel_positions.size(), false);
-    sort->pushCLDatas(_voxel_positions_cl, _voxel_positions.size());
+    clFinish(commandQueue);
     sort->sort();
     sort->waitCompletion();
 
-    
+
 
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);

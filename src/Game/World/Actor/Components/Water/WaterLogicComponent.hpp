@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 #include <bits/stl_vector.h>
+#include <clppSort.h>
 #include "CL/cl.h"
 
 
@@ -14,6 +15,8 @@ namespace game {
         private:
         ActorWPtr _actorWPtr;
         cl_kernel _hash_particles_kernel;
+        clppContext cont;
+        clppSort* sort;
         cl_kernel _sort_post_pass_kernel;
         cl_kernel _index_kernel;
         cl_kernel _index_post_pass_kernel;
@@ -29,12 +32,13 @@ namespace game {
         cl_mem _sorted_position_cl;
         std::vector<cl_float4> _sorted_velocities;
         cl_mem _sorted_velocity_cl;
-        std::vector<cl_float4> _grid_voxel_indexes;
+        std::vector<cl_uint> _grid_voxel_indexes;
         cl_mem _grid_voxel_index_cl;
-        std::vector<cl_float4> _neighbour_map;
+        std::vector<cl_uint> _neighbour_map;
         cl_mem _neighbour_map_cl;
         std::vector<cl_int2> _voxel_positions;
         cl_mem _voxel_positions_cl;
+
 
         unsigned int _particle_count;
 
