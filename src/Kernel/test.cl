@@ -36,7 +36,7 @@ __kernel void sort_post_pass(
 
 unsigned int binsearch(
     const unsigned int voxelId,
-    const int2* array,
+    __global int2* array,
     const unsigned int length
     )
 {
@@ -45,7 +45,7 @@ unsigned int binsearch(
     {
         s = (l + r) / 2;
         if(array[s].x >= voxelId)
-            p = s - 1;
+            r = s - 1;
         else
             l = s + 1;
     }
@@ -72,7 +72,7 @@ __kernel void index_post_pass(
     )
 {
     unsigned int id = get_global_id(0);
-    if(gridVoxelIndex[id] = -1)
+    if(gridVoxelIndex[id] == -1)
     {
         int i;
         for(i = id + 1; i < length && gridVoxelIndex[i] == -1; ++i);
@@ -80,19 +80,3 @@ __kernel void index_post_pass(
             gridVoxelIndex[id] = gridVoxelIndex[i];
     }
 }
-
-__kernel void histogram(
-    __global int2* voxelparticle,
-    __global int* histogram,
-    const int length,
-    const int iteration)
-{
-    unsigned int id = get_global_id(0);
-    int val = (voxelparticle[id].x>>(iteration*length))%(1<<length);
-    histogram[val]+=1;
-}
-
-
-
-
-

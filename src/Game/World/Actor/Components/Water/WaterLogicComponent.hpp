@@ -14,18 +14,28 @@ namespace game {
         private:
         ActorWPtr _actorWPtr;
         cl_kernel _hash_particles_kernel;
-        cl_kernel _histogram_kernel;
+        cl_kernel _sort_post_pass_kernel;
+        cl_kernel _index_kernel;
+        cl_kernel _index_post_pass_kernel;
 
         std::vector<cl_float4> _positions;
         cl_mem _position_cl;
+        std::vector<cl_float4> _velocities;
+        cl_mem _velocity_cl;
+        std::vector<cl_float4> _accelerations;
+        cl_mem _acceleration_cl;
+        std::vector<cl_float4> _sorted_positions;
+        cl_mem _sorted_position_cl;
+        std::vector<cl_float4> _sorted_velocities;
+        cl_mem _sorted_velocity_cl;
+        std::vector<cl_float4> _grid_voxel_indexes;
+        cl_mem _grid_voxel_index_cl;
+        std::vector<cl_float4> _neighbour_maps;
+        cl_mem _neighbour_map_cl;
         std::vector<cl_int2> _voxel_positions;
         cl_mem _voxel_positions_cl;
-        std::vector<cl_int> _histogram;
-        cl_mem _histogram_cl;
 
-        GLuint _particle_count;
-
-        const GLuint _radix_bits = 8;
+        unsigned int _particle_count;
 
         public:
         WaterLogicComponent(game::ActorWPtr actorWPtr);
@@ -33,5 +43,6 @@ namespace game {
         virtual ComponentType VGetComponentType() { return ComponentType::LOGIC_COMPONENT; }
         void Update(double deltaTime);
 
+        void LogAsynch();
     };
 }
