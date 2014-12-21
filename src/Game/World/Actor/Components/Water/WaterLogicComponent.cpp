@@ -13,12 +13,8 @@
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
 #include <System/OpenCLSystem.hpp>
-<<<<<<< HEAD
-#include <clppSort_BitonicSortGPU.h>
-=======
 #include <System/ConfigSystem.hpp>
 #include <CL/cl_platform.h>
->>>>>>> Add simple runtime config. Add fields and init for kernels.
 #include "clpp.h"
 
 game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
@@ -38,6 +34,10 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     }
     if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "index_post_pass", _index_post_pass_kernel)) {
         LOG(ERROR) << "Failed to load index_post_pass kernel";
+        event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
+    }
+    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "neighbour_map", _neighbour_map_kernel)) {
+        LOG(ERROR) << "Failed to load neighbour_map kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
     
@@ -67,8 +67,8 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     _sorted_velocity_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_float4) * _sorted_velocities.size(), NULL, &errNum);
     _grid_voxel_indexes.resize(voxelsX*voxelsY*voxelsZ);
     _grid_voxel_index_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_uint) * _grid_voxel_indexes.size(), NULL, &errNum);
-    _neighbour_maps.resize(neighbour_count*_particle_count);
-    _neighbour_map_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_uint) * _neighbour_maps.size(), NULL, &errNum);
+    _neighbour_map.resize(neighbour_count*_particle_count);
+    _neighbour_map_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_uint) * _neighbour_map.size(), NULL, &errNum);
     _voxel_positions.resize(_particle_count);
     _voxel_positions_cl = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_int2) * _voxel_positions.size(), NULL, &errNum);
 
@@ -90,6 +90,8 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
     errNum = clSetKernelArg(_index_post_pass_kernel, 0, sizeof(cl_mem), &_grid_voxel_index_cl);
     errNum = clSetKernelArg(_index_post_pass_kernel, 1, sizeof(cl_float), &_particle_count);
+
+    //errNum = clSetKernelArg(_neighbour_map_kernel, <#(cl_uint)#>, <#(size_t)#>, <#(void const *)#>)
 }
 
 void game::WaterLogicComponent::Update(double deltaTime)
@@ -134,6 +136,6 @@ void game::WaterLogicComponent::LogAsynch() {
     errNum = clEnqueueReadBuffer(commandQueue, _sorted_velocity_cl, CL_TRUE, 0, _sorted_velocities.size() * sizeof(cl_float4), &_sorted_velocities[0], 0, 0, NULL);
     errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
     errNum = clEnqueueReadBuffer(commandQueue, _grid_voxel_index_cl, CL_TRUE, 0, _grid_voxel_indexes.size() * sizeof(cl_uint), &_grid_voxel_indexes[0], 0, 0, NULL);
-    errNum = clEnqueueReadBuffer(commandQueue, _neighbour_map_cl, CL_TRUE, 0, _grid_voxel_indexes.size() * sizeof(cl_uint), &_neighbour_maps[0], 0, 0, NULL);
+    errNum = clEnqueueReadBuffer(commandQueue, _neighbour_map_cl, CL_TRUE, 0, _grid_voxel_indexes.size() * sizeof(cl_uint), &_neighbour_map[0], 0, 0, NULL);
     errNum = clEnqueueReadBuffer(commandQueue, _voxel_positions_cl, CL_TRUE, 0, _voxel_positions.size() * sizeof(cl_float2), &_voxel_positions[0], 0, 0, NULL);
 }

@@ -17,6 +17,7 @@ namespace game {
         cl_kernel _sort_post_pass_kernel;
         cl_kernel _index_kernel;
         cl_kernel _index_post_pass_kernel;
+        cl_kernel _neighbour_map_kernel;
 
         std::vector<cl_float4> _positions;
         cl_mem _position_cl;
@@ -30,7 +31,7 @@ namespace game {
         cl_mem _sorted_velocity_cl;
         std::vector<cl_float4> _grid_voxel_indexes;
         cl_mem _grid_voxel_index_cl;
-        std::vector<cl_float4> _neighbour_maps;
+        std::vector<cl_float4> _neighbour_map;
         cl_mem _neighbour_map_cl;
         std::vector<cl_int2> _voxel_positions;
         cl_mem _voxel_positions_cl;
@@ -44,5 +45,7 @@ namespace game {
         void Update(double deltaTime);
 
         void LogAsynch();
+
+
     };
 }
