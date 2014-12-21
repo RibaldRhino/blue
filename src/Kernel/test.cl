@@ -79,13 +79,109 @@ __kernel void index_post_pass(
     }
 }
 
-__constant int primes[7] = {67, 521, 4099, 32771, 262147, 2097169, 16777259};
+
+__kernel void find_voxel_neighbours(
+    __global int* voxelNeighbourMap, //64 x voxelCount
+    float4 lbf,
+    float4 rtb,
+    float h
+    )
+{
+    int voxelId = get_global_id(0);
+
+    int voxelsX = fabs((float)((rtb.x - lbf.x)/(2*h))) + 0.5;
+    int voxelsY = fabs((float)((rtb.y - lbf.y)/(2*h))) + 0.5;
+    int voxelsZ = fabs((float)((rtb.z - lbf.z)/(2*h))) + 0.5;
+
+    int voxelZ =  voxelId / (voxelsX*voxelsY);
+    int voxelY =  (voxelId / voxelsX) % voxelsY;
+    int voxelX = voxelId % voxelsX;
+
+    voxelNeighbourMap[64*voxelId+0] = (voxelY>0 && voxelX>0)?               (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+1] = (voxelY>0)?                           (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+2] = (voxelX>0)?                           (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+3] =                                       (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+4] = (voxelY>0 && voxelX>0)?               voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+5] = (voxelY>0)?                           voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+6] = (voxelX>0)?                           voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+7] =                                       voxelId;
+
+    voxelNeighbourMap[64*voxelId+8+0] = (voxelY>0 && voxelX>0)?             voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+8+1] = (voxelY>0)?                         voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+8+2] = (voxelX>0)?                         voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+8+3] =                                     voxelId;
+    voxelNeighbourMap[64*voxelId+8+4] = (voxelY>0 && voxelX>0)?             (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+8+5] = (voxelY>0)?                         (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+8+6] = (voxelX>0)?                         (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+8+7] =                                     (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
+
+    voxelNeighbourMap[64*voxelId+16+0] = (voxelX>0)?                        (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+16+1] =                                    (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+16+2] = (voxelY<voxelsY-1 && voxelX>0)?    (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+16+3] = (voxelY<voxelsY-1)?                (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+16+4] = (voxelX>0)?                        voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+16+5] =                                    voxelId;
+    voxelNeighbourMap[64*voxelId+16+6] = (voxelY<voxelsY-1 && voxelX>0)?    voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+16+7] = (voxelY<voxelsY-1)?                voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+
+    voxelNeighbourMap[64*voxelId+24+0] = (voxelX>0)?                        voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+24+1] =                                    voxelId;
+    voxelNeighbourMap[64*voxelId+24+2] = (voxelY<voxelsY-1 && voxelX>0)?    voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+24+3] = (voxelY<voxelsY-1)?                voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+24+4] = (voxelX>0)?                        (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+24+5] =                                    (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+24+6] = (voxelY<voxelsY-1 && voxelX>0)?    (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1 : -1;
+    voxelNeighbourMap[64*voxelId+24+7] = (voxelY<voxelsY-1)?                (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+
+    voxelNeighbourMap[64*voxelId+32+0] = (voxelY>0)?                        (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+32+1] = (voxelY>0 && voxelX<voxelsX-1)?    (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+32+2] =                                    (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+32+3] = (voxelX<voxelsX-1)?                (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+32+4] = (voxelY>0)?                        voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+32+5] = (voxelY>0 && voxelX<voxelsX-1)?    voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+32+6] =                                    voxelId;
+    voxelNeighbourMap[64*voxelId+32+7] = (voxelX<voxelsX-1)?                voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1 : -1;
+
+    voxelNeighbourMap[64*voxelId+40+0] = (voxelY>0)?                        voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+40+1] = (voxelY>0 && voxelX<voxelsX-1)?    voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+40+2] =                                    voxelId;
+    voxelNeighbourMap[64*voxelId+40+3] = (voxelX<voxelsX-1)?                voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+40+4] = (voxelY>0)?                        (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+40+5] = (voxelY>0 && voxelX<voxelsX-1)?    (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+40+6] =                                    (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+40+7] = (voxelX<voxelsX-1)?                (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1 : -1;
+
+    voxelNeighbourMap[64*voxelId+48+0] =                                            (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+48+1] = (voxelX<voxelsX-1)?                        (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+48+2] = (voxelY<voxelsY-1)?                        (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+48+3] = (voxelX<voxelsX-1 && voxelY<voxelsY-1)?    (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+48+4] =                                            voxelId;
+    voxelNeighbourMap[64*voxelId+48+5] = (voxelX<voxelsX-1)?                        voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+48+6] = (voxelY<voxelsY-1)?                        voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+48+7] = (voxelX<voxelsX-1 && voxelY<voxelsY-1)?    voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1 : -1;
+
+    voxelNeighbourMap[64*voxelId+56+0] =                                            voxelId;
+    voxelNeighbourMap[64*voxelId+56+1] = (voxelX<voxelsX-1)?                        voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+56+2] = (voxelY<voxelsY-1)?                        voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+56+3] = (voxelX<voxelsX-1 && voxelY<voxelsY-1)?    voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+56+4] =                                            (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
+    voxelNeighbourMap[64*voxelId+56+5] = (voxelX<voxelsX-1)?                        (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1 : -1;
+    voxelNeighbourMap[64*voxelId+56+6] = (voxelY<voxelsY-1)?                        (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+56+7] = (voxelX<voxelsX-1 && voxelY<voxelsY-1)?    (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1 : -1;
+    int i=0;
+    for(i=0;i<64;i++)
+    {
+        if(voxelNeighbourMap[64*voxelId+i] > (voxelsX*voxelsY*voxelsZ-1) || voxelNeighbourMap[64*voxelId+i] < 0) voxelNeighbourMap[64*voxelId+i]=-1;
+    }
+}
 
 __kernel void neighbour_map(
-    __global int* gridVoxelIndex,
-    __global int2* voxelParticle,
-    __global float4* positions,
     __global int* neighbourMap,
+    __global int2* voxelParticle,
+    __global int* gridVoxelIndex,
+    __global float4* sortedPositions,
+    //__global int* randomInts, //should be particle_count elements
+    __global int* voxelNeighbourMap,
     int neighboursToFind,
     float4 lbf,
     float4 rtb,
@@ -93,151 +189,74 @@ __kernel void neighbour_map(
     )
 {
 
-    int lid = get_local_id(0);
-    int lws = get_local_size(0);
+    int id = get_global_id(0);
+    int particle_count = get_global_size(0);
 
-    int id = get_global_id(0) / neighboursToFind;
-    int particle_count = get_global_size(0) / neighboursToFind;
+    uint foundCount = 0;
 
-    __local uint found_count;
-    //__local uint skip;
-    //__local uint prime;
-    __local int search_voxels[8];
-    if(lid==0)
+    int2 offsetToIndex[9];
+    int count = 0;
+    uint skip = 16777259;
+
+    int i=0;
+    int j=0;
+    int iter=0;
+    int voxelId = voxelParticle[id].x;
+
+
+    int voxelsX = fabs((float)((rtb.x - lbf.x)/(2*h))) + 0.5;
+    int voxelsY = fabs((float)((rtb.y - lbf.y)/(2*h))) + 0.5;
+    int voxelsZ = fabs((float)((rtb.z - lbf.z)/(2*h))) + 0.5;
+
+    int voxelZ = voxelId / (voxelsX*voxelsY);
+    int voxelY = voxelId / voxelsX % (voxelsX*voxelsY);
+    int voxelX = voxelId % voxelsX;
+
+    int part = 0;
+    if(voxelX * 2*h + h < sortedPositions[id].x) part+=4;
+    if(voxelY * 2*h + h < sortedPositions[id].y) part+=2;
+    if(voxelZ * 2*h + h < sortedPositions[id].z) part+=1;
+
+    int voxelNeighbour;
+    for(i=0;i<8;i++)
     {
-        int i=0;
-        /*uint A = 5293;
-        uint B = 2345;
-        uint C = 3665;
-        skip = A*particle_count*particle_count + B*particle_count + C;
-
-        for(i=6;i>=0;i--)
+        voxelNeighbour = voxelNeighbourMap[voxelId*64+8*part+i];
+        if(voxelNeighbour != -1)
         {
-            if(primes[i] > particle_count)
-            {
-                prime = primes[i];
-                break;
-            }
-        }*/
-
-        int voxelId = voxelParticle[id].x;
-
-        int voxelsX = fabs((float)((rtb.x - lbf.x)/(2*h))) + 0.5;
-        int voxelsY = fabs((float)((rtb.y - lbf.y)/(2*h))) + 0.5;
-        int voxelsZ = fabs((float)((rtb.z - lbf.z)/(2*h))) + 0.5;
-
-        int voxelZ =  voxelId / (voxelsX*voxelsY);
-        int voxelY =  voxelId / voxelsX % (voxelsX*voxelsY);
-        int voxelX = voxelId % voxelsX;
-
-        int part = 0;
-        if(voxelX * 2*h + h < positions[id].x) part+=4;
-        if(voxelY * 2*h + h < positions[id].y) part+=2;
-        if(voxelZ * 2*h + h < positions[id].z) part+=1;
-
-        int maxVal = voxelsX*voxelsY*voxelsZ-1;
-
-        switch(part)
-        {
-            case 0:
-                search_voxels[0] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1;
-                search_voxels[1] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[2] = (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1;
-                search_voxels[3] = (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
-                search_voxels[4] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1;
-                search_voxels[5] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[6] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1;
-                search_voxels[7] = voxelId;
-                break;
-            case 1:
-                search_voxels[0] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1;
-                search_voxels[1] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[2] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1;
-                search_voxels[3] = voxelId;
-                search_voxels[4] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX-1;
-                search_voxels[5] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[6] = (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX-1;
-                search_voxels[7] = (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
-                break;
-            case 2:
-                search_voxels[0] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1;
-                search_voxels[1] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
-                search_voxels[2] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1;
-                search_voxels[3] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                search_voxels[4] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1;
-                search_voxels[5] = voxelId;
-                search_voxels[6] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1;
-                search_voxels[7] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                break;
-            case 3:
-                search_voxels[0] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1;
-                search_voxels[1] = voxelId;
-                search_voxels[2] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1;
-                search_voxels[3] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                search_voxels[4] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX-1;
-                search_voxels[5] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
-                search_voxels[6] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX-1;
-                search_voxels[7] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                break;
-            case 4:
-                search_voxels[0] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[1] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1;
-                search_voxels[2] = (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
-                search_voxels[3] = (voxelZ-1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1;
-                search_voxels[4] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[5] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1;
-                search_voxels[6] = voxelId;
-                search_voxels[7] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1;
-                break;
-            case 5:
-                search_voxels[0] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[1] = voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1;
-                search_voxels[2] = voxelId;
-                search_voxels[3] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1;
-                search_voxels[4] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX;
-                search_voxels[5] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX+1;
-                search_voxels[6] = (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
-                search_voxels[7] = (voxelZ+1) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX+1;
-                break;
-            case 6:
-                search_voxels[0] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
-                search_voxels[1] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1;
-                search_voxels[2] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                search_voxels[3] = (voxelZ-1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1;
-                search_voxels[4] = voxelId;
-                search_voxels[5] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1;
-                search_voxels[6] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                search_voxels[7] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1;
-                break;
-            case 7:
-                search_voxels[0] = voxelId;
-                search_voxels[1] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1;
-                search_voxels[2] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                search_voxels[3] = voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1;
-                search_voxels[4] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
-                search_voxels[5] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX+1;
-                search_voxels[6] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX;
-                search_voxels[7] = (voxelZ+1) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX+1;
-                break;
+            offsetToIndex[iter].x = gridVoxelIndex[voxelNeighbour+1] - gridVoxelIndex[voxelNeighbour];
+            offsetToIndex[iter].y = gridVoxelIndex[voxelNeighbour];
+            iter++;
         }
-        for(i=0;i<8;i++)
-        {
-            if(search_voxels[i] > maxVal || search_voxels[i] < 0) search_voxels[i]=-1;
-        }
-        neighbourMap[neighboursToFind*id+0] = h;
-        neighbourMap[neighboursToFind*id+1] = voxelsX;
-        neighbourMap[neighboursToFind*id+2] = voxelsY;
-        neighbourMap[neighboursToFind*id+3] = voxelsZ;
-        neighbourMap[neighboursToFind*id+4] = voxelId;
-        neighbourMap[neighboursToFind*id+5] = search_voxels[0];
-        neighbourMap[neighboursToFind*id+6] = search_voxels[1];
-        neighbourMap[neighboursToFind*id+7] = search_voxels[2];
-        neighbourMap[neighboursToFind*id+8] = search_voxels[3];
-        neighbourMap[neighboursToFind*id+9] = search_voxels[4];
-        neighbourMap[neighboursToFind*id+10] = search_voxels[5];
-        neighbourMap[neighboursToFind*id+11] = search_voxels[6];
-        neighbourMap[neighboursToFind*id+12] = search_voxels[7];
     }
-    barrier(CLK_LOCAL_MEM_FENCE);
+    //neighbourMap[id*32+20] = iter;
 
+    int tmp;
+    count=offsetToIndex[0].x;
+    offsetToIndex[0].x = 0;
+    for(i=1;i<iter;i++)
+    {
+        tmp = offsetToIndex[i].x;
+        offsetToIndex[i].x = count;
+        count+=tmp;
+    }
+    offsetToIndex[i] = count;
+    //for(i=0;i<9;i++) {
+     //   neighbourMap[id*32+2*i]=offsetToIndex[i].x;
+    //    neighbourMap[id*32+2*i+1]=offsetToIndex[i].y;
+    //}
+    //neighbourMap[id*32+21] = count;
+    //iter=randomInts[id]%count;
+    uint qq = 0;
+    int particleIndex;
+    for(i=0;i<count && foundCount < neighboursToFind;i++)
+    {
+        for(j=0;offsetToIndex[j].x<=qq;j++);
+        j--;
+        particleIndex = offsetToIndex[j].y+(qq-offsetToIndex[j].x);
+        if(distance(sortedPositions[id], sortedPositions[particleIndex]) < h) {
+           neighbourMap[id*neighboursToFind+foundCount]=particleIndex;
+           foundCount=foundCount+1;
+        }
+        qq = (qq + skip)%count;
+    }
 }
