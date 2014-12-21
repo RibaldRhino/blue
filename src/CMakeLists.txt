@@ -1,6 +1,6 @@
 include_directories(${OPENCL_INCLUDE_DIRS})
-include_directories(${Boost_INCLUDE_DIR})
 include_directories(${ASSIMP_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/lib/glfw/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/glew/include)
@@ -11,7 +11,6 @@ link_directories(${GLEW_LIBRARY_DIRS})
 add_definitions(${GLEW_DEFINITIONS})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -69,7 +68,7 @@ add_dependencies(blue copy_assets)
 if(WIN32)
 add_custom_target(copy_assimp_dll)
 add_custom_command(TARGET copy_assimp_dll PRE_BUILD
-                 COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/assets/libassimp.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libassimp.dll)
+                 COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_INCLUDE_DIR}/../bin/libassimp.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libassimp.dll)
 add_dependencies(blue copy_assimp_dll)
 
 add_custom_target(copy_clpp_dll)

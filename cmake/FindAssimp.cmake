@@ -9,6 +9,7 @@
 set(_assimp_INCLUDE_SEARCH_DIRS_SYSTEM
     C:/assimp/include
     C:/assimp
+    E:/lib/Assimp/include
     "$ENV{ProgramFiles}/assimp/include"
     "$ENV{ProgramFiles}/assimp"
     /sw/local/include
@@ -17,6 +18,7 @@ set(_assimp_INCLUDE_SEARCH_DIRS_SYSTEM
 set(_assimp_LIB_SEARCH_DIRS_SYSTEM
     C:/assimp/lib
     C:/assimp
+    E:/lib/Assimp/lib
     "$ENV{ProgramFiles}/assimp/lib"
     "$ENV{ProgramFiles}/assimp"
     /sw/local/lib
