@@ -168,12 +168,6 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
                     <<_voxel_neighbours[i*64+j*8+4] << " " << _voxel_neighbours[i*64+j*8+5] << " " << _voxel_neighbours[i*64+j*8+6] << " " << _voxel_neighbours[i*64+j*8+7] << std::endl;
         }
     }
-    errNum = clSetKernelArg(_neighbour_map_kernel, 2, sizeof(cl_mem), &_sorted_position_cl);
-    errNum = clSetKernelArg(_neighbour_map_kernel, 3, sizeof(cl_mem), &_neighbour_map);
-    errNum = clSetKernelArg(_neighbour_map_kernel, 4, sizeof(cl_int), &neighbour_count);
-    errNum = clSetKernelArg(_neighbour_map_kernel, 5, sizeof(cl_float4), &lbf);
-    errNum = clSetKernelArg(_neighbour_map_kernel, 6, sizeof(cl_float4), &rtb);
-    errNum = clSetKernelArg(_neighbour_map_kernel, 7, sizeof(cl_float), &h);
 
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 0, sizeof(cl_mem), &_sorted_position_cl);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 1, sizeof(cl_mem), &_neighbour_map_cl);
@@ -241,12 +235,12 @@ void game::WaterLogicComponent::Update(double deltaTime)
     //cout<<"====================="<<endl;
     errNum = clEnqueueNDRangeKernel(commandQueue, _index_post_pass_kernel, 1, NULL, &voxelWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
-    errNum = clEnqueueReadBuffer(commandQueue, _grid_voxel_index_cl, CL_TRUE, 0, _grid_voxel_indices.size() * sizeof(cl_int), &_grid_voxel_indices[0], 0, 0, NULL);
-    for(int i=0;i<_grid_voxel_indices.size();i++)
-    {
-        cout<<i<<" "<<_grid_voxel_indices[i]<<std::endl;
-    }
-    cout<<"====================="<<endl;
+    //errNum = clEnqueueReadBuffer(commandQueue, _grid_voxel_index_cl, CL_TRUE, 0, _grid_voxel_indices.size() * sizeof(cl_int), &_grid_voxel_indices[0], 0, 0, NULL);
+    //for(int i=0;i<_grid_voxel_indices.size();i++)
+    //{
+    //    cout<<i<<" "<<_grid_voxel_indices[i]<<std::endl;
+    //}
+    //cout<<"====================="<<endl;
     errNum = clEnqueueNDRangeKernel(commandQueue, _neighbour_map_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
@@ -262,6 +256,13 @@ void game::WaterLogicComponent::Update(double deltaTime)
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_density_pressure_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
+    errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
+
+    for(int i=0;i<_density_pressure.size();i++)
+    {
+        cout<<i<<" "<<_density_pressure[i].s[0]<<" "<<_density_pressure[i].s[1]<<endl;
+    }
+
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_acceleration_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
