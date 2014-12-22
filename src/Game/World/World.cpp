@@ -67,11 +67,12 @@ namespace game {
             _waterSPtr = std::make_shared<Actor>();
             auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
             waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
-            auto waterModelSPtr = std::make_shared<WaterModelComponent>(16, 1, 1, 1);
+            auto waterModelSPtr = std::make_shared<WaterModelComponent>(32, 1, 1, 1);
             auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
             _waterSPtr->AddComponent(waterTransformSPtr);
             _waterSPtr->AddComponent(waterModelSPtr);
             _waterSPtr->AddComponent(waterRendererSPtr);
+            _waterSPtr->ClearComponent(ComponentType::LOGIC_COMPONENT);
         });
         eventManager.AddListener(event::EventType::MOUSE_RMB_RELEASED, [this](event::IEventDataSPtr& eventData)
         {
@@ -168,7 +169,6 @@ namespace game {
         _boxSPtr->AddComponent(boxRendererSPtr);*/
 
         _waterSPtr = std::make_shared<Actor>();
-
     }
 
     void World::Render() {
@@ -187,9 +187,13 @@ namespace game {
     void World::Update(double deltaTime) {
         auto cameraLogicComponent = std::dynamic_pointer_cast<CameraLogicComponent>(_cameraSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
         cameraLogicComponent->Update(deltaTime);
-        if(_waterSPtr->hasComponent(ComponentType::LOGIC_COMPONENT)) {
-            auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
-            waterLogicComponent->Update(deltaTime);
+        ++_i;
+        if(_i >= 2) {
+            if(_waterSPtr->hasComponent(ComponentType::LOGIC_COMPONENT)) {
+                auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
+                waterLogicComponent->Update(deltaTime);
+                _i = 0;
+            }
         }
     }
 }

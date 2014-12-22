@@ -19,7 +19,7 @@ namespace game {
         std::shared_ptr<Actor> _boxSPtr;
         std::shared_ptr<Actor> _backgroundSPtr;
         std::shared_ptr<Actor> _waterSPtr;
-
+        int _i = 0;
         GLuint waterShaderProgram;
     public:
         World();

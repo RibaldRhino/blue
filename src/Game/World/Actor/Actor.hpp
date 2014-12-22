@@ -15,6 +15,7 @@ namespace game
         std::shared_ptr<IComponent> getComponent(ComponentType type);
         bool hasComponent(ComponentType type);
         void AddComponent(std::shared_ptr<IComponent> component);
+        void ClearComponent(ComponentType type);
     };
     typedef std::unique_ptr<Actor> ActorUPtr;
     typedef std::shared_ptr<Actor> ActorSPtr;

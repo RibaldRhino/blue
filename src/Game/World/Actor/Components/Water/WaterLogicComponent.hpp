@@ -56,9 +56,5 @@ namespace game {
         ~WaterLogicComponent();
         virtual ComponentType VGetComponentType() { return ComponentType::LOGIC_COMPONENT; }
         void Update(double deltaTime);
-
-        void LogAsynch();
-
-
     };
 }

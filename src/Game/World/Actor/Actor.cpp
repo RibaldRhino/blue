@@ -11,3 +11,8 @@ bool game::Actor::hasComponent(game::ComponentType type) {
 void game::Actor::AddComponent(std::shared_ptr<game::IComponent> component) {
     _components[component->VGetComponentType()] = component;
 }
+
+void game::Actor::ClearComponent(ComponentType type) {
+    if(hasComponent(type))
+        _components.erase(type);
+}

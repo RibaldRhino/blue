@@ -19,6 +19,7 @@ namespace game {
 
     void Game::Run() {
         _timerUPtr->Start();
+        int i = 0;
         while (!_processManagerUPtr->Ended()) {
             _processManagerUPtr->Update(_timerUPtr->Delta());
         }
