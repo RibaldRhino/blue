@@ -50,7 +50,7 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
     if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "compute_acceleration", _compute_acceleration_kernel)) {
-        LOG(ERROR) << "Failed to load ompute_acceleration kernel";
+        LOG(ERROR) << "Failed to load compute_acceleration kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
     if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "integrate", _integrate_kernel)) {
@@ -69,11 +69,12 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
     cl_float h{0.25};
 
-    cl_float m{1};
-    cl_float g{9.81};
-    cl_float mi{1};
+    cl_float4 g{0,-9.81,0,0};
+
+    cl_float m = model->particle_mass();
+    cl_float mi{0.894};
     cl_float k{1};
-    cl_float ro0{1};
+    cl_float ro0 = 1000.0;
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
     unsigned int voxelsY = (unsigned int) (fabs((float)((rtb.s[1] - lbf.s[1])/(2*h))) + 0.5);
@@ -160,19 +161,19 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     size_t voxelWorkSize = _grid_voxel_indices.size() - 1;
     errNum = clEnqueueNDRangeKernel(commandQueue, _find_voxel_neighbours_kernel, 1, NULL, &voxelWorkSize, NULL, 0,0,0 );
     clFinish(commandQueue);
-    errNum = clEnqueueReadBuffer(commandQueue, _voxel_neighbours_cl, CL_TRUE, 0, _voxel_neighbours.size() * sizeof(cl_int), &_voxel_neighbours[0], 0, 0, NULL);
+/*    errNum = clEnqueueReadBuffer(commandQueue, _voxel_neighbours_cl, CL_TRUE, 0, _voxel_neighbours.size() * sizeof(cl_int), &_voxel_neighbours[0], 0, 0, NULL);
     for(int i=0;i<_voxel_neighbours.size()/64;i++) {
         cout<<i<<endl;
         for (int j = 0; j < 8; j++) {
             cout<<_voxel_neighbours[i*64+j*8] << " " << _voxel_neighbours[i*64+j*8+1] << " " << _voxel_neighbours[i*64+j*8+2] << " " << _voxel_neighbours[i*64+j*8+3] << " "
                     <<_voxel_neighbours[i*64+j*8+4] << " " << _voxel_neighbours[i*64+j*8+5] << " " << _voxel_neighbours[i*64+j*8+6] << " " << _voxel_neighbours[i*64+j*8+7] << std::endl;
         }
-    }
+    }*/
 
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 0, sizeof(cl_mem), &_sorted_position_cl);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 1, sizeof(cl_mem), &_neighbour_map_cl);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 2, sizeof(cl_mem), &_density_pressure_cl);
-    errNum = clSetKernelArg(_compute_density_pressure_kernel, 3, sizeof(cl_mem), &neighbour_count);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 3, sizeof(cl_int), &neighbour_count);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 4, sizeof(cl_float), &m);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 5, sizeof(cl_float), &h);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 6, sizeof(cl_float), &k);
@@ -183,7 +184,7 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     errNum = clSetKernelArg(_compute_acceleration_kernel, 2, sizeof(cl_mem), &_acceleration_cl);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 3, sizeof(cl_mem), &_density_pressure_cl);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 4, sizeof(cl_mem), &_neighbour_map_cl);
-    errNum = clSetKernelArg(_compute_acceleration_kernel, 5, sizeof(cl_float), &g);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 5, sizeof(cl_float4), &g);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 6, sizeof(cl_float), &m);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 7, sizeof(cl_float), &h);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 8, sizeof(cl_float), &mi);
@@ -245,31 +246,46 @@ void game::WaterLogicComponent::Update(double deltaTime)
     clFinish(commandQueue);
 
     errNum = clEnqueueReadBuffer(commandQueue, _neighbour_map_cl, CL_TRUE, 0, _neighbour_map.size() * sizeof(cl_int), &_neighbour_map[0], 0, 0, NULL);
-    for(int i=0;i<_neighbour_map.size()/neighbour_count;i++) {
+/*    for(int i=0;i<_neighbour_map.size()/neighbour_count;i++) {
         cout<<i<<endl;
         for(int j=0;j<neighbour_count;j++) {
             cout<<_neighbour_map[i*32+j]<<" ";
         }
         cout<<endl;
     }
-    cout<<"====================="<<endl;
+    cout<<"====================="<<endl;*/
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_density_pressure_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
-    errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
+    /*errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
 
     for(int i=0;i<_density_pressure.size();i++)
     {
         cout<<i<<" "<<_density_pressure[i].s[0]<<" "<<_density_pressure[i].s[1]<<endl;
-    }
+    }*/
 
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_acceleration_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
-    errNum = clSetKernelArg(_integrate_kernel, 6, sizeof(cl_float), &deltaTime);
+/*    errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
+
+    for(int i=0;i<_accelerations.size();i++)
+    {
+    cout<<i<<" "<<_accelerations[i].s[0]*deltaTime<<" "<<_accelerations[i].s[1]*deltaTime<<" "<<_accelerations[i].s[2]*deltaTime<<endl;
+    }*/
+
+    float castedDelta = deltaTime;
+    errNum = clSetKernelArg(_integrate_kernel, 6, sizeof(cl_float), &castedDelta);
     errNum = clEnqueueNDRangeKernel(commandQueue, _integrate_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
+
+    errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4), &_positions[0], 0, 0, NULL);
+
+    for(int i=0;i<_positions.size();i++)
+    {
+    cout<<i<<" "<<_positions[i].s[0]<<" "<<_positions[i].s[1]<<" "<<_positions[i].s[2]<<endl;
+    }
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);
