@@ -106,16 +106,21 @@ namespace gamesystem {
     bool OpenCLSystem::TryLoadKernel(std::string filePath, std::string kernelName, cl_kernel& kernel)
     {
         cl_int errNum;
-
+        std::string kernelSource;
         size_t program_length;
-        std::ifstream in(filePath, std::ios::in | std::ios::binary);
-        std::ostringstream buffer;
-        buffer << in.rdbuf();
-        std::string kernelSource = buffer.str();
-        LOG(INFO) << kernelSource;
+        if(cache.find(filePath)==cache.end()) {
+            std::ifstream in(filePath, std::ios::in | std::ios::binary);
+            std::ostringstream buffer;
+            buffer << in.rdbuf();
+            kernelSource = buffer.str();
+            //LOG(INFO) << kernelSource;
+            cache[filePath]=kernelSource;
+        } else {
+            kernelSource = cache[filePath];
+        }
         program_length = kernelSource.size();
 
-        LOG(INFO) << "Program length: " << program_length;
+        LOG(INFO) << kernelName;
 
         const char* kernelSourceC = &kernelSource[0];
         cl_program program = clCreateProgramWithSource(_context, 1, (const char **) &kernelSourceC, &program_length,

@@ -11,6 +11,7 @@
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
 
+#include <map>
 namespace gamesystem
 {
 
@@ -25,6 +26,7 @@ private:
     cl_device_id _deviceId;
     cl_platform_id _platformId;
     cl_command_queue _commandQueue;
+    std::map<std::string, std::string> cache;
     bool TryCreateContext();
     bool TryGetPlatforms(std::vector<cl_platform_id> &platforms);
 public:

@@ -7,15 +7,16 @@ game::WaterModelComponent::WaterModelComponent(GLuint resolution, float width, f
         _width(width), _height(height), _depth(depth)
 {
     _resolution = resolution;
-    points.reserve(resolution*resolution*resolution);
-    for(int i=0;i<resolution;i++) {
-        for(int j=0;j<resolution;j++) {
-            for(int k = 0; k< resolution;k++) {
+    points.reserve(resolution*resolution*resolution*(width*height*depth));
+    for(int i=0;i<resolution*width;i++) {
+        for(int j=0;j<resolution*height;j++) {
+            for(int k = 0; k< resolution*depth;k++) {
                 points.push_back((i*width)/resolution);
                 points.push_back((j*width)/resolution);
                 points.push_back((k*width)/resolution);
                 points.push_back(0);
-                radius.push_back(std::min(width, std::min(height, depth))/resolution/3);
+                auto minDim = std::min(width, std::min(height, depth));
+                radius.push_back(1.0/(resolution*3.0));
             }
         }
     }

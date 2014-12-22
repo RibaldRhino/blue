@@ -25,7 +25,7 @@ namespace game {
         float width() const { return _width; }
         float height() const { return _height; }
         float depth() const { return _depth; }
-        GLuint particle_count() const { return _resolution*_resolution*_resolution; }
+        GLuint particle_count() const { return _resolution*_resolution*_resolution*_width*_height*_depth; }
         float particle_mass() const { return (_width * _height * _depth * 1000) / _resolution; }
 
 

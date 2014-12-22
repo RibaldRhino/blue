@@ -65,16 +65,17 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
 
     cl_float4 lbf{0,0,0,0};
-    cl_float4 rtb{2,1,1,0};
+    cl_float4 rtb{1.5,1,1,0};
 
-    cl_float h{0.25};
+    cl_float h{0.05};
+    cl_float ro0 = 65;
+    cl_float m = 0.02;
 
-    cl_float4 g{0,-9.81,0,0};
 
-    cl_float m = model->particle_mass();
-    cl_float mi{0.894};
-    cl_float k{1};
-    cl_float ro0 = 1000.0;
+    cl_float4 g{0,-6,0,0};
+    cl_float mi{1};
+    cl_float k{1.5};
+    cl_float speed_loss{0.995};
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
     unsigned int voxelsY = (unsigned int) (fabs((float)((rtb.s[1] - lbf.s[1])/(2*h))) + 0.5);
@@ -196,6 +197,7 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     errNum = clSetKernelArg(_integrate_kernel, 3, sizeof(cl_mem), &_voxel_positions_cl);
     errNum = clSetKernelArg(_integrate_kernel, 4, sizeof(cl_float4), &lbf);
     errNum = clSetKernelArg(_integrate_kernel, 5, sizeof(cl_float4), &rtb);
+    errNum = clSetKernelArg(_integrate_kernel, 6, sizeof(cl_float), &speed_loss);
 }
 
 void game::WaterLogicComponent::Update(double deltaTime)
@@ -257,35 +259,35 @@ void game::WaterLogicComponent::Update(double deltaTime)
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_density_pressure_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
-    /*errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
+    //errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
 
-    for(int i=0;i<_density_pressure.size();i++)
-    {
-        cout<<i<<" "<<_density_pressure[i].s[0]<<" "<<_density_pressure[i].s[1]<<endl;
-    }*/
+    //for(int i=0;i<_density_pressure.size();i++)
+    //{
+    //    cout<<i<<" "<<_density_pressure[i].s[0]<<" "<<_density_pressure[i].s[1]<<endl;
+    //}
 
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_acceleration_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
-/*    errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
+    //errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
 
-    for(int i=0;i<_accelerations.size();i++)
-    {
-    cout<<i<<" "<<_accelerations[i].s[0]*deltaTime<<" "<<_accelerations[i].s[1]*deltaTime<<" "<<_accelerations[i].s[2]*deltaTime<<endl;
-    }*/
+    //for(int i=0;i<_accelerations.size();i++)
+    //{
+    //    cout<<i<<" "<<_accelerations[i].s[0]<<" "<<_accelerations[i].s[1]<<" "<<_accelerations[i].s[2]<<endl;
+    //}
 
     float castedDelta = deltaTime;
-    errNum = clSetKernelArg(_integrate_kernel, 6, sizeof(cl_float), &castedDelta);
+    errNum = clSetKernelArg(_integrate_kernel, 7, sizeof(cl_float), &castedDelta);
     errNum = clEnqueueNDRangeKernel(commandQueue, _integrate_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
-    errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4), &_positions[0], 0, 0, NULL);
+    //errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4), &_positions[0], 0, 0, NULL);
 
-    for(int i=0;i<_positions.size();i++)
-    {
-    cout<<i<<" "<<_positions[i].s[0]<<" "<<_positions[i].s[1]<<" "<<_positions[i].s[2]<<endl;
-    }
+    //for(int i=0;i<_positions.size();i++)
+    //{
+    //    cout<<i<<" "<<_positions[i].s[0]<<" "<<_positions[i].s[1]<<" "<<_positions[i].s[2]<<endl;
+    //}
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);

@@ -255,9 +255,14 @@ __kernel void neighbour_map(
         particleIndex = offsetToIndex[j].y+(qq-offsetToIndex[j].x);
         if(distance(sortedPositions[id], sortedPositions[particleIndex]) < h) {
            neighbourMap[id*neighboursToFind+foundCount]=particleIndex;
-           foundCount=foundCount+1;
+           foundCount++;
         }
         qq = (qq + skip)%count;
+    }
+    while(foundCount < neighboursToFind)
+    {
+        neighbourMap[id*neighboursToFind+foundCount]=-1;
+        foundCount++;
     }
 }
 
@@ -274,12 +279,13 @@ __kernel void compute_density_pressure(
 {
     unsigned int id = get_global_id(0);
     densityAndPressure[id].x = 0;
+    densityAndPressure[id].y = 0;
     int i;
-    for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind; ++i) {
+    for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind && neighbourMap[i]!=-1; ++i) {
         float dist = distance(sortedPositions[id], sortedPositions[neighbourMap[i]]);
-        densityAndPressure[id].x += 0.1;// m * 315 * pow( pow(h, 2) - pow(dist, 2), 3) / ( 64 * M_PI * pow(h, 9) );
+        densityAndPressure[id].x += ((m * 315) / ( 64 * M_PI * pow(h, 9) )) * pow( pow(h, 2) - pow(dist, 2), 3);
     }
-    densityAndPressure[id].y = 1;//k * (densityAndPressure[id].x - ro0);
+    densityAndPressure[id].y = k * (densityAndPressure[id].x-ro0);
 }
 
 __kernel void compute_acceleration(
@@ -299,17 +305,17 @@ __kernel void compute_acceleration(
     float4 pressureGrad = 0;
     float4 viscousTerm = 0;
     int i=0;
-    for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind; ++i) {
+    for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind && neighbourMap[i]!=-1; ++i) {
         int neighbourId = neighbourMap[i];
         float dist = distance(sortedPosition[id], sortedPosition[neighbourId]);
         float firstBracket = densityPressure[id].y / pow(densityPressure[id].x, 2)
                             + densityPressure[neighbourId].y / pow(densityPressure[neighbourId].x, 2);
-        float secondBracket = -45 / (M_PI * pow(h, 6));
+        float secondBracket = -45.0 / (M_PI * pow(h, 6));
         float thirdBracket = pow( h - dist, 2);
         float4 direction = normalize(sortedPosition[id] - sortedPosition[neighbourId]);
         pressureGrad += m * firstBracket * secondBracket * thirdBracket * direction;
         viscousTerm += m * (sortedVelocity[neighbourId] - sortedVelocity[id]) / densityPressure[neighbourId].x
-                            * (45 / (M_PI * pow(h, 6))) * (h - dist);
+                            * (45.0 / (M_PI * pow(h, 6.0))) * (h - dist);
     }
     viscousTerm = (mi / densityPressure[id].x) * viscousTerm;
     acceleration[id] = g - pressureGrad + viscousTerm;
@@ -322,6 +328,7 @@ __kernel void integrate(
     __global int2* voxelParticle,
     float4 lbf,
     float4 rtb,
+    float speedLoss,
     float deltaTime
     )
 {
@@ -329,12 +336,99 @@ __kernel void integrate(
     unsigned int id = get_global_id(0);
     int mappedId = voxelParticle[id].y;
     velocity[mappedId] += acceleration[id] * deltaTime;
+    float4 prev = position[mappedId];
     position[mappedId] += velocity[mappedId] * deltaTime;
+    float4 vect = position[mappedId] - prev;
+    int i=0;
+    //x=xp+xv*t
+    //y=yp+yv*t
+    //z=zp+zv*t
+    float4 inters;
+    float4 newVect;
+    float t;
+    bool didBump = false;
+    do {
+        didBump = false;
+        if( position[mappedId].x < boundary[0].x ) {
+            position[mappedId].x += 2.0f * (boundary[0].x - position[mappedId].x);
 
-    if( position[mappedId].x < boundary[0].x ) position[mappedId].x += 2.0f * (boundary[0].x - position[mappedId].x);
-    if( boundary[1].x < position[mappedId].x ) position[mappedId].x -= 2.0f * (position[mappedId].x - boundary[1].x);
-    if( position[mappedId].y < boundary[0].y ) position[mappedId].y += 2.0f * (boundary[0].y - position[mappedId].y);
-    if( boundary[1].y < position[mappedId].y ) position[mappedId].y -= 2.0f * (position[mappedId].y - boundary[1].y);
-    if( position[mappedId].z < boundary[0].z ) position[mappedId].z += 2.0f * (boundary[0].z - position[mappedId].z);
-    if( boundary[1].z < position[mappedId].z ) position[mappedId].z -= 2.0f * (position[mappedId].z - boundary[1].z);
+            inters.x = boundary[0].x;
+            t = (inters.x-prev.x)/vect.x;
+            inters.y = prev.y + vect.y*t;
+            inters.z = prev.z + vect.z*t;
+            inters.w = position[mappedId].w;
+            newVect = position[mappedId] - inters;
+            velocity[mappedId] = normalize(newVect) * length(velocity[mappedId]) * speedLoss;
+
+            didBump = true;
+        }
+        else if( boundary[1].x < position[mappedId].x ) {
+            position[mappedId].x -= 2.0f * (position[mappedId].x - boundary[1].x);
+
+            inters.x = boundary[1].x;
+            t = (inters.x-prev.x)/vect.x;
+            inters.y = prev.y + vect.y*t;
+            inters.z = prev.z + vect.z*t;
+            inters.w = position[mappedId].w;
+            newVect = position[mappedId] - inters;
+            velocity[mappedId] = normalize(newVect) * length(velocity[mappedId]) * speedLoss;
+
+            didBump = true;
+        }
+        else if( position[mappedId].y < boundary[0].y ) {
+            position[mappedId].y += 2.0f * (boundary[0].y - position[mappedId].y);
+
+            inters.y = boundary[0].y;
+            t = (inters.y-prev.y)/vect.y;
+            inters.x = prev.x + vect.x*t;
+            inters.z = prev.z + vect.z*t;
+            inters.w = position[mappedId].w;
+            newVect = position[mappedId] - inters;
+            velocity[mappedId] = normalize(newVect) * length(velocity[mappedId]) * speedLoss;
+
+            didBump = true;
+        }
+        else if( boundary[1].y < position[mappedId].y ) {
+            position[mappedId].y -= 2.0f * (position[mappedId].y - boundary[1].y);
+
+            inters.y = boundary[1].y;
+            t = (inters.y-prev.y)/vect.y;
+            inters.x = prev.x + vect.x*t;
+            inters.z = prev.z + vect.z*t;
+            inters.w = position[mappedId].w;
+            newVect = position[mappedId] - inters;
+            velocity[mappedId] = normalize(newVect) * length(velocity[mappedId]) * speedLoss;
+
+            didBump = true;
+        }
+        else if( position[mappedId].z < boundary[0].z ) {
+            position[mappedId].z += 2.0f * (boundary[0].z - position[mappedId].z);
+
+            inters.z = boundary[0].z;
+            t = (inters.z-prev.z)/vect.z;
+            inters.x = prev.x + vect.x*t;
+            inters.y = prev.y + vect.y*t;
+            inters.w = position[mappedId].w;
+            newVect = position[mappedId] - inters;
+            velocity[mappedId] = normalize(newVect) * length(velocity[mappedId]) * speedLoss;
+
+            didBump = true;
+        }
+        else if( boundary[1].z < position[mappedId].z ) {
+            position[mappedId].z -= 2.0f * (position[mappedId].z - boundary[1].z);
+
+            inters.z = boundary[1].z;
+            t = (inters.z-prev.z)/vect.z;
+            inters.x = prev.x + vect.x*t;
+            inters.y = prev.y + vect.y*t;
+            inters.w = position[mappedId].w;
+            newVect = position[mappedId] - inters;
+            velocity[mappedId] = normalize(newVect) * length(velocity[mappedId]) * speedLoss;
+
+            didBump = true;
+        }
+        vect = newVect;
+        prev = inters;
+    } while(didBump == true);
 }
+
