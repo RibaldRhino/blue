@@ -14,6 +14,7 @@ namespace game {
 
     public:
         WaterModelComponent(GLuint resolution, float width, float height, float depth);
+        ~WaterModelComponent();
         GLuint position_vbo;
         GLuint radius_vbo;
         GLuint vao;

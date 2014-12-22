@@ -3,7 +3,7 @@
 #include <memory>
 #include "Game/Process/ProcessManager.hpp"
 #include "Game/World/Actor/Actor.hpp"
-
+#include <GL/glew.h>
 #ifndef M_PI
 #define M_PI 3.1415
 #endif
@@ -19,6 +19,8 @@ namespace game {
         std::shared_ptr<Actor> _boxSPtr;
         std::shared_ptr<Actor> _backgroundSPtr;
         std::shared_ptr<Actor> _waterSPtr;
+
+        GLuint waterShaderProgram;
     public:
         World();
 

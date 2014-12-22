@@ -105,18 +105,23 @@ namespace gamesystem {
 
     bool OpenCLSystem::TryLoadKernel(std::string filePath, std::string kernelName, cl_kernel& kernel)
     {
+        if(kernelCache.find(kernelName) != kernelCache.end()) {
+            kernel = kernelCache[kernelName];
+            return true;
+        }
+
         cl_int errNum;
         std::string kernelSource;
         size_t program_length;
-        if(cache.find(filePath)==cache.end()) {
+        if(programCache.find(filePath)== programCache.end()) {
             std::ifstream in(filePath, std::ios::in | std::ios::binary);
             std::ostringstream buffer;
             buffer << in.rdbuf();
             kernelSource = buffer.str();
             //LOG(INFO) << kernelSource;
-            cache[filePath]=kernelSource;
+            programCache[filePath]=kernelSource;
         } else {
-            kernelSource = cache[filePath];
+            kernelSource = programCache[filePath];
         }
         program_length = kernelSource.size();
 
@@ -149,6 +154,7 @@ namespace gamesystem {
             LOG(ERROR) << "Failed to create kernel" << errNum;
             return false;
         }
+        kernelCache[kernelName] = kernel;
         return true;
     }
 }

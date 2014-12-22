@@ -45,3 +45,7 @@ game::WaterModelComponent::WaterModelComponent(GLuint resolution, float width, f
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 }
+
+game::WaterModelComponent::~WaterModelComponent() {
+    glDeleteVertexArrays(1, &vao);
+}

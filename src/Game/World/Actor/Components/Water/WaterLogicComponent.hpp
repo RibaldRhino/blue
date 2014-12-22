@@ -53,7 +53,7 @@ namespace game {
 
     public:
         WaterLogicComponent(game::ActorWPtr actorWPtr);
-
+        ~WaterLogicComponent();
         virtual ComponentType VGetComponentType() { return ComponentType::LOGIC_COMPONENT; }
         void Update(double deltaTime);
 

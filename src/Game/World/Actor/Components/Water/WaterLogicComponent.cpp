@@ -67,15 +67,15 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     cl_float4 lbf{0,0,0,0};
     cl_float4 rtb{1.5,1,1,0};
 
-    cl_float h{0.05};
-    cl_float ro0 = 65;
-    cl_float m = 0.02;
+    cl_float h{0.1};
+    cl_float ro0 = 325;
+    cl_float m = 0.1;
 
 
-    cl_float4 g{0,-6,0,0};
-    cl_float mi{1};
-    cl_float k{1.5};
-    cl_float speed_loss{0.995};
+    cl_float4 g{0,-5,0,0};
+    cl_float mi{3};
+    cl_float k{6};
+    cl_float speed_loss{1};
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
     unsigned int voxelsY = (unsigned int) (fabs((float)((rtb.s[1] - lbf.s[1])/(2*h))) + 0.5);
@@ -292,3 +292,19 @@ void game::WaterLogicComponent::Update(double deltaTime)
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);
 };
+
+game::WaterLogicComponent::~WaterLogicComponent() {
+
+    clReleaseMemObject(_position_cl);
+    clReleaseMemObject(_velocity_cl);
+    clReleaseMemObject(_acceleration_cl);
+    clReleaseMemObject(_sorted_position_cl);
+    clReleaseMemObject(_sorted_velocity_cl);
+    clReleaseMemObject(_grid_voxel_index_cl);
+    clReleaseMemObject(_neighbour_map_cl);
+    clReleaseMemObject(_voxel_positions_cl);
+    clReleaseMemObject(_voxel_neighbours_cl);
+    clReleaseMemObject(_density_pressure_cl);
+    delete sort;
+
+}

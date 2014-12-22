@@ -1,12 +1,9 @@
 #include "Actor/Actor.hpp"
 #include "World.hpp"
-#include <memory>
 #include "Game/World/Actor/Components/Basic/BasicRendererComponent.hpp"
 #include <fstream>
 #include <sstream>
-#include <string>
 #include <Game/World/Actor/Components/TransformComponent.hpp>
-#include <string.h>
 #include "log.hpp"
 #include <Game/World/Actor/Components/Camera/CameraLogicComponent.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,8 +13,8 @@
 #include <Game/World/Actor/Components/Water/WaterModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterRendererComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterLogicComponent.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <Event/EventManager.hpp>
 
 namespace game {
 
@@ -63,6 +60,27 @@ namespace game {
     }
 
     World::World() {
+
+        auto& eventManager = event::EventManager::getInstance();
+        eventManager.AddListener(event::EventType::MOUSE_RMB_PRESSED, [this](event::IEventDataSPtr& eventData)
+        {
+            _waterSPtr = std::make_shared<Actor>();
+            auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
+            waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
+            auto waterModelSPtr = std::make_shared<WaterModelComponent>(16, 1, 1, 1);
+            auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
+            _waterSPtr->AddComponent(waterTransformSPtr);
+            _waterSPtr->AddComponent(waterModelSPtr);
+            _waterSPtr->AddComponent(waterRendererSPtr);
+        });
+        eventManager.AddListener(event::EventType::MOUSE_RMB_RELEASED, [this](event::IEventDataSPtr& eventData)
+        {
+            auto waterLogicSPtr = std::make_shared<WaterLogicComponent>(_waterSPtr);
+            _waterSPtr->AddComponent(waterLogicSPtr);
+        });
+
+
+
         auto vert = get_file_contents("Shader/shader_vert.glsl");
         auto frag = get_file_contents("Shader/shader_frag.glsl");
         const char* basicVertexShader = vert.c_str();
@@ -104,7 +122,7 @@ namespace game {
         glCompileShader (wfs);
         GetShaderCompileLog(wfs);
 
-        GLuint waterShaderProgram = glCreateProgram ();
+        waterShaderProgram = glCreateProgram ();
         glAttachShader (waterShaderProgram, wfs);
         glAttachShader (waterShaderProgram, wgs);
         glAttachShader (waterShaderProgram, wvs);
@@ -150,15 +168,7 @@ namespace game {
         _boxSPtr->AddComponent(boxRendererSPtr);*/
 
         _waterSPtr = std::make_shared<Actor>();
-        auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
-        waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
-        auto waterModelSPtr = std::make_shared<WaterModelComponent>(16, 1, 1, 1);
-        auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
-        _waterSPtr->AddComponent(waterTransformSPtr);
-        _waterSPtr->AddComponent(waterModelSPtr);
-        _waterSPtr->AddComponent(waterRendererSPtr);
-        auto waterLogicSPtr = std::make_shared<WaterLogicComponent>(_waterSPtr);
-        _waterSPtr->AddComponent(waterLogicSPtr);
+
     }
 
     void World::Render() {
@@ -168,14 +178,18 @@ namespace game {
         renderComponent->Render();*/
         auto renderComponent = std::dynamic_pointer_cast<BasicRendererComponent>(_floorSPtr->getComponent(ComponentType::RENDER_COMPONENT));
         renderComponent->Render();
-        auto waterRenderComponent = std::dynamic_pointer_cast<WaterRendererComponent>(_waterSPtr->getComponent(ComponentType::RENDER_COMPONENT));
-        waterRenderComponent->Render();
+        if(_waterSPtr->hasComponent(ComponentType::RENDER_COMPONENT)) {
+            auto waterRenderComponent = std::dynamic_pointer_cast<WaterRendererComponent>(_waterSPtr->getComponent(ComponentType::RENDER_COMPONENT));
+            waterRenderComponent->Render();
+        }
     }
 
     void World::Update(double deltaTime) {
         auto cameraLogicComponent = std::dynamic_pointer_cast<CameraLogicComponent>(_cameraSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
         cameraLogicComponent->Update(deltaTime);
-        auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
-        waterLogicComponent->Update(deltaTime);
+        if(_waterSPtr->hasComponent(ComponentType::LOGIC_COMPONENT)) {
+            auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
+            waterLogicComponent->Update(deltaTime);
+        }
     }
 }

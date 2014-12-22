@@ -26,7 +26,8 @@ private:
     cl_device_id _deviceId;
     cl_platform_id _platformId;
     cl_command_queue _commandQueue;
-    std::map<std::string, std::string> cache;
+    std::map<std::string, std::string> programCache;
+    std::map<std::string, cl_kernel> kernelCache;
     bool TryCreateContext();
     bool TryGetPlatforms(std::vector<cl_platform_id> &platforms);
 public:
