@@ -193,11 +193,14 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     errNum = clSetKernelArg(_compute_acceleration_kernel, 6, sizeof(cl_float), &m);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 7, sizeof(cl_float), &h);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 8, sizeof(cl_float), &mi);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 9, sizeof(cl_int), &neighbour_count);
 
     errNum = clSetKernelArg(_integrate_kernel, 0, sizeof(cl_mem), &_position_cl);
     errNum = clSetKernelArg(_integrate_kernel, 1, sizeof(cl_mem), &_velocity_cl);
     errNum = clSetKernelArg(_integrate_kernel, 2, sizeof(cl_mem), &_acceleration_cl);
     errNum = clSetKernelArg(_integrate_kernel, 3, sizeof(cl_mem), &_voxel_positions_cl);
+    errNum = clSetKernelArg(_integrate_kernel, 4, sizeof(cl_float4), &lbf);
+    errNum = clSetKernelArg(_integrate_kernel, 5, sizeof(cl_float4), &rtb);
 }
 
 void game::WaterLogicComponent::Update(double deltaTime)
@@ -263,7 +266,7 @@ void game::WaterLogicComponent::Update(double deltaTime)
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_acceleration_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
-    errNum = clSetKernelArg(_integrate_kernel, 4, sizeof(cl_float), &deltaTime);
+    errNum = clSetKernelArg(_integrate_kernel, 6, sizeof(cl_float), &deltaTime);
     errNum = clEnqueueNDRangeKernel(commandQueue, _integrate_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 

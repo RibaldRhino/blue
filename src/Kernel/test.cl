@@ -283,43 +283,48 @@ __kernel void compute_density_pressure(
 }
 
 __kernel void compute_acceleration(
-    __global float4* sortedPositions,
-    __global float4* sortedVelocities,
-    __global float4* accelerations,
-    __global float2* densityAndPressure,
+    __global float4* sortedPosition,
+    __global float4* sortedVelocity,
+    __global float4* acceleration,
+    __global float2* densityPressure,
     __global int* neighbourMap,
     float g,
     float m,
     float h,
-    float mi
+    float mi,
+    int neighboursToFind
+    )
 {
     unsigned int id = get_global_id(0);
     float pressureGrad = 0;
     float viscousTerm = 0;
+    int i=0;
     for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind; ++i) {
         int neighbourId = neighbourMap[i];
-        float dist = distance(sortedPositions[id], sortedPositions[neighbourId]);
+        float dist = distance(sortedPosition[id], sortedPosition[neighbourId]);
         float firstBracket = densityPressure[id].y / pow(densityPressure[id].x, 2)
                             + densityPressure[neighbourId].y / pow(densityPressure[neighbourId].x, 2);
         float secondBracket = -45 / (M_PI * pow(h, 6));
         float thirdBracket = pow( h - dist, 2);
         float fourthBracket = normalize(dist);
         pressureGrad += m * firstBracket * secondBracket * thirdBracket * fourthBracket;
-        viscousTerm += m * (distance(sortedVelocities[neighbourId], sortedVelocities[id]) / densityPressure[neighbourId].x)
+        viscousTerm += m * (distance(sortedVelocity[neighbourId], sortedVelocity[id]) / densityPressure[neighbourId].x)
                             * (45 / (M_PI * pow(h, 6))) * (h - dist);
     }
     acceleration[id] = g - pressureGrad + viscousTerm;
 }
 
 __kernel void integrate(
-    __global float4* positions,
-    __global float4* velocities,
-    __global float4* accelerations,
+    __global float4* position,
+    __global float4* velocity,
+    __global float4* acceleration,
     __global int2* voxelParticle,
-    float3* boundary,
+    float4 lbf,
+    float4 rtb,
     float deltaTime
     )
 {
+    float4 boundary[2] = { {lbf.x, lbf.y, lbf.z, 0}, {rtb.x, rtb.y, rtb.z, 0}};
     unsigned int id = get_global_id(0);
     int mappedId = voxelParticle[id].y;
     velocity[mappedId] += acceleration[id] * deltaTime;
