@@ -187,12 +187,13 @@ namespace game {
     void World::Update(double deltaTime) {
         auto cameraLogicComponent = std::dynamic_pointer_cast<CameraLogicComponent>(_cameraSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
         cameraLogicComponent->Update(deltaTime);
-        ++_i;
-        if(_i >= 2) {
+        static double skipTimer = 0;
+        skipTimer += deltaTime;
+        if(skipTimer >= _updateStep) {
             if(_waterSPtr->hasComponent(ComponentType::LOGIC_COMPONENT)) {
                 auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
                 waterLogicComponent->Update(deltaTime);
-                _i = 0;
+                skipTimer = 0;
             }
         }
     }
