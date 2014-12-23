@@ -192,7 +192,7 @@ namespace game {
         if(skipTimer >= _updateStep) {
             if(_waterSPtr->hasComponent(ComponentType::LOGIC_COMPONENT)) {
                 auto waterLogicComponent = std::dynamic_pointer_cast<WaterLogicComponent>(_waterSPtr->getComponent(ComponentType::LOGIC_COMPONENT));
-                waterLogicComponent->Update(deltaTime);
+                waterLogicComponent->Update(_updateStep);
                 skipTimer = 0;
             }
         }

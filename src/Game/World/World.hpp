@@ -21,7 +21,7 @@ namespace game {
         std::shared_ptr<Actor> _waterSPtr;
         GLuint waterShaderProgram;
 
-        double _updateStep = 0.33;
+        double _updateStep = 1.0 / 60.0;
     public:
         World();
 
