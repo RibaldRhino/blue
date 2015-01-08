@@ -1,3 +1,9 @@
+float constant k = 10;
+float constant mi = 2;
+float4 constant g = {0, -20, 0, 0};
+float constant m = 0.02;
+float constant ro0 = 70;
+
 __kernel void hash_particles(
     __global float4* position,
     __global int2* voxelparticle,
@@ -97,77 +103,77 @@ __kernel void find_voxel_neighbours(
     int voxelY =  (voxelId / voxelsX) % voxelsY;
     int voxelX = voxelId % voxelsX;
 
-    voxelNeighbourMap[64*voxelId+0] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+1] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+0] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+1] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
     voxelNeighbourMap[64*voxelId+2] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+3] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
     voxelNeighbourMap[64*voxelId+4] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+5] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+5] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
     voxelNeighbourMap[64*voxelId+6] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+7] = voxelId;
 
-    voxelNeighbourMap[64*voxelId+8+0] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+8+1] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+8+0] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+8+1] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
     voxelNeighbourMap[64*voxelId+8+2] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+8+3] = voxelId;
-    voxelNeighbourMap[64*voxelId+8+4] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+8+5] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+8+4] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+8+5] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
     voxelNeighbourMap[64*voxelId+8+6] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+8+7] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
 
     voxelNeighbourMap[64*voxelId+16+0] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+16+1] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
-    voxelNeighbourMap[64*voxelId+16+2] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+16+3] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+16+2] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+16+3] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
     voxelNeighbourMap[64*voxelId+16+4] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+16+5] = voxelId;
-    voxelNeighbourMap[64*voxelId+16+6] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+16+7] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+16+6] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+16+7] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
 
     voxelNeighbourMap[64*voxelId+24+0] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+24+1] = voxelId;
-    voxelNeighbourMap[64*voxelId+24+2] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+24+3] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+24+2] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+24+3] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
     voxelNeighbourMap[64*voxelId+24+4] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX-1) % voxelsX);
     voxelNeighbourMap[64*voxelId+24+5] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
-    voxelNeighbourMap[64*voxelId+24+6] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
-    voxelNeighbourMap[64*voxelId+24+7] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+24+6] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX-1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+24+7] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
 
-    voxelNeighbourMap[64*voxelId+32+0] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+32+1] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+32+0] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+32+1] = voxelY > 0 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
     voxelNeighbourMap[64*voxelId+32+2] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
     voxelNeighbourMap[64*voxelId+32+3] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX+1) % voxelsX);
-    voxelNeighbourMap[64*voxelId+32+4] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+32+5] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+32+4] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+32+5] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
     voxelNeighbourMap[64*voxelId+32+6] = voxelId;
     voxelNeighbourMap[64*voxelId+32+7] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX+1) % voxelsX);
 
-    voxelNeighbourMap[64*voxelId+40+0] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+40+1] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+40+0] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+40+1] = voxelY > 0 ? voxelZ * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
     voxelNeighbourMap[64*voxelId+40+2] = voxelId;
     voxelNeighbourMap[64*voxelId+40+3] = voxelZ * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX+1) % voxelsX);
-    voxelNeighbourMap[64*voxelId+40+4] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+40+5] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+40+4] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+40+5] = voxelY > 0 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY-1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
     voxelNeighbourMap[64*voxelId+40+6] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + voxelX;
     voxelNeighbourMap[64*voxelId+40+7] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + voxelY * (voxelsX) + ((voxelX+1) % voxelsX);
 
     voxelNeighbourMap[64*voxelId+48+0] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
     voxelNeighbourMap[64*voxelId+48+1] = ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX+1) % voxelsX);
-    voxelNeighbourMap[64*voxelId+48+2] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+48+3] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+48+2] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+48+3] = voxelY < voxelsY-1 ? ((voxelZ-1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
     voxelNeighbourMap[64*voxelId+48+4] = voxelId;
     voxelNeighbourMap[64*voxelId+48+5] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX+1) % voxelsX);
-    voxelNeighbourMap[64*voxelId+48+6] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+48+7] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+48+6] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+48+7] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
 
     voxelNeighbourMap[64*voxelId+56+0] = voxelId;
     voxelNeighbourMap[64*voxelId+56+1] = voxelZ * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX+1) % voxelsX);
-    voxelNeighbourMap[64*voxelId+56+2] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+56+3] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+56+2] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+56+3] = voxelY < voxelsY-1 ? voxelZ * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
     voxelNeighbourMap[64*voxelId+56+4] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + voxelX;
     voxelNeighbourMap[64*voxelId+56+5] = ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY) * (voxelsX) + ((voxelX+1) % voxelsX);
-    voxelNeighbourMap[64*voxelId+56+6] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + voxelX : -1;
-    voxelNeighbourMap[64*voxelId+56+7] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (normalizedY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
+    voxelNeighbourMap[64*voxelId+56+6] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + voxelX : -1;
+    voxelNeighbourMap[64*voxelId+56+7] = voxelY < voxelsY-1 ? ((voxelZ+1) % voxelsZ) * (voxelsX*voxelsY) + (voxelY+1) * (voxelsX) + ((voxelX+1) % voxelsX) : -1;
 
     int i;
     for(i = 0; i < 64; i++)
@@ -272,10 +278,7 @@ __kernel void compute_density_pressure(
     __global int* neighbourMap,
     __global float2* densityAndPressure,
     int neighboursToFind,
-    float m,
-    float h,
-    float k,
-    float ro0
+    float h
     )
 {
     unsigned int id = get_global_id(0);
@@ -286,7 +289,8 @@ __kernel void compute_density_pressure(
         float dist = distance(sortedPositions[id], sortedPositions[neighbourMap[i]]);
         densityAndPressure[id].x += ((m * 315) / ( 64 * M_PI * pow(h, 9) )) * pow( pow(h, 2) - pow(dist, 2), 3);
     }
-    densityAndPressure[id].y = k * (densityAndPressure[id].x-ro0);
+    //densityAndPressure[id].y = k * (densityAndPressure[id].x-ro0);
+    densityAndPressure[id].y = k * ( pow( densityAndPressure[id].x / ro0, 7.0) - 1.0 );
 }
 
 __kernel void compute_acceleration(
@@ -295,10 +299,10 @@ __kernel void compute_acceleration(
     __global float4* acceleration,
     __global float2* densityPressure,
     __global int* neighbourMap,
-    float4 g,
-    float m,
     float h,
-    float mi,
+    //float alpha,
+    //float beta,
+    //float eta,
     int neighboursToFind
     )
 {
@@ -309,14 +313,20 @@ __kernel void compute_acceleration(
     for(i = id * neighboursToFind; i < (id + 1) * neighboursToFind && neighbourMap[i]!=-1; ++i) {
         int neighbourId = neighbourMap[i];
         float dist = distance(sortedPosition[id], sortedPosition[neighbourId]);
-        float firstBracket = densityPressure[id].y / pow(densityPressure[id].x, 2)
-                            + densityPressure[neighbourId].y / pow(densityPressure[neighbourId].x, 2);
-        float secondBracket = -45.0 / (M_PI * pow(h, 6));
-        float thirdBracket = pow( h - dist, 2);
+        float firstBracket = densityPressure[id].y / pow(densityPressure[id].x, 2.0)
+                            + densityPressure[neighbourId].y / pow(densityPressure[neighbourId].x, 2.0);
+        float secondBracket = -45.0 / (M_PI * pow(h, 6.0));
+        float thirdBracket = pow( h - dist, 2.0);
         float4 direction = normalize(sortedPosition[id] - sortedPosition[neighbourId]);
         pressureGrad += m * firstBracket * secondBracket * thirdBracket * direction;
+
         viscousTerm += m * (sortedVelocity[neighbourId] - sortedVelocity[id]) / densityPressure[neighbourId].x
                             * (45.0 / (M_PI * pow(h, 6.0))) * (h - dist);
+
+        //float4 velDiffDistProduct = (sortedVelocity[id] - sortedVelocity[neighbourId]) * (sortedPosition[id] - sortedPosition[neighbourId]);
+        //float4 miFactor = velDiffDistProduct < 0 ? velDiffDistProduct / ( h * ( pow(dist, 2.0) / pow(h, 2.0) + pow(eta, 2.0) ) ) : 0;
+        //float meanSoundVel = 1.0;// ( pow( 0.001 * densityPressure[id].y / densityPressure[id].x, 0.5) + pow( 0.001 * densityPressure[neighbourId].y / densityPressure[neighbourId].x, 0.5) ) / 2.0;
+        //viscousTerm -= ( alpha * miFactor * meanSoundVel - beta * pow(miFactor, 2.0) ) / ( (densityPressure[id].x + densityPressure[neighbourId].x) / 2.0);
     }
     viscousTerm = (mi / densityPressure[id].x) * viscousTerm;
     acceleration[id] = g - pressureGrad + viscousTerm;

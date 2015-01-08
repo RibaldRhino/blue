@@ -20,40 +20,40 @@
 game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     auto &&model = std::dynamic_pointer_cast<WaterModelComponent>(actorWPtr.lock()->getComponent(ComponentType::MODEL_COMPONENT));
     auto &openCLSystem = gamesystem::OpenCLSystem::getInstance();
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "hash_particles", _hash_particles_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "hash_particles", _hash_particles_kernel)) {
         LOG(ERROR) << "Failed to load hash_particles kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "sort_post_pass", _sort_post_pass_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "sort_post_pass", _sort_post_pass_kernel)) {
         LOG(ERROR) << "Failed to load sort_post_pass kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "indexx", _index_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "indexx", _index_kernel)) {
         LOG(ERROR) << "Failed to load indexx kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "index_post_pass", _index_post_pass_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "index_post_pass", _index_post_pass_kernel)) {
         LOG(ERROR) << "Failed to load index_post_pass kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "neighbour_map", _neighbour_map_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "neighbour_map", _neighbour_map_kernel)) {
         LOG(ERROR) << "Failed to load neighbour_map kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "find_voxel_neighbours", _find_voxel_neighbours_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "find_voxel_neighbours", _find_voxel_neighbours_kernel)) {
         LOG(ERROR) << "Failed to load find_voxel_neighbours kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
 
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "compute_density_pressure", _compute_density_pressure_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "compute_density_pressure", _compute_density_pressure_kernel)) {
         LOG(ERROR) << "Failed to load compute_density_pressure kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "compute_acceleration", _compute_acceleration_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "compute_acceleration", _compute_acceleration_kernel)) {
         LOG(ERROR) << "Failed to load compute_acceleration kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
-    if (!openCLSystem.TryLoadKernel("Kernel/test.cl", "integrate", _integrate_kernel)) {
+    if (!openCLSystem.TryLoadKernel("Kernel/sph.cl", "integrate", _integrate_kernel)) {
         LOG(ERROR) << "Failed to load integrate kernel";
         event::EventManager::getInstance().TriggerEvent(std::make_shared<event::OnWindowClose>());
     }
@@ -65,17 +65,20 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
 
     cl_float4 lbf{0,0,0,0};
-    cl_float4 rtb{2,2,2,0};
+    cl_float4 rtb{4,4,4,0};
 
     cl_float h{0.1};
-    cl_float ro0 = 65;
-    cl_float m = 0.02;
+    //cl_float ro0 = 12;
+    //cl_float m = 0.0002;
 
 
-    cl_float4 g{0,-20,0,0};
-    cl_float mi{6};
-    cl_float k{6};
+    //cl_float4 g{0,-8,0,0};
+    //cl_float mi{6};
+    //cl_float k{0.1};
     cl_float speed_loss{1};
+    //cl_float alpha{0.5};
+    //cl_float beta{1.0};
+    //cl_float eta{0.01};
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
     unsigned int voxelsY = (unsigned int) (fabs((float)((rtb.s[1] - lbf.s[1])/(2*h))) + 0.5);
@@ -175,21 +178,25 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 1, sizeof(cl_mem), &_neighbour_map_cl);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 2, sizeof(cl_mem), &_density_pressure_cl);
     errNum = clSetKernelArg(_compute_density_pressure_kernel, 3, sizeof(cl_int), &neighbour_count);
-    errNum = clSetKernelArg(_compute_density_pressure_kernel, 4, sizeof(cl_float), &m);
-    errNum = clSetKernelArg(_compute_density_pressure_kernel, 5, sizeof(cl_float), &h);
-    errNum = clSetKernelArg(_compute_density_pressure_kernel, 6, sizeof(cl_float), &k);
-    errNum = clSetKernelArg(_compute_density_pressure_kernel, 7, sizeof(cl_float), &ro0);
+    //errNum = clSetKernelArg(_compute_density_pressure_kernel, 4, sizeof(cl_float), &m);
+    errNum = clSetKernelArg(_compute_density_pressure_kernel, 4, sizeof(cl_float), &h);
+    //errNum = clSetKernelArg(_compute_density_pressure_kernel, 6, sizeof(cl_float), &k);
+    //errNum = clSetKernelArg(_compute_density_pressure_kernel, 7, sizeof(cl_float), &ro0);
 
     errNum = clSetKernelArg(_compute_acceleration_kernel, 0, sizeof(cl_mem), &_sorted_position_cl);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 1, sizeof(cl_mem), &_sorted_velocity_cl);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 2, sizeof(cl_mem), &_acceleration_cl);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 3, sizeof(cl_mem), &_density_pressure_cl);
     errNum = clSetKernelArg(_compute_acceleration_kernel, 4, sizeof(cl_mem), &_neighbour_map_cl);
-    errNum = clSetKernelArg(_compute_acceleration_kernel, 5, sizeof(cl_float4), &g);
-    errNum = clSetKernelArg(_compute_acceleration_kernel, 6, sizeof(cl_float), &m);
-    errNum = clSetKernelArg(_compute_acceleration_kernel, 7, sizeof(cl_float), &h);
-    errNum = clSetKernelArg(_compute_acceleration_kernel, 8, sizeof(cl_float), &mi);
-    errNum = clSetKernelArg(_compute_acceleration_kernel, 9, sizeof(cl_int), &neighbour_count);
+    //errNum = clSetKernelArg(_compute_acceleration_kernel, 5, sizeof(cl_float4), &g);
+    //errNum = clSetKernelArg(_compute_acceleration_kernel, 6, sizeof(cl_float), &m);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 5, sizeof(cl_float), &h);
+//    errNum = clSetKernelArg(_compute_acceleration_kernel, 8, sizeof(cl_float), &mi);
+    errNum = clSetKernelArg(_compute_acceleration_kernel, 6, sizeof(cl_int), &neighbour_count);
+//    errNum = clSetKernelArg(_compute_acceleration_kernel, 8, sizeof(cl_float), &alpha);
+//    errNum = clSetKernelArg(_compute_acceleration_kernel, 9, sizeof(cl_float), &beta);
+//    errNum = clSetKernelArg(_compute_acceleration_kernel, 10, sizeof(cl_float), &eta);
+//    errNum = clSetKernelArg(_compute_acceleration_kernel, 11, sizeof(cl_int), &neighbour_count);
 
     errNum = clSetKernelArg(_integrate_kernel, 0, sizeof(cl_mem), &_position_cl);
     errNum = clSetKernelArg(_integrate_kernel, 1, sizeof(cl_mem), &_velocity_cl);
@@ -259,35 +266,35 @@ void game::WaterLogicComponent::Update(double deltaTime)
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_density_pressure_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
-    //errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
-
-    //for(int i=0;i<_density_pressure.size();i++)
-    //{
-    //    cout<<i<<" "<<_density_pressure[i].s[0]<<" "<<_density_pressure[i].s[1]<<endl;
-    //}
+//    errNum = clEnqueueReadBuffer(commandQueue, _density_pressure_cl, CL_TRUE, 0, _density_pressure.size() * sizeof(cl_float2), &_density_pressure[0], 0, 0, NULL);
+//
+//    for(int i=0;i<_density_pressure.size();i++)
+//    {
+//        cout<<i<<" "<<_density_pressure[i].s[0]<<" "<<_density_pressure[i].s[1]<<endl;
+//    }
 
 
     errNum = clEnqueueNDRangeKernel(commandQueue, _compute_acceleration_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
-    //errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
-
-    //for(int i=0;i<_accelerations.size();i++)
-    //{
-    //    cout<<i<<" "<<_accelerations[i].s[0]<<" "<<_accelerations[i].s[1]<<" "<<_accelerations[i].s[2]<<endl;
-    //}
+//    errNum = clEnqueueReadBuffer(commandQueue, _acceleration_cl, CL_TRUE, 0, _accelerations.size() * sizeof(cl_float4), &_accelerations[0], 0, 0, NULL);
+//
+//    for(int i=0;i<_accelerations.size();i++)
+//    {
+//        cout<<i<<" "<<_accelerations[i].s[0]<<" "<<_accelerations[i].s[1]<<" "<<_accelerations[i].s[2]<<endl;
+//    }
 
     float castedDelta = deltaTime;
     errNum = clSetKernelArg(_integrate_kernel, 7, sizeof(cl_float), &castedDelta);
     errNum = clEnqueueNDRangeKernel(commandQueue, _integrate_kernel, 1, NULL, &particlesWorkSize, NULL, 0, 0, 0);
     clFinish(commandQueue);
 
-    //errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4), &_positions[0], 0, 0, NULL);
-
-    //for(int i=0;i<_positions.size();i++)
-    //{
-    //    cout<<i<<" "<<_positions[i].s[0]<<" "<<_positions[i].s[1]<<" "<<_positions[i].s[2]<<endl;
-    //}
+//    errNum = clEnqueueReadBuffer(commandQueue, _position_cl, CL_TRUE, 0, _positions.size() * sizeof(cl_float4), &_positions[0], 0, 0, NULL);
+//
+//    for(int i=0;i<_positions.size();i++)
+//    {
+//        cout<<i<<" "<<_positions[i].s[0]<<" "<<_positions[i].s[1]<<" "<<_positions[i].s[2]<<endl;
+//    }
 
     errNum = clEnqueueReleaseGLObjects(commandQueue, 1, &_position_cl, 0,0,0);
     clFinish(commandQueue);

@@ -19,6 +19,7 @@ namespace game {
         std::shared_ptr<Actor> _boxSPtr;
         std::shared_ptr<Actor> _backgroundSPtr;
         std::shared_ptr<Actor> _waterSPtr;
+        std::shared_ptr<Actor> _uiSPtr;
         GLuint waterShaderProgram;
 
         double _updateStep = 1.0 / 60.0;
