@@ -1,0 +1,6 @@
+\select@language {polish}
+\contentsline {section}{\numberline {1}Cel prac i wizja produktu}{4}
+\contentsline {section}{\numberline {2}Zakres funkcjonalno\IeC {\'s}ci}{4}
+\contentsline {section}{\numberline {3}Wybrane aspekty realizacji}{5}
+\contentsline {section}{\numberline {4}Organizacja pracy}{5}
+\contentsline {section}{\numberline {5}Wyniki projektu}{6}
