@@ -130,7 +130,7 @@
 \section{Struktura projektu}
 
 	\subsection{Wstęp}
-		Poniższy słowny opis przedstawia główne cechy i decyzje architektoniczne, nie zagłębiając się w szczegóły dotyczące różnego rodzaju implementacji interfejsów, czy wszystkich klas wykorzystanych w projekcie. Z punkty widzenia dostarczenia funkcjonalności zgodnych z tematem pracy inżynierskiej, duża część napisanego kodu jest nieistotna. Kod ten stanowi pewnego rodzaju próbę włączenia implementacji SPH do projektu zbliżonego architektonicznie do przeciętnej gry komputerowej. Dokładny opis zastosowanej architektury, na której się wzorowaliśmy, można znaleźć w pozycji [2] z bibliografii. Różnice wynikają głównie z zastosowania innych bibliotek do osiągnięcia tych samych celów (WinAPI vs GLFW, OpenGL vs DirectX, Boost.Signals2 vs Fastdelegate etc.), oraz z tego, że w [2] opisany jest dużo bardziej złożony system niż ten zaimplementowany w naszej pracy inżynierskiej.
+		Poniższy słowny opis przedstawia główne cechy i decyzje architektoniczne, nie zagłębiając się w szczegóły dotyczące różnego rodzaju implementacji interfejsów, czy wszystkich klas wykorzystanych w projekcie. Z punkty widzenia dostarczenia funkcjonalności zgodnych z tematem pracy inżynierskiej, duża część napisanego kodu jest nieistotna. Kod ten stanowi pewnego rodzaju próbę włączenia implementacji SPH do projektu zbliżonego architektonicznie do przeciętnej gry komputerowej. Dokładny opis zastosowanej architektury, na której się wzorowaliśmy, można znaleźć w pozycji \cite{GameCodingComplete} z bibliografii. Różnice wynikają głównie z zastosowania innych bibliotek do osiągnięcia tych samych celów (WinAPI vs GLFW, OpenGL vs DirectX, Boost.Signals2 vs Fastdelegate etc.), oraz z tego, że w \cite{GameCodingComplete} opisany jest dużo bardziej złożony system niż ten zaimplementowany w naszej pracy inżynierskiej.
 	
 	\subsection{Kluczowe elementy stworzonego frameworku}
 		\subsubsection{Obsługa OpenGL i okna}
@@ -152,7 +152,7 @@
 			
 			Dzięki tej klasie osiągamy inwersję zależności (dependency inversion). Poszczególne obiekty systemu nie muszę wiedzieć o żadnych innych obiektach. Chcąc poinformować, że zaszło jakieś zdarzenie lub chcąc wysłać jakąś wiadomość do systemu jedyne co obiekty muszą posiadać to referencję do EventManager'a. To on zajmuje się dystrybucją wiadomości do zainteresowanych odbiorców.
 		 
-		\subsubsection{Model actorów złożonych z komponentów}
+		\subsubsection{Model aktorów złożonych z komponentów}
 		
 			W każdej grze istnieje koncepja aktorów (zwanych czasami obiektami gry (and. game object)), które mogą wykonywać jakieś akcje w czasie, posiadają logikę rysowania, przechowują swój stan i położenie. Klasyczne podejście do budowy tego typu obiektów - wszystko w jednej klasie - łamie SRP (Single Responsibility Principle). Postanowiliśmy więc wykorzystać model zwany CBSE (Component-Based Software Engineering) do reprezentacji aktorów. 
 			
@@ -599,7 +599,6 @@ Nasza implementacja metody SPH składa się z 9 jąder i wykorzystujemy 10 globa
 		Uzyskany efekt wygląda znakomicie i jako, że sfery składają się tylko z 2 trójkątów, rysowanie symulowanej cieczy przestało być problemem. [ref: http://www.arcsynthesis.org/gltut/illumination/tutorial%2013.html]
 		
 \section{Opis wykorzystanych zewnętrznych bibliotek}
-
 	\ \\
 	\begin{tabular}{| p{\dimexpr 0.25\linewidth-2\tabcolsep} | p{\dimexpr 0.75\linewidth-2\tabcolsep} |}
 		\hline
