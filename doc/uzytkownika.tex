@@ -1,0 +1,151 @@
+% By zmienic jezyk na angielski/polski, dodaj opcje do klasy english lub polish
+\documentclass[polish, 12pt]{aghthesis}
+\usepackage{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{comment}
+
+\author{Dawid Romanowski, Wojciech Czarny}
+
+\title{Implementacja metody SPH \\ na procesory graficzne}
+
+\supervisor{dr hab.\ inż.\ Krzysztof Boryczko, prof.\ nadzw.\ AGH}
+
+\date{2014}
+
+% Szablon przystosowany jest do druku dwustronnego, 
+\begin{document}
+\raggedbottom
+\maketitle{}
+
+\tableofcontents
+\clearpage
+
+	\section{Opis metody SPH}
+
+		\subsection{Wstęp}
+			
+			Metoda Smoothed Particle Hydrodynamics (SPH) początkowo miała służyć do symulacji zjawisk astrofizycznych takich jak powstawanie galaktyk czy gwiazd. Zaproponowana niezależnie w 1977 roku prez Ginolda i Monaghana oraz Lucy obecnie jest często wykorzystywana do symulacji zjawisk w mniejszej skali - w szczególności zachowań płynów. 
+
+			Ideą tej metody jest wyróżnienie pewnego dyskretnego zbioru węzłów (zwanych dalej cząstkami) badanego przez nas płynu, nadanie im pewnych własności fizycznych a następnie interpolacja tych własności fizycznych w pewnej przestrzeni. Do interpolacji wykorzystywane są funkcje wygładzające, które zamieniają punktową reprezentację wartości fizycznych na reprezentację przestrzenną.
+
+			SPH jest metodą Langrange'owską z czego wynika, że cząski mogą się poruszać w czasie. W naszym modelu ograniczyliśmy się do trzech rodzajów sił działających na cząstki. Siła grawitacyjna, siła spowodowana różnicą ciśnień oraz lepkość.
+
+		\subsection{Równanie Naviera-Stokesa}
+
+			Metoda SPH jest oparta na równaniu hydrodynamicznym Naviera-Stokesa
+
+			\[{\rho}[\frac{\partial v}{\partial t} + v \cdot \nabla v ]= F - \nabla p + \mu \nabla^2 v \label{eq:navier-stokes} \tag{1}\]
+
+			\[{\rho}(\nabla \cdot v)=0 \label{eq:continuity} \tag{2}\]
+
+			dla cieczy nieściśliwych, gdzie: ${\rho}$ to gęstość cieczy, ${\mu}$ to współczynnik lepkości a F reprezentuje zewnętrzne siły działające na ciecz.
+			
+			Analiza równania (\ref{eq:navier-stokes}) pokazuję, że przyspieszenie jest zależne jedynie od sił zewnętrznych działających na cząstkę, ujemnego gradientu ciśnienia układu oraz lepkości cieczy. Jedyna siła zewnętrzna, która interesuje nas w naszej pracy to siła grawitacji. Możemy więc zapisać: \[F={\rho}g \label {eq:gravity_force} \tag{3} \] Czynnik $v {\cdot} {\nabla} v$ reprezentuje przyspieszenie konwekcyjne, które jest efektem niezależnego od czasu przyspieszenia cząstek w zależności od przestrzeni. $-{\nabla}$p oznacza, że ciecz będzie się poruszać z przestrzeni o większym ciśnieniu w kierunku mniejszego ciśnienia. Lepkość reprezentowana jest jako stała lepkości razy laplasjan pola prędkości, który można interpretować jako różnicę między prędkością w danym punkcie a średnią prękością w małej otaczającej go przestrzeni. Lepkościa rozprasza pęd czątek i sprawia, że układ dąży do stanu równowagi.
+			
+			Równanie (\ref{eq:continuity}) jest po prostu równaniem zachowania masy. W naszej pracy nie było ono istotne ze względu na cechy metody SPH, które gwarantują, że jest ono spełnione w każdej sytuacji.
+			 
+		\subsection{Funkcje wygładzające}
+			
+			Celem funkcji wygładzającej jest transformacja reprezentacji cząstki z punktowej masy na przestrzenną. Funkcje wygładzające najczęściej przyjmują kształt zbliżony do rozkładu normalnego, należą conajmniej do klasy ${C^2}$ (mają ciągłą pierwsza i drugą pochodną) i są znormalizowane (całkują się do 1 od $-{\infty}$ do $+{\infty}$). Prostym przykładem takiej funkcji może być funkcja Gaussa \[W_G(r,h)=\frac{1}{h^{\nu}\pi^{{\nu}/2}}exp(-\frac{r^2}{h^2}) \label{eq:gaussian} \tag{4}\] gdzie ${\nu}$ to ilość wymiarów, r to odległość od od cząstki której estymujemy wielkość fizyczną i h to tak zwany promień wygładzania.
+			
+			Mając tak zdefiniowany promień wygładzania oraz dowolną dyskretną dystrybucję czątek, możemy estymować wartość fizyczną A w dowolnym punkcie przestrzeni i jako: \[{A}_i=\sum_{j=1}^{N}m_j\frac{A_j}{\rho_j}W(r_{ij},h_j) \label{eq:calc_all} \tag{5}\] gdzie ${r_{ij}}$ to odległość od cząstki j do punktu w przestrzeni, który rozważamy (pozycja i), ${m_j}$ to masa cząstki j, ${h_j}$ to promień wygładzania cząstki j, a suma jest po wszystkich cząstkach ze zbioru. 
+			
+			Przy doborze odpowiedniej funkcji wygładzającej W kluczową rolę odgrywa promień wygładzania h. Funkcja Gaussa nie jest używana do obliczeń ponieważ fakt, iż dąży ona do 0 w nieskończoności - rozciąga się w nieskończoność. Korzystając z niej, wszystkie cząstki brałyby udział przy obliczeniach w każdym punkcie. Jest to niepotrzebne, szczególnie kiedy cząstka jest bardzo odległa od rozpatrywanego punktu. Dlatego przeważanie dobiera się takie funkcje wygładzające, że dla ${r_{ij} > h}$ wartość funkcji wynosi 0. Przykładem takiej funkcji może być 
+			
+			\[ W_{ij} = \left\{
+				\begin{array}{l l}
+					\frac{105}{16 \pi h^5}(1 + 3 \frac{|r_{ij}|}{h})(1-\frac{|r_{ij}}{h})^3 & \quad \text{gdy ${|r_{ij}| \leq h}$}  \\ 0 & \quad \text{gdy ${|r_{ij}| > h}$} 
+				\end{array} \right.\ \label{eq:kernel_function} \tag{6}\]
+			
+			opisywana w [L. B. Lucy, “A numerical approach to the testing of the fission hypothesis,” Astron. J.,vol. 82, pp. 1013–1024, 1977.] 
+			
+		\subsection{Wzory użytkowe}
+			\subsubsection{Gęstość}
+			Z równania (\ref{eq:calc_all}) gęstość w dowolnym punkcie możemy obliczyć korzystając ze wzoru \[{\rho}_i=\sum_{j=1}^{N}m_jW(r_{ij},h_j) \label{eq:calc_density} \tag{7}\] 
+			\subsubsection{Równanie stanu}
+			Jako równanie stanu wykorzystaliśmy zaproponowaną przez Monaghana w [Monaghan J.J. Sph without a tensile instability. J. Comp. Phys., 159:290-311, 1999.] funkcję:
+			\[p_i(\rho)=\frac{\rho_0 c_0^2}{\gamma}[(\frac{\rho_i}{\rho_0})^{\gamma} - 1] \label{eq:calc_state} \tag{8}\]
+			gdzie ${c_0}$ to prędkość dźwięku przy zadanej gęstości ${\rho_0}$, a ${\gamma}$ ma wartość 7, dzięki czemu płyn jest odporny na ściskanie. $\rho_0$ jest gęstością spoczynkową układu, do której dążyć będą wszystkie obszary gęstości. Łatwo zauważyć iż dzięki podniesieniu ilorazu gęstości do wysokiej potęgi (wskazana wartość wyznaczona została jako optymalna) nawet małe odchylenia gęstości powodować będą duże różnice ciśnienia, co uodparnia układ na ściskanie.
+			
+			Możliwe jest także użycie prostszego wyrażenia:	
+			\[p_i(\rho) = k(\rho_0 - \rho_i) \tag{8.1}\]
+			
+			daje ono możliwość symulowania zachowań gazu, ponieważ umożliwia ściskanie w dużo większym stopniu niż ($\ref{eq:calc_state}$).
+			
+			\subsubsection{Różnica ciśnień}
+			Przekształcenia opisane w 
+			
+			\begin{comment}
+			\begin{verbatim} 
+			
+			https://mail-attachment.googleusercontent.com/attachment/u/0/?ui=2&ik=0de943f1dc&view=att&th=14a6f878d3d5bcd7&attid=0.1&disp=inline&realattid=f0542169af95b747_0.1&safe=1&zw&saduie=AG9B_P-TA2-idqG0MQqY4q5EAvip&sadet=1420650131132&sads=RLJfbKiezWhS0D0KM1B7LKtfXcI&sadssc=1		
+			\end{verbatim}
+			\end{comment}
+			
+			pokazują, że skłądową sił pochodząca od ciśnienia, działającą na cząstkę i można zapisać jako: \[\frac{\nabla P_i}{\rho_i} = \sum_j m_j(\frac{P_j}{{\rho_j}^2} + \frac{P_i}{{\rho_i}^2})\nabla W(r_{ij}, h_j) \label{eq:calc_pressure} \tag{9}\] Gdzie ${\nabla}$W to piersza pochoda funkcji wygładzającej po odległości.
+			
+			\subsubsection{Lepkość}
+			Oprócz oczywistego wzoru na lepkość wynikającego bezpośrednio z (\ref{eq:navier-stokes}) istnieje wiele innych modeli lepkości. Część z nich jest opisana w 
+			
+			\begin{comment}
+			\begin{verbatim} 
+			https://mail-attachment.googleusercontent.com/attachment/u/0/?ui=2&ik=0de943f1dc&view=att&th=14a6f878d3d5bcd7&attid=0.1&disp=inline&realattid=f0542169af95b747_0.1&safe=1&zw&saduie=AG9B_P-TA2-idqG0MQqY4q5EAvip&sadet=1420650131132&sads=RLJfbKiezWhS0D0KM1B7LKtfXcI&sadssc=1
+			\end{verbatim}
+			\end{comment}
+			
+			W naszym projekcie wykorzystaliśmy model Monaghana ponieważ dawał zadowalające wyniki i był najmniej złożony obliczeniowo. Składnik ten wyrażony jest wzorem:
+			
+			\[{\Pi}_{ij} = \frac{-\alpha \mu_{ij} c_{ij} + \beta\mu_{ij}^2}{\rho_{ij}} \label{eq:viscosity_term} \tag{10}\]
+	
+			gdzie $\alpha$ i $\beta$ są parametrami modelu, a ich wartość zależy od oczekiwanych właściwości symulowanego płynu, $c_{ij} = (c_i + c_j) / 2$ (gdzie $c_i = (\gamma p_i / \rho_i)^\frac{1}{2}$ to prędkość dźwięku w miejscu $r_i$) oraz:
+			
+			\[{\mu}_{ij} = \left\{
+				\begin{array}{l l}
+					\frac{(v_i - v_j)\cdot(r_i - r_j)}{h_{ij}(||r_i - r_j||^2 / h_{ij}^2 + \eta^2)} & \quad if{(v_i - v_j)\cdot(r_i - r_j) < 0}  \\ 0 & \quad if{(v_i - v_j)\cdot(r_i - r_j) \geq 0} 
+				\end{array} \right.\ \label{eq:mu_factor} \tag{11}\]
+				
+			Promień wygładzania obliczyć można jako $h_{ij} = (h_i + h_j)/2$, jednakże w naszym przypadku jest on zawsze stały, więc $h_{ij}$ zamienić można na $h$. Ta postać modelu lepkości jest kombinacją tzw. lepkości bulk (liniowa względem $\mu_{ij}$) oraz lepkości von Neumanna-Richtmeyera (kwadratowo zależna od $\mu_{ij}$). Lepkość von Neumanna-Richtmeyera zaproponowana została do symulacji uderzeń w celu zapobiegnięcia zjawisku przenikania się cząstek. 
+			
+			$\,$		
+
+			Jak wykazano w [Lombardi J.C. Tests of spurious transport in smoothed particle hydrodynamics. Journal of Computational Physics, 152:687-735, 1999.], wyniki najbliższe rzeczywistości można uzyskać przyjmując $\alpha \approx 0.5, \beta \approx 1.0$ oraz $\eta \approx 0.1$
+	
+	\section{GPGPU i OpenCL}
+		
+		\subsection{Wstęp do GPGPU}
+			GPGPU (ang. General-Purpouse computing on Graphics Processor Units) to technika cechująca się wykorzystaniem GPU, które przeważnie zajmują się obliczeniami związanymi z grafiką komputerową, do dowolnych innych obliczeń. Technika ta znajduje zastosowanie głównie w obliczeniach równoległych ze względu na wykorzystanie w nowoczesnych kartach graficznych architektury SIMD (Single Instruction Multiple Data) i modelu wykonywania SIMT (Single Instruction Multiple Threads). GPU są obecnie zdolne wykonywać nawet tysiące wątków jednocześnie co sprawia, że znacząco lepiej radzą sobie z algorytmami równoległymi niż przeciętne CPU. 
+			
+			$\,$		
+
+			Obecnie najczęściej stosowanymi bibliotekami GPGPU są otwarty standard OpenCL i własnościowy standard Nvidii CUDA.
+		
+		\subsection{Wstęp do OpenCL}
+			W naszej pracy postanowiliśmy wykorzystać bibliotekę OpenCL ze względu na to, że jest głównym otwartym standardem w dziedzinie GPGPU. Napisana przez organizację non-profit Khronos Group stanowi główną konkurencję dla własnościowej technologii CUDA. Jej główną zaletą w stosunku do CUDA jest to, że może być używany na wielu różnych urządzeniach - niekoniecznie tylko na GPU. Wadą okazuje się konieczność implementacji interfejsów programistycznych przez poszczególnych dostawców urządzeń, co wiąże się z rozbieżnością standardów pomiędzy różnymi środowiskami sprzętowymi oraz ewentualnymi brakami ich najaktualniejszych wersji. Szczególnie opieszałą w kwestii rozwoju biblioteki jest firma Nvidia, dla której produktu OpenCL jest godną uwagi alternatywą.
+			
+			$\,$		
+
+			Programowanie w OpenCL polega na pisaniu w OpenCL C (języku zbliżonym składniowo do C++99, z pewnymi rozszerzeniami umożliwiającymi łatwiejsze operowanie na wektorach i macierzach) funkcji zwanych kernelami, którym przekazujemy dane z hosta (CPU) które następnie są uruchamiane w olbrzymiej ilości wątków (najczęściej na GPU). Możemy w ten sposób wykonać zdefiniowane w kernelach operacje na różnych zbiorach danych równolegle. Okazuje się, że wiele problemów obliczeniowych da się rozwiązać dużo bardziej intuicyjnie dzięki temu podejściu, m.in. sortowanie pozycyjne, łamanie haseł metodą naiwną, czy też pewne elementy metody SPH. Po zrównolegleniu ich obliczeń możliwe są zauważalne wzrosty ich wydajności.
+			
+			$\,$		
+			
+			Standard OpenCL definiuje pojęcia "grupa robocza" i "element roboczy". Elementy robocze są abstrackją dla wątków. Przy każdym wykonaniu kerneli OpenCL generowana jest pewna ilość elementów roboczych i to w nich wykonują się odpowiednie operacje. Grupy robocze są pewnym zbiorem elementów roboczych. Są one konieczne jeśli chcemy synchronizować elementy robocze przy pomocy tzw. barier. Niemniej jednak grupy robocze mają ograniczoną sprzętowo maksymalną pojemność elementów roboczych. Jako, że niemożliwym jest synchronizacja między grupami roboczymi, niemożliwa jest synchronizacja między wszystkimi wątkami wykonywanami przez urządzenie w danym momencie. Stanowi to jedną z największych przeszkód w implementacji algorytmów w tej technologii. W OpenCL wyróżniamy cztery rodzaje pamięci 
+			\begin{itemize}
+				\item pamięć globalna - dostępna dla wszystkich wątków. Dostęp do niej bywa kosztowny.
+				\item pamięć stała - wątki mogą tylko odczytywać dane. Dostęp jest niezbyt kosztowny.
+				\item pamięć lokalna - dostępna z poziomu grupy roboczej. Dostęp jest niezbyt kosztowny.
+				\item pamięć prywatna - dostępna z poziomy elementu roboczego. Dostęp jest bardzo szybki.
+			\end{itemize}
+			Dobre wykorzystanie pamięci o szybkim dostępie jest kluczem do optymalnie działająych kerneli OpenCL. 
+		
+		\subsection{Sposób wykorzystania OpenCL w projekcie}
+			OpenCL posłużył nam do implementacji wszystkich algorytmów składających się na metodę SPH. Ideą pracy była próba osiągnięcia maksymalnej wydajności, dzięki wykorzystaniu możliwości paralelizacji wykonywanych obliczeń. Przydatne były także techniki takie jak OpenCL/OpenGL interop, które umożliwiły ominięcie zauważalnie kosztownego kroku odczytu danych z pamięci karty graficznej do pamięci RAM przy wizualizacji, dzięki przechowywaniu wszyskich danych na karcie graficznej. W OpenCL zaimplementowaliśmy algorytmy takie jak sortowanie, wyszukiwanie sąsiadów, podział pudła obliczeniowego czy obliczenia związane z wzorami (\ref{eq:calc_density}), (\ref{eq:calc_state}), (\ref{eq:calc_pressure}). Pomimo iż wiele z nich można zrealizować na różne sposoby, to wciąż da się je sprowadzić do dużej ilości niezależnych obliczeń.	
+			
+	\section{Wymagania sprzętowe i programistyczne}
+		W celu umożliwienia użycia biblioteki OpenCL wymagany jest kompatybilny hardware GPU lub CPU dostępny od producentów takich jak AMD, Intel, czy Nvidia. W przypadku korzystania z tego ostatniego możliwe jest też użycie zestawu narzędzi jaki oferuje CUDA.
+		
+		Jako że jednym z głównych założeń naszej pracy była możliwość wyświetlenia wyników obliczeń w czasie rzeczywistym, kluczowe jest również użycie biblioteki OpenGL lub DirectX w trybie współdzielenia pamięci z biblioteką odpowiedzialną za obliczenia równoległe.
+	
+\end{document}
