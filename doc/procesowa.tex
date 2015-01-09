@@ -1,0 +1,150 @@
+% By zmienic jezyk na angielski/polski, dodaj opcje do klasy english lub polish
+\documentclass[polish, 12pt]{aghthesis}
+\usepackage{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{comment}
+
+\author{Dawid Romanowski, Wojciech Czarny}
+
+\title{Implementacja metody SPH \\ na procesory graficzne}
+
+\supervisor{dr hab.\ inż.\ Krzysztof Boryczko, prof.\ nadzw.\ AGH}
+
+\date{2014}
+
+% Szablon przystosowany jest do druku dwustronnego, 
+\begin{document}
+\raggedbottom
+\maketitle{}
+
+\tableofcontents
+\clearpage
+
+\section{Wizja projektu}
+
+	\subsection{Cel projektu}
+	
+	Przed rozpoczęciem badań i prac nad projektem, po konsultacji z opiekunem główne założenia projektu zostały określone następująco:
+	
+	\begin{itemize}
+	
+		\item Przeprowadzenie wszystkich obliczeń wymaganych do ostatecznego zasymulowania zachowania płynu na wielordzeniowej architekturze przy użyciu zestawu narzędzi OpenCL lub CUDA
+		
+		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najpłynniejszej animacji uzyskanych wyników (przyjęto, że $\sim 30$ klatek na sekundę jest wystarczającym osiągnięciem)
+		
+		\item Graficzna prezentacja wyników w czasie rzeczywistym
+	
+	\end{itemize}
+	
+	\subsection{Opis problemu}
+	
+	Symulacja zjawisk fizycznych przy użyciu komputerów możliwa jest jedynie z taką dokładnością na jaką pozwala nam moc obliczeniowa maszyny. W wielu przypadkach jednak dokładność numeryczna nie jest kluczowym kryterium, za to tym co tak naprawdę chce się uzyskać jest dokładność wizualna. Dlatego też przy wizualizacji symulacji modeli fizycznych stosuje się uproszczenia mające na celu naśladowanie poprawnych wyników pod względem wyglądu. W przypadku symulacji zachowania płynów nie jest możliwa wizualizacja wyników w czasie wykonywania obliczeń, gdy obliczenia uwzględniają wszystkie oddziaływania pomiędzy elementami modelu fizycznego. Konieczna jest zatem dyskretyzacja problemu oraz przyjęcie uproszczonych zjawisk lub zastąpienie ich prostszymi rozwiązaniami aproksymującymi ich zachowania. Takim podejściem jest właśnie metoda SPH, będąca uproszczeniem praw hydrodynamiki opisanym przez równania Naviera-Stokesa.
+	
+	$\,$
+	
+	Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym. Zwłaszcza gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, coraz popularniejsze staje się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. Sprawdzenie wyników realizacji obliczeń metody SPH w ten właśnie sposób jest jedną z głównych założeń naszej pracy.
+	
+	\clearpage	
+	
+	\subsection{Opis użytkownika}
+	
+	Realizacja pracy zakłada istnienie dwóch rodzajów użytkowników.
+	
+	Pierwszym i najważniejszym jest osoba chcąca osiągnąć te same cele, których realizacji podjęli się autorzy pracy. Dla tego użytkownika zaimplementowany system oraz dokumentacja projektu są zbiorem przemyśleń i wskazówek do odtworzenia i rozwoju powstałej technologii.
+	
+	Drugim typem użytkownika jest osoba korzystająca z zaimplementowanego systemu w celu zobaczenia jego możliwości oraz lepszego zrozumienia metody hydrodynamiki cząstek wygładzanych poprzez manipulację parametrów układu przy użyciu interfejsu użytkownika, oraz obserwację wpływu dokonywanych zmian dzięki modułowi graficznemu aplikacji.
+	
+	\subsection{Początkowy opis wymagań}
+	
+		\subsubsection{Wymagania funkcjonalne}
+		
+		\begin{itemize}
+		
+			\item Moduł obliczeniowy
+			
+			\begin{itemize}
+			
+				\item Realizacja obliczeń związanych z symulacją cząstek płynu w skali makro równolegle na procesorach wielordzeniowych przy użyciu OpenCL
+				\item Użycie trybu współdzielenia pamięci (interop) pomiędzy OpenCL i OpenGL w celu pozbycia się konieczności odczytu dużych ilości danych z pamięci procesora graficznego.
+			
+			\end{itemize}						
+			
+			\item Moduł graficzny
+			
+			\begin{itemize}
+			
+				\item Możliwość przejrzystego zaprezentowania pudła obliczeniowego (pudło oraz jego zawartość muszą być obserwowalne w trzech wymiarach przestrzennych)
+				\item Możliwość poruszania kamerą (obracanie i przemieszczanie w przestrzeni trójwymiarowej)
+				\item Wyświetlanie obecnej konfiguracji modelu (parametrów obliczeniowych) oraz informacji pomocniczych wyliczanych w trakcie wykonywania obliczeń poprzez graficzny interfejs użytkownika
+				\item Wyświetlanie obszarów płynu w postaci sfer w możliwie najoptymalniejszy sposób, by duża ilość cząstek nie powodowała dużego narzutu obliczeniowego związanego z wyświetlaniem dużej ilości poligonów
+				\item Możliwość dostosowywania wartości parametrów modelu w trakcie działania aplikacji poprzez wejście z klawiatury w celu dobrania najbardziej realistycznie wyglądającej konfiguracji
+				\item Osiągnięcie płynnej animacji wyników obliczeń na poziomie przynajmniej $\sim30$ klatek na sekundę
+			
+			\end{itemize}	
+		
+		\end{itemize}
+		
+		\subsubsection{Wymagania niefunkcjonalne}
+		
+		\begin{itemize}
+		
+			\item Implementacja projektu w środowisku wieloplatformowym (rozwijanie równolegle w systemach Windows 8.1 oraz Linux Mint) z wykorzystaniem CMake.
+			\item Zrównoleglenie możliwie jak największej ilości obliczeń
+		
+		\end{itemize}
+
+\section{Przebieg pracy}
+	
+	\subsection{Kamienie milowe}
+	
+	\begin{description}
+	
+  		\item[Milestone 1] \hfill \\ Na samym początku, przez rozpoczęciem zapoznawania się z tematem pracy, nie mieliśmy żadnego doświadczenia i wiedzy na temat wytwarzania oprogramowania w środowisku zrównoleglonym, czy też na temat zasady działania metody hydrodynamiki cząstek wygładzonych. Jedynym w miarę znanym nam aspektem było niskopoziomowe programowanie modułów graficznych przy użyciu bibliotek OpenGL/DirectX, dlatego też w celu posunięcia prac do przodu postanowiliśmy zacząć od stworzenia prototypu części graficznej projektu.
+  		
+  		\item[Milestone 2] \hfill \\ Po stworzeniu działającego prototypu modułu graficznego na jego podstawie zaczęła powstawać wersja finalna struktury aplikacji. Zaczęliśmy też tworzyć prototyp modułu obliczeniowego, jako że nie mieliśmy wcześniej styczności z interfejsem programistycznym OpenCL, czy też językiem OpenCL C pierwsze przedsięwzięcia miały na celu nauczyć nas posługiwania się tą technologią i nie miały wiele wspólnego z realizacją obliczeń metody SPH, dlatego też zostały później porzucone. Gdy już nabraliśmy więcej pewności w programowaniu przy użyciu OpenCL zaczęliśmy planować podział poszczególnych etapów obliczeń pomiędzy funkcje kerneli, a następnie ich implementację. Na tym etapie zaczęły też pojawiać się rozwiązania typu użycie trybu współdzielenia pamięci na karcie graficznej oraz użycie czterowierzchołkowych płaszczyzn z obrazem sfery zwróconych w stronę kamery zamiast dużo bardziej skomplikowanych modeli sfer.
+  		
+ 		\item[Milestone 3] \hfill \\ W trakcie ostatniego kamienia milowego dokończona została implementacja prototypu modułu obliczeniowego. Następnie, jako że do jego poprawnego działania potrzebny jest odpowiedni dobór stałych parametryzujących obliczenia, potrzebna była możliwość zmiany tych parametrów w trakcie przeprowadzania symulacji, by móc obserwować ich poprawność. W tym celu należało zaimplementować funkcjonalność graficznego interfejsu użytkownika oraz możliwość korygowania parametrów poprzez wejście z klawiatury. Na koniec pozostały ewentualne optymalizacje związane z wykonywaniem obliczeń, celem których było wykonywanie jak największej ilości obliczeń równolegle zamiast sekwencyjnie.
+  			
+	\end{description}
+	
+	\subsection{Minutki ze spotkań}
+	
+		\subsubsection*{11.03.2014 - Spotkanie z prowadzącym pracownię projektową (inicjujące)}
+		
+			\begin{itemize}
+			
+				\item ogólny plan spotkań oraz określenie milestone'ów (3-4 milestone'y)
+				\item przeplatane spotkania z klientem i managerem
+				\item pierwszy milestone na prototyp, zapoznanie się z technologią, na zakończenie prezentacja wyników dotychczasowej pracy
+				\item dokumentacja powinna być rozwijana wraz z implementacją
+				\item do opracowania krótka wizja projektu, ma być umieszczona w Confluence
+						
+			\end{itemize}
+		
+		\subsubsection*{20.03.2014 - Spotkanie z klientem (inicjujące)}
+		
+				Na pierwszym spotkaniu z klientem została nam zaprezentowany ogólny zarys problemu:
+				
+			\begin{itemize}
+			
+				\item klient jest już w posiadaniu aplikacji symulującej cząstki metodą SPH, jednak problem jest rozwiązywany sekwencyjnie i jedynie generuje wyniki do post-renderowania
+				\item całość obliczeń zamyka się w czterech etapach:
+				\begin{itemize}
+				
+					\item obliczenie gęstości dla każdego obszaru
+					\item obliczenie różnicy ciśnień dla każdego obszaru
+					\item obliczenie przyspieszenia dla każdego obszaru
+					\item interpolacja prędkości i położenia w kroku czasowym dla każdego obszaru
+				
+				\end{itemize}
+				\item problemem jest to, że liczenie oddziaływań dla każdej cząstki na podstawie wszystkich pozostałych jest zbyt kosztowne, dlatego też głównym założeniem metody SPH jest wprowadzenie promienia wygładzającego, wszystkie cząstki znajdujące się dalej niż promień wygładzania mają zerowy wpływ na rozpatrywaną cząstkę
+				\item żeby nie sprawdzać odległości wszystkich cząstek wybiera się tylko $k$ najbliższych 
+			
+			\end{itemize}
+
+\section{Podsumowanie}
+
+\end{document}
