@@ -6,11 +6,6 @@
 \usepackage{indentfirst}
 \usepackage{amsmath}
 \usepackage{comment}
-\usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage{caption}
-\usepackage{subcaption}
-\usepackage{listings}
 
 \author{Dawid Romanowski, Wojciech Czarny}
 
@@ -170,23 +165,9 @@
 	\section{Korzystanie z programu oraz wyniki}
 		Po uruchomieniu programu można się poruszać w wirtualnym świecie przy pomocy klawiszy WSAD oraz myszki (przytrymując lewy przycisk). Kliknięcie w prawy przycisk myszy powoduje uruchomienie (a później zrestartowanie) symulacji.
 		
-	\begin{figure}
-	\centering
-		\includegraphics[width=0.49\textwidth]{1.png}
-		\includegraphics[width=0.49\textwidth]{2.png}
-		\includegraphics[width=0.49\textwidth]{3.png}
-		\includegraphics[width=0.49\textwidth]{4.png}
-		\includegraphics[width=0.49\textwidth]{5.png}
-		\includegraphics[width=0.49\textwidth]{6.png}
-		\includegraphics[width=0.49\textwidth]{7.png}
-		\includegraphics[width=0.49\textwidth]{8.png}
-		\caption{Screenshoty z działania aplikacji}
-	\end{figure}
-			 
-			 
-	\nocite{OpenCLProgrammingGuide, SPHWebinar}
-
-	\bibliography{bibliografia}
+		
+		 
+		 \bibliography{bibliografia}
 		
 		
 		
