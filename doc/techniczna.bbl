@@ -1,0 +1,21 @@
+\begin{thebibliography}{1}
+
+\bibitem{CLPP}
+Clpp - opencl data parallel primitives library.
+\newblock \url{https://code.google.com/p/clpp/}.
+
+\bibitem{GameCodingComplete}
+M.~McShaffry and D.~Graham.
+\newblock {\em Game Coding Complete}.
+\newblock Cengage Learning PTR, 2012.
+
+\bibitem{OpenCLProgrammingGuide}
+A.~Munshi and B.~Gaster.
+\newblock {\em OpenCL Programming Guide}.
+\newblock Addison-Wesley Professional, 2011.
+
+\bibitem{SPHWebinar}
+Smoothed particle hydrodynamics webinar by {AMD}.
+\newblock \url{https://www.youtube.com/watch?v=SQPCXzqH610}.
+
+\end{thebibliography}

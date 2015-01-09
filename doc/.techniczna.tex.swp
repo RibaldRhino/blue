@@ -130,24 +130,42 @@
 \section{Struktura projektu}
 
 	\subsection{Wstęp}
-		Poniższy słowny opis przedstawia główne cechy i decyzje architektoniczne, nie zagłębiając się w szczegóły dotyczące różnego rodzaju implementacji interfejsów, czy wszystkich klas wykorzystanych w projekcie. Z punkty widzenia dostarczenia funkcjonalności zgodnych z tematem pracy inżynierskiej, duża część napisanego kodu jest nieistotna. Kod ten stanowi pewnego rodzaju próbę włączenia implementacji SPH do projektu zbliżonego architektonicznie do przeciętnej gry komputerowej. Dokładny opis zastosowanej architektury, na której się wzorowaliśmy, można znaleźć w książce [Game Coding Complete]. Różnice wynikają głównie z zastosowania innych bibliotek do osiągnięcia tych samych celów (WinAPI vs GLFW, OpenGL vs DirectX, Boost.Signals2 vs Fastdelegate etc.), oraz z tego, że w [Game Coding Complete] opisany jest dużo bardziej złożony system niż ten zaimplementowany w naszej pracy inżynierskiej.
+		Poniższy słowny opis przedstawia główne cechy i decyzje architektoniczne, nie zagłębiając się w szczegóły dotyczące różnego rodzaju implementacji interfejsów, czy wszystkich klas wykorzystanych w projekcie. Z punkty widzenia dostarczenia funkcjonalności zgodnych z tematem pracy inżynierskiej, duża część napisanego kodu jest nieistotna. Kod ten stanowi pewnego rodzaju próbę włączenia implementacji SPH do projektu zbliżonego architektonicznie do przeciętnej gry komputerowej. Dokładny opis zastosowanej architektury, na której się wzorowaliśmy, można znaleźć w pozycji [2] z bibliografii. Różnice wynikają głównie z zastosowania innych bibliotek do osiągnięcia tych samych celów (WinAPI vs GLFW, OpenGL vs DirectX, Boost.Signals2 vs Fastdelegate etc.), oraz z tego, że w [2] opisany jest dużo bardziej złożony system niż ten zaimplementowany w naszej pracy inżynierskiej.
 	
 	\subsection{Kluczowe elementy stworzonego frameworku}
+		\subsubsection{Obsługa OpenGL i okna}
+			Klasa OpenGLSystem zajmuje się inicjalizacją okna oraz dostarczaniem informacji na temat kontekstu OpenGL, które są niezbędne do poprawnej inicjalizacji urządzenia OpenCL. Istnieje bowiem możliwość, że system OpenCL zostałby zainicjalizowany na urządzeniu innym niż OpenGL przez co niemożliwa byłaby komunikacja z wykorzystaniem OpenCL\\OpenGL interop.
+			
+			Klasa Window oraz klasa InputManager stanowią wrapper na funkcjonalności biblioteki GLFW. Umożliwiają one inicjalizację okna oraz obsługę zdarzeń wywołanych przez użytkownika takich jak naciśnięcie klawisza czy ruch myszką. 
+			
 		\subsubsection{Obsługa OpenCL}
-			Klasa OpenCLSystem jest klasą stanowiącą lekki wrapper na wszystkie konieczne funkcje OpenCL takie jak:
+			Klasa OpenCLSystem stanowi lekki wrapper na wszystkie konieczne funkcje OpenCL takie jak:
 			\begin{itemize}
 				\item Wykrywanie urządzenia, na którym jest zainicjalizowany OpenGL
 				\item Tworzenie kontekstu OpenCL
 				\item Czytanie i budowanie jąder OpenCL
 			\end{itemize}
+			W kodzie funkcjie OpenCL przeważnie są wywoływane bezpośrednio, jako że API OpenCL jest klasycznym API w języku C, które przechowuje wewnętrznie swój własny stan.
 			
+		\subsubsection{Obsługa zdarzeń}
+			Klasa EventManager wraz z interfejsem IEventData oraz typem wyliczeniowym EventType stanowią trzon systemu zdarzeń w stworzonym frameworku. Ideą tego systemu jest to, że każda klasa może się zarejestrować na odbiór pewnego rodzaju eventów oraz sama wysłać event do systemu. Klasa EventManager jest przez to globalna dla całej aplikacji. W każdej klatce zdarzenia, które wystąpiły są wysyłane do opowiednich odbiorców.
 			
-		wrapper OpenGsL i okna
-		actor component
-		event manager
+			Dzięki tej klasie osiągamy inwersję zależności (dependency inversion). Poszczególne obiekty systemu nie muszę wiedzieć o żadnych innych obiektach. Chcąc poinformować, że zaszło jakieś zdarzenie lub chcąc wysłać jakąś wiadomość do systemu jedyne co obiekty muszą posiadać to referencję do EventManager'a. To on zajmuje się dystrybucją wiadomości do zainteresowanych odbiorców.
+		 
+		\subsubsection{Model actorów złożonych z komponentów}
+		
+			W każdej grze istnieje koncepja aktorów (zwanych czasami obiektami gry (and. game object)), które mogą wykonywać jakieś akcje w czasie, posiadają logikę rysowania, przechowują swój stan i położenie. Klasyczne podejście do budowy tego typu obiektów - wszystko w jednej klasie - łamie SRP (Single Responsibility Principle). Postanowiliśmy więc wykorzystać model zwany CBSE (Component-Based Software Engineering) do reprezentacji aktorów. 
+			
+			Każdy aktor składa się z wielu komponentów definujących takie rzeczy jak logikę, sposób rysowania, przemieszczenie w przestrzeni. Mogą też istnieć specyficzne komponenty takie jak komponent kamery. Jako, że każdy komponent zajmuje się swoją własną dziedziną nie jest łamane SRP i system staje się znacząco bardziej skalowalny. 
+			
+			Przykładem zastosowania tego modelu są klasy WaterLogicComponent, WaterModelComponent oraz WaterRenderComponent - każda z nich zajmuje się dostarczeniem jednej funkcjonalności. WaterLogiComponent zawiera logikę OpenCL, która porusza modelem płynu zdefiniowanym i zainicjalizowanym w WaterModelComponent. WaterRenderComponent natomiast komunikuje się z WaterModelComponent w celu wyświetlenia modelu cieczy na ekranie. Łatwym byłoby stworzenie innego sposoby renderowania czy innego zachowania cieczy (co było wykonywane w pierwszych iteracjach) i polegałoby tylko na podmianie tych, raczej lekkich, komponentów.
+			
+		\subsubsection{Wykorzystanie C++11}
+		
+		Pisząc kod stosowaliśmy się do idiomu C++ RAII (Resource Acquisition Is Initialization). W całym kodzie słowo kluczowe "delete" nie występuje ponieważ wszystkie zmienne są inicjalizowane w taki sposób, aby kiedy nie są potrzebne same się usuwały. Wykorzystujemy do tego takie dodatki w C++11 jak shared\_ptr, unique\_ptr czy std::array zamist zwykłych wskaźników i wskaźników na tablice. Korzystamy też z nowowprowadzonych lambd oraz słowa kluczowego auto.
 
 \section{Sposób implementacji metody SPH}
-Nasza implementacja metody SPH składa się z 9 jąder i wykorzystujemy 10 globalnych buforów. Dodatkowo korzystamy z biblioteki clpp [https://code.google.com/p/clpp/], która dostarcza nam optymalnych implementacji sortowań na kartę graficzną algorytmem Radix Sort.
+Nasza implementacja metody SPH składa się z 9 jąder i wykorzystujemy 10 globalnych buforów. Dodatkowo korzystamy z biblioteki clpp, która dostarcza nam optymalnych implementacji sortowań na kartę graficzną algorytmem Radix Sort.
 		
 		\subsection{Wyszukanie sąsiadów cel}
 			\paragraph{Nazwa jądra} \ \\
@@ -596,6 +614,9 @@ Nasza implementacja metody SPH składa się z 9 jąder i wykorzystujemy 10 globa
 			Boost.Signals2 &  Biblioteka boost jest przez wielu uważana za drugi standard C++, oczywiśćie po libstdc++. Boost.Signals2 udostępnia funkcjonalność sygnałów i slotów, zbliżoną na przykład do systemu eventów w językach takich jak C\#. Została ona wykorzystana do stworzenia globalnego systemu zdarzeń, dzięki któremu trywialnym stało się pisanie mapowania działań użytkownika na funkcje wewnątrz programu. \\
 		\hline	
 	\end{tabular}
-
+	\clearpage
+	
+	\nocite{OpenCLProgrammingGuide,GameCodingComplete,CLPP,SPHWebinar}
+	\bibliography{bibliografia}
 	
 \end{document}
