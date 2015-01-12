@@ -19,7 +19,7 @@
 \contentsline {subsubsection}{\numberline {2.2.1}Obs\IeC {\l }uga OpenGL i okna}{8}
 \contentsline {subsubsection}{\numberline {2.2.2}Obs\IeC {\l }uga OpenCL}{9}
 \contentsline {subsubsection}{\numberline {2.2.3}Obs\IeC {\l }uga zdarze\IeC {\'n}}{9}
-\contentsline {subsubsection}{\numberline {2.2.4}Model actor\IeC {\'o}w z\IeC {\l }o\IeC {\.z}onych z komponent\IeC {\'o}w}{9}
+\contentsline {subsubsection}{\numberline {2.2.4}Model aktor\IeC {\'o}w z\IeC {\l }o\IeC {\.z}onych z komponent\IeC {\'o}w}{9}
 \contentsline {subsubsection}{\numberline {2.2.5}Wykorzystanie C++11}{10}
 \contentsline {section}{\numberline {3}Spos\IeC {\'o}b implementacji metody SPH}{10}
 \contentsline {subsection}{\numberline {3.1}Wyszukanie s\IeC {\k a}siad\IeC {\'o}w cel}{10}
