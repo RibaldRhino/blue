@@ -45,7 +45,7 @@
 	
 	$\,$
 	
-	Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym. Zwłaszcza gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, coraz popularniejsze staje się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. Sprawdzenie wyników realizacji obliczeń metody SPH w ten właśnie sposób jest jedną z głównych założeń naszej pracy.
+	Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym. Zwłaszcza gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, coraz popularniejsze staje się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. Sprawdzenie wyników realizacji obliczeń metody SPH w ten właśnie sposób jest jednym z głównych założeń naszej pracy.
 	
 	\clearpage	
 	
@@ -146,5 +146,136 @@
 			\end{itemize}
 
 \section{Podsumowanie}
+
+	\subsection{Realizacja założeń i dalszy rozwój}
+	
+		Udało się stworzyć aplikację będącą PoC (Proof of Concept, ang. dowód koncepcji) badanego problemu. Aplikacja ta przeprowadza symulację zachowania płynu przy użyciu metody SPH zaimplementowanej jako seria funkcji OpenCL. Wyniki przeprowadzanej symulacji wizualizowane są w czasie rzeczywistym przy użyciu OpenGL. Płynność uzyskanej animacji zależy od ilości symulowanych cząstek, jednakże w porównaniu z innymi symulacjami, których wyniki dostępne są w internecie, spełnia nasze oczekiwania.
+		
+		Poniższe elementy nie zostały zrealizowane w pełni bądź pominięte, głównie z powodu braku czasu. Nie są to elementy niezbędne do poprawnego działania projektu, jednakże ich realizacja bardzo pomogłaby w dalszym rozwoju stworzonego oprogramowania.
+		
+		\begin{itemize}
+		
+			\item Stworzenie przejrzystego interfejsu użytkownika dostarczającego informacje potrzebne do debugowania kodu. Okazało się, że poprawna implementacja wszystkich elementów logiki aplikacji jest niewystarczająca do poprawnego działania symulacji, kluczowym jest także dobór odpowiednich stałych parametrów równań. Pomimo iż udało nam się dobrać przykładową poprawną parametryzację, zmiana dowolnej stałej wymaga dostosowania wszystkich pozostałych, co bez znajomości informacji takich jak np. maksymalne/średnie/minimalne ciśnienie występujące w chwili obecnej w układzie jest niezwykle uciążliwe i trudne. Kluczowym jest więc stworzenie modułu odpowiedzialnego za wyciąganie takich danych z pamięci karty graficznej, a następnie wyświetlanie ich w postaci tekstu w oknie graficznym aplikacji. Do osiągnięcia tego celu zaleca się wymianę biblioteki odpowiedzialnej za zarządzanie oknem (w chwili obecnej GLFW) na bibliotekę o wyższym poziomie abstrakcji (np. SDL, SFML), co umożliwiłoby zarówno zachowanie funkcjonalności zarządzania oknem graficznym, jak i łatwą integrację wyświetlania tekstu.
+			
+			\item Podpięcie odpowiednich zdarzeń związanych z wprowadzaniem wejścia z klawiatury do logiki odpowiedzialnej za zmianę stałych parametrów równań. Umożliwiłoby to zmianę stałych w trakcie wykonywania symulacji i jednoczesną obserwację ich poprawności. Dzięki temu możliwe byłoby dużo łatwiejsze dobranie poprawnych parametrów poprzez bezpośrednie badanie ich wpływu na zachowanie symulowanego płynu.
+			
+			\item Możliwa jest także wymiana sposobu liczenia składowej lepkości przy obliczaniu przyspieszenia cząstki. Obecny sposób może nie dawać najbliższych rzeczywistości rezultatów wizualnych.
+			
+			\item W chwili obecnej możliwe jest przeprowadzenie symulacji w prostopadłościennym pudle obliczeniowym poprzez umieszczenie w nim prostopadłościennej ściany równo oddalonych od siebie cząstek płynu. Następnie pod wpływem grawitacji i sił oddziaływań między nimi zaczynają się one przemieszczać w obrębie pudła. Aby zaobserwować bardziej skomplikowane zjawiska i właściwości obserwowanego układu należałoby zaimplementować moduł odpowiedzialny za tworzenie i zarządzanie prostymi bryłami kolizyjnymi. Bryły pełniłyby wewnątrz pudła tą samą funkcję co ściany pudła, jednakże składając je w bardziej skomplikowane kształty można by zaobserwować zjawiska takie jak opływanie przeszkody z dwóch stron przez cząstki płynu oraz wydostawanie się cząstek płynu z naczynia przez otwór.
+			
+			\item Możliwa jest dalsza optymalizacja obliczeń w celu uzyskania mniejszych wymagań ze strony sprzętu, co pozwoliłoby na zwiększenie dopuszczalnej ilości cząstek biorących udział w symulacji lub zwiększyłoby zakres sprzętu, na którym można przeprowadzić symulację. M.in. należałoby rozważyć które bloki instrukcji wykonywanych sekwencyjnie w kernelach OpenCL można zastąpić przez wykonanie ich za pomocą kerneli lokalnych.
+		
+		\end{itemize}
+		
+	\subsection{Narzędzia wspierające proces wytwarzania oprogramowania}
+	
+		Do zarządzania procesem wytwarzania oprogramowania wykorzystywane były głównie narzędzia dostępne w obrębie serwisu hostingowego GitHub:
+		
+		\begin{itemize}
+		
+			\item System kontroli wersji Git, służył do synchronizacji pracy pomiędzy lokalnymi środowiskami autorów. Pozwalał na zachowywanie stabilnych wersji oprogramowania i powracanie do nich w razie potrzeby. Był też jedną z formy komunikacji pomiędzy autorami dzięki możliwości nazywania pakietów wprowadzanych zmian (commit'ów).
+			
+			\item Na pewnym etapie do zarządzania zadaniami i planowania kolejnych kierunków rozwoju projektu używana była webowa aplikacja Trello, która umożliwia rozwijanie m.in. oprogramowania przy wykorzystaniu metody kanban. Dzięki niej możliwy był podział wszystkich zadań na trzy grupy: nowe, w trakcie realizacji oraz wykonane.
+		
+		\end{itemize}
+		
+		W trakcie realizacji projektu szczególnie przydatne okazały się następujące techniki:
+		
+		\begin{itemize}
+
+			\item Rubber duck debugging - rolę gumowej kaczki najczęściej pełniła druga osoba zajmująca się projektem, przedstawianie jej krok po kroku segmentów debugowanego kodu bardzo często pomagało autorowi uświadomić sobie naturę błędu oraz metoda ta miała przewagę nad jej klasyczną wersją, ponieważ osoba pełniąca rolę gumowej kaczki mogła zadawać kluczowe pytania pomagające zrozumieć jej działanie kodu, co często naprowadzało autora na trop błędu.
+			
+			\item Pair programming - metoda szczególnie pasująca do realizowanego projektu, gdyż był on rozwijany w zespole dwuosobowym.
+			
+			\item Wymieniona wcześniej metoda kanban
+		
+		\end{itemize}
+		
+		Poza tym w celu komunikacji pomiędzy członkami zespołu wykorzystywane były:
+		
+		\begin{itemize}
+		
+			\item Wiadomości e-mail do kontaktowania się z managerem, klientem oraz pomiędzy członkami zespołu. Umożliwiały też wymianę dokumentów naukowych na podstawie których tworzony był projekt oraz wszelkich kluczowych dokumentów znalezionych w internecie, dotyczących aspektów technicznych.
+			
+			\item Komunikatory internetowe (np. Google Hangouts), były głównie używane w trakcie zdalnej pracy członków zespołu do rozmowy o obecnie realizowanych zadaniach.
+		
+		\end{itemize}
+		
+	\subsection{Podział prac}
+	
+		\subsubsection*{Dawid Romanowski} 
+		
+		\begin{itemize}
+		
+			\item w ramach dokumentacji technicznej
+			
+				\begin{itemize}
+				
+					\item
+				
+				\end{itemize}
+			
+			\item w ramach dokumentacji procesowej
+			
+				\begin{itemize}
+				
+					\item
+				
+				\end{itemize}
+			
+			\item w ramach dokumentacji użytkownika
+			
+				\begin{itemize}
+				
+					\item
+					
+					\item GPGPU i OpenCL
+				
+				\end{itemize}
+			
+			\item zaplanowanie oraz implementacja finalnej architektury systemu
+			
+			\item implementacja kerneli związanych z wyszukiwaniem sąsiadów
+			
+			\item zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemie Linux Mint
+		
+		\end{itemize}
+		
+	\subsubsection*{Wojciech Czarny} 
+		
+		\begin{itemize}
+			
+			\item w ramach dokumentacji procesowej
+			
+				\begin{itemize}
+				
+					\item Wizja projektu, cel projektu, opisy problemu i użytkowników, wymagania.
+					
+					\item Dokumentacja przebiegu pracy, kamieni milowych, minutek.
+					
+					\item Sformułowanie podsumowania, określenie stopnia realizacji założeń i dalszych kierunków rozwoju, udokumentowanie użytych narzędzi oraz podziału prac
+				
+				\end{itemize}
+			
+			\item w ramach dokumentacji użytkownika
+			
+				\begin{itemize}
+				
+					\item Opis metody SPH - część wzorów użytkowych, 
+					
+					\item GPGPU i OpenCL
+				
+				\end{itemize}
+			
+			\item stworzenie prototypu modułu graficznego i obliczeniowego
+			
+			\item wsparcie przy implementacji finalnej architektury systemu
+			
+			\item implementacja kerneli związanych z zarządzaniem danymi oraz kerneli realizujących obliczenia metody SPH
+					
+			\item zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemie Windows 8.1
+		
+		\end{itemize}
+		
 
 \end{document}
