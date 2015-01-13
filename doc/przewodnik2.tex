@@ -1,0 +1,181 @@
+% By zmienic jezyk na angielski/polski, dodaj opcje do klasy english lub polish
+\documentclass[polish, 12pt]{aghthesis}
+\usepackage{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{comment}
+
+\author{Dawid Romanowski, Wojciech Czarny}
+
+\title{Implementacja metody SPH \\ na procesory graficzne}
+
+\supervisor{dr hab.\ inż.\ Krzysztof Boryczko, prof.\ nadzw.\ AGH}
+
+\date{2014}
+
+% Szablon przystosowany jest do druku dwustronnego, 
+\begin{document}
+\maketitle{}
+\tableofcontents
+\clearpage
+
+
+\section{Opis problemu}
+
+	Symulacja czasu rzeczywistego zjawisk fizycznych jest zagadnieniem złożonym zarówno od strony teoretycznej jak i od strony implementacyjnej. Aby uzyskać realistycznie wyglądający efekt wymagane jest opracowanie szczegółowego modelu fizycznego danego zjawiska, zapisanie go w taki sposób aby umożliwić jego implementację i na końcu olbrzymia moc obliczeniowa, aby móc podziwiać efekty działania modelu w czasie rzeczywistym. Pierwsze dwa kroki są zależne od nas i możemy je do woli szlifować, jednak w obliczu zbyt małej mocy procesorów jedyny możliwy efekt końcowy to zbiór danych wyjściowych otrzymywany po wykonaniu wszystkich obliczeń - rzecz bezużyteczna w symulacjach czasu rzeczywistego takich jak na przykład gry komputerowe.
+
+	W symulacji zjawisk fizycznych często występuje konieczność wykonywania dużej ilości prostych, powtarzalnych obliczeń dla różnych elementów układu. Przykładem może być symulacja zachowania żdźbeł trawy w szerokim polu. Mogą być ich miliony, a dla każdego z nich musimy wykonać podobne obliczenia zależne od takich czynników jak kierunek wiatru, nacisk otaczających elementów czy ukształtowanie podłoża. CPU nie będzie w stanie nadążyć przy tak olbrzymiej liczbie elementów nawet jeśli odpowienio wykorzystamy wszystkie dostępne rdzenie. 
+	
+
+		Gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, popularniejsze stało się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. GPGPU (general purpose computation on graphics processing unit) to technika wykonywania równoległych obliczeń na procesorach graficznych, która zyskuje na popularnośći w ostatnich latach. Wynika to z tego, że w nowoczesnych GPU wykorzystywany jest model obliczeniowy SIMT (single instruction, multiple threads), który w połączeniu z ogromną (w stosunku do CPU) ilością rdzeni (setki, czy nawet tysiące) sprawia, że implementacje pewnych algorytmów mogą uzyskać olbrzymie przyspieszenie.
+
+	Zjawisko fizyczne, które będzie nas interesować w naszej pracy to zachowanie cieczy znajdującej się za tamą w zamkniętym zbiorniku, w przypadku przerwania tejże tamy i wylewania się cieczy do zbiornika. W przypadku symulacji zachowania płynów nie jest możliwa wizualizacja wyników w czasie wykonywania obliczeń, gdy obliczenia uwzględniają wszystkie oddziaływania pomiędzy elementami modelu fizycznego. Konieczna jest zatem dyskretyzacja problemu oraz przyjęcie uproszczonych zjawisk lub zastąpienie ich prostszymi rozwiązaniami aproksymującymi ich zachowania. Istnieje wiele metod symulowania cieczy - DPD (dissipative particle dynamics), SPH (smoothed particle hydrodynamics) czy SDPD (smoothed dissipative particle dynamics), każda mająca swoje zalety i wady.
+
+	Zadaniem naszej pracy jest implementacja metody SPH w technice GPGPU oraz stworzenie aplikacji, która umożliwi wizualizację zachowania cieczy w trakcie wykonywania symulacji przerwania tamy. Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym.
+
+\section{Opis metody SPH}
+\subsection{Wstęp}
+			
+			Metoda Smoothed Particle Hydrodynamics (SPH) początkowo miała służyć do symulacji zjawisk astrofizycznych takich jak powstawanie galaktyk czy gwiazd. Zaproponowana niezależnie w 1977 roku prez Ginolda i Monaghana oraz Lucy obecnie jest często wykorzystywana do symulacji zjawisk w mniejszej skali - w szczególności zachowań płynów. 
+
+			Ideą tej metody jest wyróżnienie pewnego dyskretnego zbioru węzłów (zwanych dalej cząstkami) badanego przez nas płynu, nadanie im pewnych własności fizycznych a następnie interpolacja tych własności fizycznych w pewnej przestrzeni. Do interpolacji wykorzystywane są funkcje wygładzające, które zamieniają punktową reprezentację wartości fizycznych na reprezentację przestrzenną.
+
+			SPH jest metodą Langrange'owską z czego wynika, że cząski mogą się poruszać w czasie. W naszym modelu ograniczyliśmy się do trzech rodzajów sił działających na cząstki. Siła grawitacyjna, siła spowodowana różnicą ciśnień oraz lepkość.
+
+		\subsection{Równanie Naviera-Stokesa}
+
+			Metoda SPH jest oparta na równaniu hydrodynamicznym Naviera-Stokesa
+
+			\[{\rho}[\frac{\partial v}{\partial t} + v \cdot \nabla v ]= F - \nabla p + \mu \nabla^2 v \label{eq:navier-stokes} \tag{1}\]
+
+			\[{\rho}(\nabla \cdot v)=0 \label{eq:continuity} \tag{2}\]
+
+			dla cieczy nieściśliwych, gdzie: ${\rho}$ to gęstość cieczy, ${\mu}$ to współczynnik lepkości a F reprezentuje zewnętrzne siły działające na ciecz.
+			
+			Analiza równania (\ref{eq:navier-stokes}) pokazuję, że przyspieszenie jest zależne jedynie od sił zewnętrznych działających na cząstkę, ujemnego gradientu ciśnienia układu oraz lepkości cieczy. Jedyna siła zewnętrzna, która interesuje nas w naszej pracy to siła grawitacji. Możemy więc zapisać: \[F={\rho}g \label {eq:gravity_force} \tag{3} \] Czynnik $v {\cdot} {\nabla} v$ reprezentuje przyspieszenie konwekcyjne, które jest efektem niezależnego od czasu przyspieszenia cząstek w zależności od przestrzeni. $-{\nabla}$p oznacza, że ciecz będzie się poruszać z przestrzeni o większym ciśnieniu w kierunku mniejszego ciśnienia. Lepkość reprezentowana jest jako stała lepkości razy laplasjan pola prędkości, który można interpretować jako różnicę między prędkością w danym punkcie a średnią prękością w małej otaczającej go przestrzeni. Lepkościa rozprasza pęd czątek i sprawia, że układ dąży do stanu równowagi.
+			
+			Równanie (\ref{eq:continuity}) jest po prostu równaniem zachowania masy. W naszej pracy nie było ono istotne ze względu na cechy metody SPH, które gwarantują, że jest ono spełnione w każdej sytuacji.
+			 
+		\subsection{Funkcje wygładzające}
+			
+			Celem funkcji wygładzającej jest transformacja reprezentacji cząstki z punktowej masy na przestrzenną. Funkcje wygładzające najczęściej przyjmują kształt zbliżony do rozkładu normalnego, należą conajmniej do klasy ${C^2}$ (mają ciągłą pierwsza i drugą pochodną) i są znormalizowane (całkują się do 1 od $-{\infty}$ do $+{\infty}$). Prostym przykładem takiej funkcji może być funkcja Gaussa \[W_G(r,h)=\frac{1}{h^{\nu}\pi^{{\nu}/2}}exp(-\frac{r^2}{h^2}) \label{eq:gaussian} \tag{4}\] gdzie ${\nu}$ to ilość wymiarów, r to odległość od od cząstki której estymujemy wielkość fizyczną i h to tak zwany promień wygładzania.
+			
+			Mając tak zdefiniowany promień wygładzania oraz dowolną dyskretną dystrybucję czątek, możemy estymować wartość fizyczną A w dowolnym punkcie przestrzeni i jako: \[{A}_i=\sum_{j=1}^{N}m_j\frac{A_j}{\rho_j}W(r_{ij},h_j) \label{eq:calc_all} \tag{5}\] gdzie ${r_{ij}}$ to odległość od cząstki j do punktu w przestrzeni, który rozważamy (pozycja i), ${m_j}$ to masa cząstki j, ${h_j}$ to promień wygładzania cząstki j, a suma jest po wszystkich cząstkach ze zbioru. 
+			
+			
+			Przy doborze odpowiedniej funkcji wygładzającej W kluczową rolę odgrywa promień wygładzania h. Funkcja Gaussa nie jest używana do obliczeń ponieważ fakt, iż dąży ona do 0 w nieskończoności - rozciąga się w nieskończoność. Korzystając z niej, wszystkie cząstki brałyby udział przy obliczeniach w każdym punkcie. Jest to niepotrzebne, szczególnie kiedy cząstka jest bardzo odległa od rozpatrywanego punktu. Dlatego przeważanie dobiera się takie funkcje wygładzające, że dla ${r_{ij} > h}$ wartość funkcji wynosi 0. Przykładem takiej funkcji może być
+			
+			\[ W_{ij} = \frac{1}{\pi h^3} \left\{ 
+				\begin{array}{l l l}
+					1 - \frac{3}{2}(\frac{|r_{ij}|}{h})^2 + \frac{3}{4}(\frac{|r_{ij}|}{h})^3  & \quad \text{gdy ${0 \leq \frac{|r_{ij}|}{h} < 1}$}  \\ 
+					\frac{1}{4}[2 - (\frac{|r_{ij}|}{h})]^3  & \quad \text{gdy ${1 \leq \frac{|r_{ij}|}{h} < 2}$}  \\ 
+					0 & \quad \text{gdy ${\frac{|r_{ij}|}{h} \geq 2 }$} 
+				\end{array} \right.\ \label{eq:kernel_function} \tag{6}\]
+			\ \\
+			zaproponowana przez Monaghana i Lattanzio w \cite{MonLat} czy:
+			
+			\[ W_{ij} = \left\{
+				\begin{array}{l l}
+					\frac{105}{16 \pi h^5}(1 + 3 \frac{|r_{ij}|}{h})(1-\frac{|r_{ij}|}{h})^3 & \quad \text{gdy ${|r_{ij}| \leq h}$}  \\ 0 & \quad \text{gdy ${|r_{ij}| > h}$} 
+				\end{array} \right.\ \label{eq:kernel_function} \tag{7}\]
+			\ \\
+			opisywana w pozycji \cite{Lucy}
+			
+			My zdecydowaliśmy się wykorzystać drugą opcję, głównie ze względu na łątwiejszą implementację. 
+			
+			Kolejnym problemem przy doborze odpowiedniego promienia wygładzania jest to, zbyt duża lub zbyt mała wielkość może całkowicie zaburzyć wyniki eksperymentu.
+			\begin{figure}[h!]
+			\centering
+			\includegraphics[width=0.8\textwidth]{smoothing.png}
+			\caption{a) h=0.5 b) h=1 c) h=2}
+			\label{fig:smoothing}
+			\end{figure}
+			Rysunek \ref{fig:smoothing} pokazuje co może się stać jeśli źle dobierzemy wartość promienia wygładzania. Pokazuje on równoodległe cząstki o tej samej wadze. Obliczona gęstość docelowo powinna przypominać linię ${\rho}$ = 1. Widać natomiast, że w c, gdzie dobraliśmy zbyt duże h linia ta znacząco przewyższa wartość oczekiwaną. Poprawnie dobrane h, do którego winniśmy dążyć, leży gdzieś pomiędzy przykładem a i b.
+			
+		\subsection{Wzory użytkowe}
+			\subsubsection{Gęstość}
+			Z równania (\ref{eq:calc_all}) gęstość w dowolnym punkcie możemy obliczyć korzystając ze wzoru \[{\rho}_i=\sum_{j=1}^{N}m_jW(r_{ij},h_j) \label{eq:calc_density} \tag{8}\] 
+			\subsubsection{Równanie stanu}
+			Jako równanie stanu wykorzystaliśmy zaproponowaną przez Monaghana w [Monaghan J.J. Sph without a tensile instability. J. Comp. Phys., 159:290-311, 1999.] funkcję:
+			\[p_i(\rho)=\frac{\rho_0 c_0^2}{\gamma}[(\frac{\rho_i}{\rho_0})^{\gamma} - 1] \label{eq:calc_state} \tag{8}\]
+			gdzie ${c_0}$ to prędkość dźwięku przy zadanej gęstości ${\rho_0}$, a ${\gamma}$ ma wartość 7, dzięki czemu płyn jest odporny na ściskanie. $\rho_0$ jest gęstością spoczynkową układu, do której dążyć będą wszystkie obszary gęstości. Łatwo zauważyć iż dzięki podniesieniu ilorazu gęstości do wysokiej potęgi (wskazana wartość wyznaczona została jako optymalna) nawet małe odchylenia gęstości powodować będą duże różnice ciśnienia, co uodparnia układ na ściskanie.
+			
+			Możliwe jest także użycie prostszego wyrażenia:	
+			\[p_i(\rho) = k(\rho_0 - \rho_i) \tag{9}\]
+			
+			daje ono możliwość symulowania zachowań gazu, ponieważ umożliwia ściskanie w dużo większym stopniu niż ($\ref{eq:calc_state}$).
+			
+			\subsubsection{Różnica ciśnień}
+			Przekształcenia opisane w \cite{Boryczko} pokazują, że skłądową sił pochodząca od ciśnienia, działającą na cząstkę i można zapisać jako: \[\frac{\nabla P_i}{\rho_i} = \sum_j m_j(\frac{P_j}{{\rho_j}^2} + \frac{P_i}{{\rho_i}^2})\nabla W(r_{ij}, h_j) \label{eq:calc_pressure} \tag{9}\] Gdzie ${\nabla}$W to piersza pochoda funkcji wygładzającej po odległości.
+			
+			\subsubsection{Lepkość}
+			Oprócz oczywistego wzoru na lepkość wynikającego bezpośrednio z (\ref{eq:navier-stokes}) istnieje wiele innych modeli lepkości \cite{Boryczko}.
+						
+			W naszym projekcie wykorzystaliśmy model Monaghana ponieważ dawał zadowalające wyniki i był najmniej złożony obliczeniowo. Składnik ten wyrażony jest wzorem:
+			
+			\[{\Pi}_{ij} = \frac{-\alpha \mu_{ij} c_{ij} + \beta\mu_{ij}^2}{\rho_{ij}} \label{eq:viscosity_term} \tag{10}\]
+	
+			gdzie $\alpha$ i $\beta$ są parametrami modelu, a ich wartość zależy od oczekiwanych właściwości symulowanego płynu, $c_{ij} = (c_i + c_j) / 2$ (gdzie $c_i = (\gamma p_i / \rho_i)^\frac{1}{2}$ to prędkość dźwięku w miejscu $r_i$) oraz:
+			
+			\[{\mu}_{ij} = \left\{
+				\begin{array}{l l}
+					\frac{(v_i - v_j)\cdot(r_i - r_j)}{h_{ij}(||r_i - r_j||^2 / h_{ij}^2 + \eta^2)} & \quad if{(v_i - v_j)\cdot(r_i - r_j) < 0}  \\ 0 & \quad if{(v_i - v_j)\cdot(r_i - r_j) \geq 0} 
+				\end{array} \right.\ \label{eq:mu_factor} \tag{11}\]
+				
+			Promień wygładzania obliczyć można jako $h_{ij} = (h_i + h_j)/2$, jednakże w naszym przypadku jest on zawsze stały, więc $h_{ij}$ zamienić można na $h$. Ta postać modelu lepkości jest kombinacją tzw. lepkości bulk (liniowa względem $\mu_{ij}$) oraz lepkości von Neumanna-Richtmeyera (kwadratowo zależna od $\mu_{ij}$). Lepkość von Neumanna-Richtmeyera zaproponowana została do symulacji uderzeń w celu zapobiegnięcia zjawisku przenikania się cząstek. 
+			
+
+			Jak wykazano w \cite{Lombardi}, wyniki najbliższe rzeczywistości można uzyskać przyjmując $\alpha \approx 0.5, \beta \approx 1.0$ oraz $\eta \approx 0.1$
+
+\section{Cele projektu}
+\label{sec:cele}
+
+Bardzo ciężko jest znaleźć w internecie poprawną implementację metody SPH wraz z wizualizacją, działającą w czasie rzeczywistym. W technologii OpenCL, na którą się zdecydowaliśmy, taka implementacja po prostu nie istnieje (lub nam nie udało się jej znaleźć). Rozwój algorytmów opartych o GPGPU jest rzeczą widoczną od stosunkowo niedawna, więc projekt ten jest pracą na swój sposób pionierską mającą pokazać zasadność skorzystania z tej techniki w symulacjach.
+		
+	Po konsultacji z opiekunem główne założenia projektu zostały określone następująco:
+	
+	\begin{itemize}
+	
+		\item Przeprowadzenie wszystkich obliczeń wymaganych do ostatecznego zasymulowania zachowania płynu metodą SPH na wielordzeniowej architekturze przy użyciu zestawu narzędzi OpenCL lub CUDA (zdecydowaliśmy się na OpenCL)
+				
+		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najlepszego stosunku jakości do płynności animacji (przyjęto, że $\sim 30$ klatek na sekundę jest ograniczeniem dolnym w kwestii płynności animacji)
+		
+		\item Graficzna prezentacja wyników w czasie rzeczywistym
+	
+		\item Stworzenie dokumentacji, która będzie zawierała nasze przemyślenia odnośnie tworzonego produktu w celu umożliwienia potencjanemu użytkownikowi rozwoju oprogramowania w przyszłości.
+		
+	\end{itemize}
+	
+\section{Zakres funkcjonalności}
+	
+	Docelowym produktem jest interaktywna aplikacja graficzna wyświetlająca symulację przerwania tamy. Symulacja cieczy powinna spełniać wszystkie cele określone w sekcji \ref{sec:cele}.
+	
+		Ponadto aplikacja powinna umożliwiać poruszanie się po wirtualnym świecie, dobieranie parametrów symulacji takich jak lepkość czy gęstość cieczy oraz restartowanie symulacji.
+	
+\section{Opis wykorzystanych technologii}
+	\subsection{OpenCL}
+\begin{tabular}{| p{\dimexpr 0.25\linewidth-2\tabcolsep} | p{\dimexpr 0.75\linewidth-2\tabcolsep} |}
+		\hline
+			OpenCL & Szeroki opis znajduje się w sekcji 1. \\
+		\hline
+			OpenGL &  Jest to specyfikacja otwartego i uniwersalnego API do tworzenia grafiki. Ciekawym resultatem uniwersalności bibliotek typu OpenGL i OpenCL jest to, że de facto OpenCL i OpenGL same w sobie są jedynie specyfikacjami API a nie implementacjami. W gestii producentów leży implementacja danego API na dostarczane urządzenie.\\
+		\hline
+			CLPP &  Jest to ogólnodostępna biblioteka do sortowania z wykorzystaniem OpenCL. Wykorzystaliśmy ją w projekcie ponieważ sortowanie było kluczowym elementem algorytmu, a clpp oferowało wysoce zoptymalizowaną, w stosunku do naszej, implementację radix sorta działająca na GPU.\\
+		\hline
+			GLFW &  Jest to jedna z najlżejszych wieloplatformowych bibliotek do tworzenia i obsługi okien, dostępnych w C++. W naszym projekcie klasy Window i InputManager są wrapperami na funkcjonalności GLFW. Ma ona tę wadę, że nie umożliwia łatwego wyświetlania tekstu czy prostych obiektów geometrycznych w oknie tak jak konkurencyjne biblioteki SFML, SDL czy FreeGLUT. Niemniej jednak do celów naszej aplikacji była wystarczająca. \\
+		\hline
+			Boost.Signals2 &  Biblioteka boost jest przez wielu uważana za drugi standard C++, oczywiśćie po libstdc++. Boost.Signals2 udostępnia funkcjonalność sygnałów i slotów, zbliżoną na przykład do systemu eventów w językach takich jak C\#. Została ona wykorzystana do stworzenia globalnego systemu zdarzeń, dzięki któremu trywialnym stało się pisanie mapowania działań użytkownika na funkcje wewnątrz programu. \\
+		\hline	
+\end{tabular}
+
+\section{Opis realizacji}
+\section{Organizacja pracy}
+\section{Wyniki projektu}
+\bibliography{bibliografia}
+
+
+
+\end{document}
+

@@ -46,14 +46,14 @@
 	
 	W przetwarzaniu heterogenicznym kluczową cechą w projektowaniu algorytmów jest wiedza na temat architektury urządzenia docelowego. Wiedza ta umożliwia nam odpowiednie dobieranie algorytmów w zależności od możliwości sprzętowych platformy. OpenCL definiuje abstrakcję urządzenia skłądającą się z hosta podłączonego do jednego lub więcej urządzeń typu CPU, GPU czy DSP.
 	
-	Każde urządzenie OpenCL składa się z jednego lub więcej elementów obliczeniowych (ang. compute unit), które się dalej dzielą na elementy przetwarzające (ang. processing unit). Obliczenia na urządzeniu są wykonywane przez elementy przetwarzające dla elementów roboczych (ang. work item) będących częścią modelu wykonywania. Ten prosty model znakomicie się mapuje na większość dostępnych na rynku urządzeń.
+	Każde urządzenie OpenCL składa się z jednego lub więcej elementów obliczeniowych (ang. compute unit), które się dalej dzielą na elementy przetwarzające (ang. processing element) (rys. \ref{fig:model}). Obliczenia na urządzeniu są wykonywane przez elementy przetwarzające dla elementów roboczych (ang. work item) będących częścią modelu wykonywania. Ten prosty model mapuje się z na większość dostępnych na rynku urządzeń.
 	
 	
 	\begin{figure}[h!]
     \centering
     \includegraphics[width=0.8\textwidth]{PlatformModel.jpg}
     \caption{Model urządzenia}
-    \label{fig:awesome_image}
+    \label{fig:model}
 	\end{figure}
 	
 	\subsection{Model wykonywania}
@@ -68,7 +68,7 @@
 	\end{itemize}
 	
 	\subsubsection{Uruchamianie jąder}
-	Uruchamianie jąder polega na wywołaniu odpowiedniej funkcji po stronie hosta, która kolejkuje jądro w kolejce wykonywania. Przy wywoływaniu funkcji należy wyspecyfikować jak pogrupowane w grupy robocze (ang. work group) będą jądra przy wykonywaniu, poprzez zdefiniowane N-wymiarowego zakresu (ang. NDRange), gdzie N jest nie mniejsze niż 1 i nie większe niż 3. Każdemy jądru przy instancjowaniu przypisane zostaje N indeksów. Instancja jądra jest nazywana elementem roboczym (ang. work item). Każda instancja jądra jest świadoma takich swoich parametrów jak globalny identyfikator, lokalny identyfikator czy identyfikator grupy lokalnej.
+	Uruchamianie jąder polega na wywołaniu odpowiedniej funkcji po stronie hosta, która kolejkuje jądro w kolejce wykonywania. Przy wywoływaniu funkcji należy wyspecyfikować jak pogrupowane w grupy robocze (ang. work group) będą jądra przy wykonywaniu, poprzez zdefiniowane N-wymiarowego zakresu (ang. NDRange), gdzie N jest nie mniejsze niż 1 i nie większe niż 3 (rys \ref{fig:ndrange_examples}). Każdemy jądru przy instancjowaniu przypisane zostaje N indeksów. Instancja jądra jest nazywana elementem roboczym (ang. work item). Każda instancja jądra jest świadoma takich swoich parametrów jak globalny identyfikator, lokalny identyfikator czy identyfikator grupy lokalnej (rys \ref{fig:ndrange_numbering}).
 	
 	
 	\begin{figure}
