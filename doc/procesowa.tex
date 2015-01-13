@@ -47,8 +47,6 @@
 		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najpłynniejszej animacji uzyskanych wyników (przyjęto, że $\sim 30$ klatek na sekundę jest wystarczającym osiągnięciem)
 		
 		\item Graficzna prezentacja wyników w czasie rzeczywistym
-	
-		\item Stworzenie dokumentacji, która będzie zawierała nasze przemyślenia odnośnie tworzonego produktu w celu umożliwienia potencjanemu użytkownikowi rozwoju oprogramowania w przyszłości.
 		
 	\end{itemize}
 	
@@ -97,6 +95,7 @@
 		
 			\item Implementacja projektu w środowisku wieloplatformowym (rozwijanie równolegle w systemach Windows 8.1 oraz Linux Mint) z wykorzystaniem CMake.
 			\item Zrównoleglenie możliwie jak największej ilości obliczeń
+			\item Stworzenie dokumentacji, która będzie zawierała nasze przemyślenia odnośnie tworzonego produktu w celu umożliwienia potencjalnemu użytkownikowi rozwoju oprogramowania w przyszłości.
 		
 		\end{itemize}
 
@@ -121,7 +120,9 @@
 			\begin{itemize}
 			
 				\item ogólny plan spotkań oraz określenie milestone'ów (3-4 milestone'y)
-				\item przeplatane spotkania z klientem i managerem
+				\item spotkania będą odbywać się co dwa tygodnie we wtorki
+				\item przeplatane spotkania z klientem i prowadzącym PP
+				\item na spotkaniach wystarczy obecność jednej osoby zaangażowanej w tworzenie projektu na raz
 				\item pierwszy milestone na prototyp, zapoznanie się z technologią, na zakończenie prezentacja wyników dotychczasowej pracy
 				\item dokumentacja powinna być rozwijana wraz z implementacją
 				\item do opracowania krótka wizja projektu, ma być umieszczona w Confluence
@@ -130,7 +131,7 @@
 		
 		\subsubsection*{20.03.2014 - Spotkanie z klientem (inicjujące)}
 		
-				Na pierwszym spotkaniu z klientem została nam zaprezentowany ogólny zarys problemu:
+			Na pierwszym spotkaniu z klientem została nam zaprezentowany ogólny zarys problemu:
 				
 			\begin{itemize}
 			
@@ -145,9 +146,67 @@
 				
 				\end{itemize}
 				\item problemem jest to, że liczenie oddziaływań dla każdej cząstki na podstawie wszystkich pozostałych jest zbyt kosztowne, dlatego też głównym założeniem metody SPH jest wprowadzenie promienia wygładzającego, wszystkie cząstki znajdujące się dalej niż promień wygładzania mają zerowy wpływ na rozpatrywaną cząstkę
-				\item żeby nie sprawdzać odległości wszystkich cząstek wybiera się tylko $k$ najbliższych 
+				\item żeby nie sprawdzać odległości wszystkich cząstek wybiera się tylko $k$ najbliższych sąsiadów, wyznaczanych przy użyciu algorytmu heurystycznego
+				\item dla przestrzeni jedno, dwu i trójwymiarowych wyznaczono optymalną ilość sąsiadów potrzebnych do uzyskania możliwie najrzeczywistszych rezultatów, w naszym przypadku (przestrzeń trójwymiarowa) jest to 55
 			
 			\end{itemize}
+		
+		\subsubsection*{08.04.2014 - Spotkanie z prowadzącym pracownię projektową}
+		
+			W trakcie spotkania przedstawiliśmy wizję projektu oraz wstępne decyzje jakie podjęliśmy w sprawie technologii jakich zamierzamy użyć w projekcie.
+			
+			\begin{itemize}
+			
+				\item przedstawiliśmy na czym polega metoda SPH
+				\item krótkie uwagi odnośnie wizji projektu, ukierunkowanie na tematy, które powinniśmy dogłębniej zbadać
+					\begin{itemize}
+						\item powinniśmy jak najszybciej stworzyć działający prototyp, aby mając odniesienie do całości problematyki projektu móc zacząć tworzyć projekt finalny
+						\item jak wyobrażamy sobie strukturę projektu
+						\item co jest najistotniejsze przy realizacji, co można odłożyć na później, co nie jest niezbędne
+					\end{itemize}
+				\item powody dla których wybraliśmy OpenCL zamiast CUDA
+					\begin{itemize}
+						
+						\item szersze spektrum sprzętu na którym możliwy jest rozwój oprogramowania
+						\item mniejsze zaplecze gotowych rozwiązań, przez co większy stopień pionierskości projektu
+						
+					\end{itemize}
+			
+			\end{itemize}
+			
+		\subsubsection*{15.05.2014 - Spotkanie z klientem}
+		
+			Po zapoznaniu się z dokumentami teoretycznymi dotyczącymi SPH, które otrzymaliśmy od klienta, spotkaliśmy się z klientem aby wyjaśnić powstałe dotychczas wątpliwości oraz przedstawić nasze przemyślenia dotyczące realizacji pracy i dotychczasowe rezultaty.
+			
+			\begin{itemize}
+			
+				\item zaproponowane sposoby wyznaczania sąsiadów
+				
+					\begin{itemize}
+					
+						\item naiwne sprawdzanie odległości wszystkich pozostałych cząstek aż do znalezienia wymaganej liczby sąsiadów (rozwiązanie najmniej optymalne, jednakże łatwe do implementacji i przydatne w fazie prototypowania oraz do porównywania z lepszymi metodami)
+						\item podzielenie pudła obliczeniowego na mniejsze sześciany o takiej samej długości boku, mapowanie położenia cząstki na odpowiedni sześcian, a następnie szukanie sąsiadów jedynie w sześcianach bezpośrednio przyległych do rogu sześcianu, w którym znajduje się cząstka (8 sześcianów)
+						\item podzielenie cząstek przy pomocy struktury danych oct-tree, podobne rozwiązanie do poprzedniego, jednakże umożliwia podanie oczekiwanej ilości cząstek w jednym węźle struktury oraz pozwala na symulację płynu poza pudłem obliczeniowym
+					
+					\end{itemize}
+					
+				\item prezentacja dotychczasowych rezultatów:
+				
+					\begin{itemize}
+					
+						\item wstępny, działający moduł graficzny aplikacji, umożliwiający wszystkie transformacje kamery w przestrzeni trójwymiarowej
+						\item możliwość ładowania modeli i umieszczania ich w przestrzeni, przydatne m.in. do stworzenia otoczenia w jakim będzie przeprowadzana symulacja (podłoże, wizualizacja pudła obliczeniowego)
+						\item prototyp modułu obliczeniowego, zawierający inicjalizację OpenCL oraz demonstracyjne przekształcenia położeń cząstek
+					
+					\end{itemize}
+			
+			\end{itemize}
+		
+		\subsubsection*{08.10.2014 - Spotkanie z klientem}
+		
+		\subsubsection*{02.12.2014 - Spotkanie z klientem}
+			
+		\subsubsection*{05.01.2015 - Spotkanie z prowadzącym pracownię projektową}
 
 \section{Podsumowanie}
 
