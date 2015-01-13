@@ -25,20 +25,7 @@
 
 \section{Wizja projektu}
 
-	\subsection{Cel projektu}
-	
-	Przed rozpoczęciem badań i prac nad projektem, po konsultacji z opiekunem główne założenia projektu zostały określone następująco:
-	
-	\begin{itemize}
-	
-		\item Przeprowadzenie wszystkich obliczeń wymaganych do ostatecznego zasymulowania zachowania płynu na wielordzeniowej architekturze przy użyciu zestawu narzędzi OpenCL lub CUDA
-		
-		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najpłynniejszej animacji uzyskanych wyników (przyjęto, że $\sim 30$ klatek na sekundę jest wystarczającym osiągnięciem)
-		
-		\item Graficzna prezentacja wyników w czasie rzeczywistym
-	
-	\end{itemize}
-	
+
 	\subsection{Opis problemu}
 	
 	Symulacja zjawisk fizycznych przy użyciu komputerów możliwa jest jedynie z taką dokładnością na jaką pozwala nam moc obliczeniowa maszyny. W wielu przypadkach jednak dokładność numeryczna nie jest kluczowym kryterium, za to tym co tak naprawdę chce się uzyskać jest dokładność wizualna. Dlatego też przy wizualizacji symulacji modeli fizycznych stosuje się uproszczenia mające na celu naśladowanie poprawnych wyników pod względem wyglądu. W przypadku symulacji zachowania płynów nie jest możliwa wizualizacja wyników w czasie wykonywania obliczeń, gdy obliczenia uwzględniają wszystkie oddziaływania pomiędzy elementami modelu fizycznego. Konieczna jest zatem dyskretyzacja problemu oraz przyjęcie uproszczonych zjawisk lub zastąpienie ich prostszymi rozwiązaniami aproksymującymi ich zachowania. Takim podejściem jest właśnie metoda SPH, będąca uproszczeniem praw hydrodynamiki opisanym przez równania Naviera-Stokesa.
@@ -47,7 +34,24 @@
 	
 	Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym. Zwłaszcza gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, coraz popularniejsze staje się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. Sprawdzenie wyników realizacji obliczeń metody SPH w ten właśnie sposób jest jednym z głównych założeń naszej pracy.
 	
-	\clearpage	
+	\subsection{Cele projektu}
+	
+	Bardzo ciężko jest znaleźć w internecie działającą w czasie rzeczywistym implementację metody SPH wraz z wizualizacją. W technologii OpenCL, na którą się zdecydowaliśmy, taka implementacja (działająca) po prostu nie istnieje (lub nam nie udało się jej znaleźć). Rozwój algorytmów opartych o GPGPU jest rzeczą widoczną od stosunkowo niedawna, więc projekt ten jest pracą na swój sposób pionierską mającą pokazać zasadność skorzystania z tej techniki w symulacjach.
+		
+	Po konsultacji z opiekunem główne założenia projektu zostały określone następująco:
+	
+	\begin{itemize}
+	
+		\item Przeprowadzenie wszystkich obliczeń wymaganych do ostatecznego zasymulowania zachowania płynu metodą SPH na wielordzeniowej architekturze przy użyciu zestawu narzędzi OpenCL lub CUDA
+				
+		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najpłynniejszej animacji uzyskanych wyników (przyjęto, że $\sim 30$ klatek na sekundę jest wystarczającym osiągnięciem)
+		
+		\item Graficzna prezentacja wyników w czasie rzeczywistym
+	
+		\item Stworzenie dokumentacji, która będzie zawierała nasze przemyślenia odnośnie tworzonego produktu w celu umożliwienia potencjanemu użytkownikowi rozwoju oprogramowania w przyszłości.
+		
+	\end{itemize}
+	
 	
 	\subsection{Opis użytkownika}
 	
@@ -237,7 +241,7 @@
 			
 			\item implementacja kerneli związanych z wyszukiwaniem sąsiadów
 			
-			\item zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemie Linux Mint
+			\item zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemach z rodziny debian (Linux Mint, Ubuntu).
 		
 		\end{itemize}
 		
