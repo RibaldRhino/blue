@@ -69,7 +69,7 @@
 		
 		\begin{itemize}
 		
-			\item Moduł obliczeniowy
+			\item Moduł obliczeniowy:
 			
 			\begin{itemize}
 			
@@ -78,16 +78,16 @@
 			
 			\end{itemize}						
 			
-			\item Moduł graficzny
+			\item Moduł graficzny:
 			
 			\begin{itemize}
 			
-				\item Możliwość przejrzystego zaprezentowania pudła obliczeniowego (pudło oraz jego zawartość muszą być obserwowalne w trzech wymiarach przestrzennych)
-				\item Możliwość poruszania kamerą (obracanie i przemieszczanie w przestrzeni trójwymiarowej)
-				\item Wyświetlanie obecnej konfiguracji modelu (parametrów obliczeniowych) oraz informacji pomocniczych wyliczanych w trakcie wykonywania obliczeń poprzez graficzny interfejs użytkownika
-				\item Wyświetlanie obszarów płynu w postaci sfer w możliwie najoptymalniejszy sposób, by duża ilość cząstek nie powodowała dużego narzutu obliczeniowego związanego z wyświetlaniem dużej ilości poligonów
-				\item Możliwość dostosowywania wartości parametrów modelu w trakcie działania aplikacji poprzez wejście z klawiatury w celu dobrania najbardziej realistycznie wyglądającej konfiguracji
-				\item Osiągnięcie płynnej animacji wyników obliczeń na poziomie przynajmniej $\sim30$ klatek na sekundę
+				\item Możliwość przejrzystego zaprezentowania pudła obliczeniowego (pudło oraz jego zawartość muszą być obserwowalne w trzech wymiarach przestrzennych).
+				\item Możliwość poruszania kamerą (obracanie i przemieszczanie w przestrzeni trójwymiarowej).
+				\item Wyświetlanie obecnej konfiguracji modelu (parametrów obliczeniowych) oraz informacji pomocniczych wyliczanych w trakcie wykonywania obliczeń poprzez graficzny interfejs użytkownika.
+				\item Wyświetlanie obszarów płynu w postaci sfer w możliwie najoptymalniejszy sposób, by duża ilość cząstek nie powodowała dużego narzutu obliczeniowego związanego z wyświetlaniem dużej ilości poligonów.
+				\item Możliwość dostosowywania wartości parametrów modelu w trakcie działania aplikacji poprzez wejście z klawiatury w celu dobrania najbardziej realistycznie wyglądającej konfiguracji.
+				\item Osiągnięcie płynnej animacji wyników obliczeń na poziomie przynajmniej $\sim30$ klatek na sekundę.
 			
 			\end{itemize}	
 		
@@ -123,13 +123,13 @@
 		
 			\begin{itemize}
 			
-				\item ogólny plan spotkań oraz określenie milestone'ów (3-4 milestone'y)
-				\item spotkania będą odbywać się co dwa tygodnie we wtorki
-				\item przeplatane spotkania z klientem i prowadzącym PP
-				\item na spotkaniach wystarczy obecność jednej osoby zaangażowanej w tworzenie projektu na raz
-				\item pierwszy milestone na prototyp, zapoznanie się z technologią, na zakończenie prezentacja wyników dotychczasowej pracy
-				\item dokumentacja powinna być rozwijana wraz z implementacją
-				\item do opracowania krótka wizja projektu, ma być umieszczona w Confluence
+				\item Ogólny plan spotkań oraz określenie milestone'ów (3-4 milestone'y).
+				\item Spotkania będą odbywać się co dwa tygodnie we wtorki.
+				\item Przeplatane spotkania z klientem i prowadzącym PP.
+				\item Na spotkaniach wystarczy obecność jednej osoby zaangażowanej w tworzenie projektu na raz.
+				\item Pierwszy milestone na prototyp, zapoznanie się z technologią, na zakończenie prezentacja wyników dotychczasowej pracy.
+				\item Dokumentacja powinna być rozwijana wraz z implementacją.
+				\item Do opracowania krótka wizja projektu, ma być umieszczona w Confluence.
 						
 			\end{itemize}
 		
@@ -139,19 +139,19 @@
 				
 			\begin{itemize}
 			
-				\item klient jest już w posiadaniu aplikacji symulującej cząstki metodą SPH, jednak problem jest rozwiązywany sekwencyjnie i jedynie generuje wyniki do post-renderowania
-				\item całość obliczeń zamyka się w czterech etapach:
+				\item Klient jest już w posiadaniu aplikacji symulującej cząstki metodą SPH, jednak problem jest rozwiązywany sekwencyjnie i jedynie generuje wyniki do post-renderowania.
+				\item Całość obliczeń zamyka się w czterech etapach:
 				\begin{itemize}
 				
-					\item obliczenie gęstości dla każdego obszaru
-					\item obliczenie różnicy ciśnień dla każdego obszaru
-					\item obliczenie przyspieszenia dla każdego obszaru
-					\item interpolacja prędkości i położenia w kroku czasowym dla każdego obszaru
+					\item Obliczenie gęstości dla każdego obszaru.
+					\item Obliczenie różnicy ciśnień dla każdego obszaru.
+					\item Obliczenie przyspieszenia dla każdego obszaru.
+					\item Interpolacja prędkości i położenia w kroku czasowym dla każdego obszaru.
 				
 				\end{itemize}
-				\item problemem jest to, że liczenie oddziaływań dla każdej cząstki na podstawie wszystkich pozostałych jest zbyt kosztowne, dlatego też głównym założeniem metody SPH jest wprowadzenie promienia wygładzającego, wszystkie cząstki znajdujące się dalej niż promień wygładzania mają zerowy wpływ na rozpatrywaną cząstkę
-				\item żeby nie sprawdzać odległości wszystkich cząstek wybiera się tylko $k$ najbliższych sąsiadów, wyznaczanych przy użyciu algorytmu heurystycznego
-				\item dla przestrzeni jedno, dwu i trójwymiarowych wyznaczono optymalną ilość sąsiadów potrzebnych do uzyskania możliwie najrzeczywistszych rezultatów, w naszym przypadku (przestrzeń trójwymiarowa) jest to 55
+				\item Problemem jest to, że liczenie oddziaływań dla każdej cząstki na podstawie wszystkich pozostałych jest zbyt kosztowne, dlatego też głównym założeniem metody SPH jest wprowadzenie promienia wygładzającego, wszystkie cząstki znajdujące się dalej niż promień wygładzania mają zerowy wpływ na rozpatrywaną cząstkę.
+				\item Żeby nie sprawdzać odległości wszystkich cząstek wybiera się tylko $k$ najbliższych sąsiadów, wyznaczanych przy użyciu algorytmu heurystycznego.
+				\item Dla przestrzeni jedno, dwu i trójwymiarowych wyznaczono optymalną ilość sąsiadów potrzebnych do uzyskania możliwie najrzeczywistszych rezultatów, w naszym przypadku (przestrzeń trójwymiarowa) jest to 55.
 			
 			\end{itemize}
 		
@@ -161,18 +161,18 @@
 			
 			\begin{itemize}
 			
-				\item przedstawiliśmy na czym polega metoda SPH
-				\item krótkie uwagi odnośnie wizji projektu, ukierunkowanie na tematy, które powinniśmy dogłębniej zbadać
+				\item Przedstawiliśmy na czym polega metoda SPH.
+				\item Krótkie uwagi odnośnie wizji projektu, ukierunkowanie na tematy, które powinniśmy dogłębniej zbadać.
 					\begin{itemize}
-						\item powinniśmy jak najszybciej stworzyć działający prototyp, aby mając odniesienie do całości problematyki projektu móc zacząć tworzyć projekt finalny
-						\item jak wyobrażamy sobie strukturę projektu
-						\item co jest najistotniejsze przy realizacji, co można odłożyć na później, co nie jest niezbędne
+						\item Powinniśmy jak najszybciej stworzyć działający prototyp, aby mając odniesienie do całości problematyki projektu móc zacząć tworzyć projekt finalny.
+						\item Jak wyobrażamy sobie strukturę projektu.
+						\item Co jest najistotniejsze przy realizacji, co można odłożyć na później, co nie jest niezbędne.
 					\end{itemize}
-				\item powody dla których wybraliśmy OpenCL zamiast CUDA
+				\item Powody dla których wybraliśmy OpenCL zamiast CUDA:
 					\begin{itemize}
 						
-						\item szersze spektrum sprzętu na którym możliwy jest rozwój oprogramowania
-						\item mniejsze zaplecze gotowych rozwiązań, przez co większy stopień pionierskości projektu
+						\item Szersze spektrum sprzętu na którym możliwy jest rozwój oprogramowania.
+						\item Mniejsze zaplecze gotowych rozwiązań, przez co większy stopień pionierskości projektu.
 						
 					\end{itemize}
 			
@@ -184,23 +184,23 @@
 			
 			\begin{itemize}
 			
-				\item zaproponowane sposoby wyznaczania sąsiadów
+				\item Zaproponowane sposoby wyznaczania sąsiadów:
 				
 					\begin{itemize}
 					
-						\item naiwne sprawdzanie odległości wszystkich pozostałych cząstek aż do znalezienia wymaganej liczby sąsiadów (rozwiązanie najmniej optymalne, jednakże łatwe do implementacji i przydatne w fazie prototypowania oraz do porównywania z lepszymi metodami)
-						\item podzielenie pudła obliczeniowego na mniejsze sześciany o takiej samej długości boku, mapowanie położenia cząstki na odpowiedni sześcian, a następnie szukanie sąsiadów jedynie w sześcianach bezpośrednio przyległych do rogu sześcianu, w którym znajduje się cząstka (8 sześcianów)
-						\item podzielenie cząstek przy pomocy struktury danych oct-tree, podobne rozwiązanie do poprzedniego, jednakże umożliwia podanie oczekiwanej ilości cząstek w jednym węźle struktury oraz pozwala na symulację płynu poza pudłem obliczeniowym
+						\item Naiwne sprawdzanie odległości wszystkich pozostałych cząstek aż do znalezienia wymaganej liczby sąsiadów (rozwiązanie najmniej optymalne, jednakże łatwe do implementacji i przydatne w fazie prototypowania oraz do porównywania z lepszymi metodami).
+						\item Podzielenie pudła obliczeniowego na mniejsze sześciany o takiej samej długości boku, mapowanie położenia cząstki na odpowiedni sześcian, a następnie szukanie sąsiadów jedynie w sześcianach bezpośrednio przyległych do rogu sześcianu, w którym znajduje się cząstka (8 sześcianów).
+						\item Podzielenie cząstek przy pomocy struktury danych oct-tree, podobne rozwiązanie do poprzedniego, jednakże umożliwia podanie oczekiwanej ilości cząstek w jednym węźle struktury oraz pozwala na symulację płynu poza pudłem obliczeniowym.
 					
 					\end{itemize}
 					
-				\item prezentacja dotychczasowych rezultatów:
+				\item Prezentacja dotychczasowych rezultatów:
 				
 					\begin{itemize}
 					
-						\item wstępny, działający moduł graficzny aplikacji, umożliwiający wszystkie transformacje kamery w przestrzeni trójwymiarowej
-						\item możliwość ładowania modeli i umieszczania ich w przestrzeni, przydatne m.in. do stworzenia otoczenia w jakim będzie przeprowadzana symulacja (podłoże, wizualizacja pudła obliczeniowego)
-						\item prototyp modułu obliczeniowego, zawierający inicjalizację OpenCL oraz demonstracyjne przekształcenia położeń cząstek
+						\item Wstępny, działający moduł graficzny aplikacji, umożliwiający wszystkie transformacje kamery w przestrzeni trójwymiarowej.
+						\item Możliwość ładowania modeli i umieszczania ich w przestrzeni, przydatne m.in. do stworzenia otoczenia w jakim będzie przeprowadzana symulacja (podłoże, wizualizacja pudła obliczeniowego).
+						\item Prototyp modułu obliczeniowego, zawierający inicjalizację OpenCL oraz demonstracyjne przekształcenia położeń cząstek.
 					
 					\end{itemize}
 			
@@ -211,7 +211,7 @@
 			Spotkanie z klientem w celu pokazania postępu prac po wakacjach. 
 			
 			\begin{itemize}
-			\item Stanu projektu
+			\item Stan projektu:
 				\begin{itemize}
 					\item Istnieją błędy w implementacji przez które symulacja nie działała zgodnie z oczekiwaniami.
 					\item Usunięcie wizualizacji pudła obliczeniowego, ponieważ zmniejszało przejrzystość symulacji.
@@ -225,7 +225,7 @@
 			Spotkanie z klientem w celu pokazania w większości gotowej pracy.
 			
 			\begin{itemize}
-			\item Stanu projektu
+			\item Stan projektu:
 				\begin{itemize}
 					\item Symulacja przebiega w sposób zadowalający.
 					\item Model lepkości wymaga poprawy.
@@ -282,7 +282,7 @@
 			
 			\item Pair programming - metoda szczególnie pasująca do realizowanego projektu, gdyż był on rozwijany w zespole dwuosobowym.
 			
-			\item Wymieniona wcześniej metoda kanban
+			\item Wymieniona wcześniej metoda kanban.
 		
 		\end{itemize}
 		
@@ -312,44 +312,44 @@
 		
 		\begin{itemize}
 		
-			\item w ramach dokumentacji technicznej
+			\item W ramach dokumentacji technicznej:
 			
 				\begin{itemize}
 				
-					\item Opis OpenCL
-					\item Struktura projektu
-					\item Sposób implementacji metody SPH
-					\item Sposób implementacji wizualizacji metody SPH
-					\item Opis wykorzystanych zewnętrznych bibliotek
+					\item Opis OpenCL.
+					\item Struktura projektu.
+					\item Sposób implementacji metody SPH.
+					\item Sposób implementacji wizualizacji metody SPH.
+					\item Opis wykorzystanych zewnętrznych bibliotek.
 				
 				\end{itemize}
 			
-			\item w ramach dokumentacji procesowej
+			\item W ramach dokumentacji procesowej:
 			
 				\begin{itemize}
 				
-					\item Pomoc przy formułowaniu celów pracy
-					\item Zapisywanie minutek w trakcie spotkań
+					\item Pomoc przy formułowaniu celów pracy.
+					\item Zapisywanie minutek w trakcie spotkań.
 				
 				\end{itemize}
 			
-			\item w ramach dokumentacji użytkownika
+			\item W ramach dokumentacji użytkownika:
 			
 				\begin{itemize}
 				
-					\item Opis metody SPH - od wstępu do opisu funkcji wygładzających włącznie
+					\item Opis metody SPH - od wstępu do opisu funkcji wygładzających włącznie.
 					
-					\item GPGPU i OpenCL
+					\item GPGPU i OpenCL.
 					
-					\item Korzystanie z programu wraz z zrzutami ekranu
+					\item Korzystanie z programu wraz z zrzutami ekranu.
 				
 				\end{itemize}
 			
-			\item zaplanowanie oraz implementacja finalnej architektury systemu
+			\item Zaplanowanie oraz implementacja finalnej architektury systemu.
 			
-			\item implementacja kerneli związanych z wyszukiwaniem sąsiadów
+			\item Implementacja jąder związanych z wyszukiwaniem sąsiadów.
 			
-			\item zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemach z rodziny debian (Linux Mint, Ubuntu).
+			\item Zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemach z rodziny debian (Linux Mint, Ubuntu).
 		
 		\end{itemize}
 		
@@ -357,7 +357,7 @@
 		
 		\begin{itemize}
 			
-			\item w ramach dokumentacji procesowej
+			\item W ramach dokumentacji procesowej:
 			
 				\begin{itemize}
 				
@@ -365,27 +365,27 @@
 					
 					\item Dokumentacja przebiegu pracy, kamieni milowych, minutek.
 					
-					\item Sformułowanie podsumowania, określenie stopnia realizacji założeń i dalszych kierunków rozwoju, udokumentowanie użytych narzędzi oraz podziału prac
+					\item Sformułowanie podsumowania, określenie stopnia realizacji założeń i dalszych kierunków rozwoju, udokumentowanie użytych narzędzi oraz podziału prac.
 				
 				\end{itemize}
 			
-			\item w ramach dokumentacji użytkownika
+			\item W ramach dokumentacji użytkownika:
 			
 				\begin{itemize}
 				
-					\item Opis metody SPH - część wzorów użytkowych, 
+					\item Opis metody SPH - część wzorów użytkowych.
 					
-					\item GPGPU i OpenCL
+					\item GPGPU i OpenCL.
 				
 				\end{itemize}
 			
-			\item stworzenie prototypu modułu graficznego i obliczeniowego
+			\item Stworzenie prototypu modułu graficznego i obliczeniowego.
 			
-			\item wsparcie przy implementacji finalnej architektury systemu
+			\item Wsparcie przy implementacji finalnej architektury systemu.
 			
-			\item implementacja kerneli związanych z zarządzaniem danymi oraz kerneli realizujących obliczenia metody SPH
+			\item Implementacja kerneli związanych z zarządzaniem danymi oraz kerneli realizujących obliczenia metody SPH.
 					
-			\item zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemie Windows 8.1
+			\item Zarządzanie plikami CMake w celu zapewnienia poprawnej kompilacji i linkowania aplikacji w systemie Windows 8.1.
 		
 		\end{itemize}
 		
