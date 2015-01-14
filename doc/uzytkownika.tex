@@ -129,10 +129,10 @@
 			GPGPU (ang. General-Purpouse computing on Graphics Processor Units) to technika cechująca się wykorzystaniem GPU, które przeważnie zajmują się obliczeniami związanymi z grafiką komputerową, do dowolnych innych obliczeń. Technika ta znajduje zastosowanie głównie w obliczeniach równoległych ze względu na wykorzystanie w nowoczesnych kartach graficznych architektury SIMD (Single Instruction Multiple Data) i modelu wykonywania SIMT (Single Instruction Multiple Threads). GPU są obecnie zdolne wykonywać nawet tysiące wątków jednocześnie co sprawia, że znacząco lepiej radzą sobie z algorytmami równoległymi niż przeciętne CPU. 
 			
 
-			Obecnie najczęściej stosowanymi bibliotekami GPGPU są otwarty standard OpenCL i własnościowy standard Nvidii CUDA.
+			Obecnie najczęściej stosowanymi rozwiązaniami GPGPU są otwarty standard OpenCL i własnościowy standard Nvidii CUDA.
 		
 		\subsection{OpenCL}
-			W naszej pracy postanowiliśmy wykorzystać bibliotekę OpenCL ze względu na to, że jest głównym otwartym standardem w dziedzinie GPGPU. Napisana przez organizację non-profit Khronos Group stanowi główną konkurencję dla własnościowej technologii CUDA. Jej główną zaletą w stosunku do CUDA jest to, że może być używany na wielu różnych urządzeniach - niekoniecznie tylko na GPU. Wadą okazuje się konieczność implementacji interfejsów programistycznych przez poszczególnych dostawców urządzeń, co wiąże się z rozbieżnością standardów pomiędzy różnymi środowiskami sprzętowymi oraz ewentualnymi brakami ich najaktualniejszych wersji. Szczególnie opieszałą w kwestii rozwoju biblioteki jest firma Nvidia, dla której produktu OpenCL jest godną uwagi alternatywą.	
+			W naszej pracy postanowiliśmy wykorzystać OpenCL ze względu na to, że jest głównym otwartym standardem w dziedzinie GPGPU. Napisany przez organizację non-profit Khronos Group stanowi główną konkurencję dla własnościowej technologii Nvidii - CUDA. Jego główną zaletą w stosunku do CUDA jest to, że może być używany na wielu różnych urządzeniach - niekoniecznie tylko na GPU. Wadą natomiast jest to, że w celu umożliwienia działania na szerokiej gamie sprzętu, wprowadzono bardzo abstrakcyjne modele urządzenia, pamięci i wykonywania, do którego ciężko jest się początkowo przyzwyczaić. Szczególnie opieszałą w kwestii rozwoju OpenCL jest firma Nvidia, dla której ich własnościowa technologia CUDA jest priorytetem.	
 
 			Programowanie w OpenCL polega na pisaniu w OpenCL C (języku zbliżonym składniowo do C++99, z pewnymi rozszerzeniami umożliwiającymi łatwiejsze operowanie na wektorach i macierzach) funkcji zwanych jądrami, którym przekazujemy dane z hosta (CPU) które następnie są uruchamiane w olbrzymiej ilości wątków (najczęściej na GPU). Możemy w ten sposób wykonać zdefiniowane w jądrach operacje na różnych zbiorach danych równolegle. 
 			
@@ -146,7 +146,7 @@
 			OpenCL posłużył nam do implementacji wszystkich algorytmów składających się na metodę SPH. Ideą pracy była próba osiągnięcia maksymalnej wydajności, dzięki wykorzystaniu możliwości paralelizacji wykonywanych obliczeń. Przydatne były także techniki takie jak OpenCL/OpenGL interop, które umożliwiły ominięcie zauważalnie kosztownego kroku odczytu danych z pamięci karty graficznej do pamięci RAM przy wizualizacji, dzięki przechowywaniu wszystkich danych na karcie graficznej. W OpenCL zaimplementowaliśmy algorytmy takie jak sortowanie, wyszukiwanie sąsiadów, podział pudła obliczeniowego czy obliczenia związane z wzorami (\ref{eq:calc_density}), (\ref{eq:calc_state}), (\ref{eq:calc_pressure}). Pomimo iż wiele z nich można zrealizować na różne sposoby, to wciąż da się je sprowadzić do dużej ilości niezależnych obliczeń.
 			
 	\section{Wymagania sprzętowe i programistyczne}
-		W celu umożliwienia użycia biblioteki OpenCL wymagany jest kompatybilny hardware GPU lub CPU dostępny od producentów takich jak AMD, Intel, czy Nvidia. W przypadku korzystania z tego ostatniego możliwe jest też użycie zestawu narzędzi jaki oferuje CUDA.
+		W celu umożliwienia użycia OpenCL wymagany jest kompatybilny hardware GPU lub CPU dostępny od producentów takich jak AMD, Intel, czy Nvidia. W przypadku korzystania z tego ostatniego możliwe jest też użycie zestawu narzędzi jaki oferuje CUDA.
 		
 		Specyficznym aspektem OpenCL jest to, że to producent musi dostarczyć implementacji bibliotek. OpenCL sam w sobie jest tylko specyfikacją API. Różnice w API nie mają prawa wystąpić, ale czasami na danym sprzęcie jest możliwe uruchomienie dodatkowych funkcji.
 		
@@ -165,13 +165,13 @@
 		
 		Należy CMakeowi wskazać plik CMakeLists.txt w głównym katalogu naszego projektu oraz wskazać docelowe miejsce, w którym mają się wygenerować pliki do budowania (makefile, vcproj). CMake następnie spróbuje znaleźć wszystkie konieczne biblioteki oraz wygeneruje, zależnie od konfiguracji, odpowiedni typ projektu.
 		
-		 Jako, że CMake sam w sobie nie jest narzędziem które buduje projekt, a jedynie generatorem, należy później skorzystać z odpowiedniego kompilatora jak na przykład clang, g++, mingw, visual c++. Jedynym wymaganiem co do kompilatora jest wsparcie dla standardu C++11.
+		 Jako, że CMake sam w sobie nie jest narzędziem które buduje projekt, a jedynie generatorem, należy później skorzystać z odpowiedniego kompilatora jak na przykład clang, g++, mingw, visual c++. Jedynym wymaganiem z naszej strony co do kompilatora jest wsparcie dla standardu C++11.
 		 
 	\section{Korzystanie z programu}
 		Po uruchomieniu programu można się poruszać w wirtualnym świecie przy pomocy klawiszy WSAD oraz myszki (przytrzymując lewy przycisk). Kliknięcie w prawy przycisk myszy powoduje uruchomienie (a później zrestartowanie) symulacji.
 		Zrzuty z działania aplikacji są widoczne na (rys \ref{img:screen})
 		
-	\begin{figure}
+	\begin{figure}[h!]
 	\centering
 		\includegraphics[width=0.49\textwidth]{1.png}
 		\includegraphics[width=0.49\textwidth]{2.png}

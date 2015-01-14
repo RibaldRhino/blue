@@ -106,7 +106,7 @@
 			\subsubsection{Gęstość}
 			Z równania (\ref{eq:calc_all}) gęstość w dowolnym punkcie możemy obliczyć korzystając ze wzoru \[{\rho}_i=\sum_{j=1}^{N}m_jW(r_{ij},h_j) \label{eq:calc_density} \tag{8}\] 
 			\subsubsection{Równanie stanu}
-			Jako równanie stanu wykorzystaliśmy zaproponowaną przez Monaghana w [Monaghan J.J. Sph without a tensile instability. J. Comp. Phys., 159:290-311, 1999.] funkcję:
+			Jako równanie stanu wykorzystaliśmy zaproponowaną przez Monaghana w \cite{Monaghan} funkcję:
 			\[p_i(\rho)=\frac{\rho_0 c_0^2}{\gamma}[(\frac{\rho_i}{\rho_0})^{\gamma} - 1] \label{eq:calc_state} \tag{8}\]
 			gdzie ${c_0}$ to prędkość dźwięku przy zadanej gęstości ${\rho_0}$, a ${\gamma}$ ma wartość 7, dzięki czemu płyn jest odporny na ściskanie. $\rho_0$ jest gęstością spoczynkową układu, do której dążyć będą wszystkie obszary gęstości. Łatwo zauważyć iż dzięki podniesieniu ilorazu gęstości do wysokiej potęgi (wskazana wartość wyznaczona została jako optymalna) nawet małe odchylenia gęstości powodować będą duże różnice ciśnienia, co uodparnia układ na ściskanie.
 			
@@ -165,6 +165,8 @@ Bardzo ciężko jest znaleźć w internecie poprawną implementację metody SPH 
 \section{Opis wykorzystanych technologii}
 
 \subsection{OpenCL}
+			Zdecydowaliśmy się na wykorzystanie OpenCL ze względu na to, że jest głównym otwartym standardem w dziedzinie GPGPU. Napisany przez organizację non-profit Khronos Group stanowi główną konkurencję dla własnościowej technologii Nvidii - CUDA. Jej główną zaletą w stosunku do CUDA jest to, że może być używany na wielu różnych urządzeniach - niekoniecznie tylko na GPU. Wadą natomiast jest to, że w celu umożliwienia działania na szerokiej gamie sprzętu, wprowadzono bardzo abstrakcyjny model, do którego ciężko jest się początkowo przyzwyczaić. Szczególnie opieszałą w kwestii rozwoju OpenCL jest firma Nvidia, dla której ich własnościowa technologia CUDA jest priorytetem.	
+
 			Programowanie w OpenCL polega na pisaniu w OpenCL C (języku zbliżonym składniowo do C++99, z pewnymi rozszerzeniami umożliwiającymi łatwiejsze operowanie na wektorach i macierzach) funkcji zwanych jądrami, którym przekazujemy dane z hosta (CPU) które następnie są uruchamiane w olbrzymiej ilości wątków (najczęściej na GPU). Możemy w ten sposób wykonać zdefiniowane w kernelach operacje na różnych zbiorach danych równolegle. 
 			
 			Należy również z poziomu hosta dobrać odpowiednie parametry wywołania jąder. Jest to operacja bardzo bliska sprzętowi. Istnieje na przykład możliwość, że zły dobór parametrów zamiast uruchomić obliczenia na GPU spowoduje błąd. Należy brać to pod uwagę, szczególnie jeśli jednym z celów pisanej aplikacji jest wieloplatformowość.
@@ -391,7 +393,7 @@ Udało się stworzyć aplikację będącą PoC (Proof of Concept, ang. dowód ko
 			\item Możliwa jest dalsza optymalizacja obliczeń w celu uzyskania mniejszych wymagań ze strony sprzętu, co pozwoliłoby na zwiększenie dopuszczalnej ilości cząstek biorących udział w symulacji lub zwiększyłoby zakres sprzętu, na którym można przeprowadzić symulację. M.in. należałoby rozważyć które bloki instrukcji wykonywanych sekwencyjnie w kernelach OpenCL można zastąpić przez wykonanie ich za pomocą grup lokalnych.
 		\end{itemize}
 
-\nocite{OpenCLProgrammingGuide, GameCodingComplete, CLPP, SPHWebinar, Lucy, MonLat, Boryczko, Lombardi}
+\nocite{OpenCLProgrammingGuide, GameCodingComplete, CLPP, SPHWebinar, Lucy, MonLat, Boryczko, Lombardi, Monaghan}
 \bibliography{bibliografia}
 
 \end{document}
