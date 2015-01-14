@@ -170,9 +170,13 @@ Bardzo ciężko jest znaleźć w internecie poprawną implementację metody SPH 
 \section{Opis wykorzystanych technologii}
 
 \subsection{OpenCL}
+<<<<<<< HEAD
 			Zdecydowaliśmy się na wykorzystanie OpenCL ze względu na to, że jest głównym otwartym standardem w dziedzinie GPGPU. Napisany przez organizację non-profit Khronos Group stanowi główną konkurencję dla własnościowej technologii Nvidii - CUDA. Jej główną zaletą w stosunku do CUDA jest to, że może być używany na wielu różnych urządzeniach - niekoniecznie tylko na GPU. Wadą natomiast jest to, że w celu umożliwienia działania na szerokiej gamie sprzętu, wprowadzono bardzo abstrakcyjny model, do którego ciężko jest się początkowo przyzwyczaić. Szczególnie opieszałą w kwestii rozwoju OpenCL jest firma Nvidia, dla której ich własnościowa technologia CUDA jest priorytetem.	
 
+			Programowanie w OpenCL polega na pisaniu w OpenCL C (języku zbliżonym składniowo do C++99, z pewnymi rozszerzeniami umożliwiającymi łatwiejsze operowanie na wektorach i macierzach) funkcji zwanych jądrami, którym przekazujemy dane z hosta (CPU) które następnie są uruchamiane w olbrzymiej ilości wątków (najczęściej na GPU). Możemy w ten sposób wykonać zdefiniowane w kernelach operacje na różnych zbiorach danych równolegle. 
+=======
 			Programowanie w OpenCL polega na pisaniu w OpenCL C (języku zbliżonym składniowo do C++99, z pewnymi rozszerzeniami umożliwiającymi łatwiejsze operowanie na wektorach i macierzach) funkcji zwanych jądrami, którym przekazujemy dane z hosta (CPU) które następnie są uruchamiane w olbrzymiej ilości wątków (najczęściej na GPU). Możemy w ten sposób wykonać zdefiniowane w jądrach operacje na różnych zbiorach danych równolegle. 
+>>>>>>> 8626aff585018d9f5cfaae465bc208bb9d75b01f
 			
 			Należy również z poziomu hosta dobrać odpowiednie parametry wywołania jąder. Jest to operacja bardzo bliska sprzętowi. Istnieje na przykład możliwość, że zły dobór parametrów zamiast uruchomić obliczenia na GPU spowoduje błąd. Należy brać to pod uwagę, szczególnie jeśli jednym z celów pisanej aplikacji jest wieloplatformowość.
 			

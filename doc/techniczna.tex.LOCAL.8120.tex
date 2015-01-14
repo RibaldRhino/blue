@@ -61,10 +61,10 @@
 	\subsubsection{Zadania hosta}
 	Kluczowymi częściami modelu wykonywania OpenCL są aplikacja kliencka (uruchamiana na hoście) oraz jądra (ang. kernels), które sąuruchamiane na docelowym urządzeniu wspierającym OpenCL. Głównymi zadaniami hosta są:
 	\begin{itemize} 
-	\item Komunikacja z urządzeniem OpenCL.
-	\item Pytanie o dostępne zasoby i cechy urządzenia.
-	\item Tworzenie kontekstu (ang. context) (składającego. się m.in. z konkretnego urządzenia (na przykład GPU) na konkretnej platformie (na przykład AMD oraz kolejki wykonywania (and. command queue))
-	\item Budowanie jąder i zarządzanie ich uruchamianiem.
+	\item komunikacja z urządzeniem OpenCL
+	\item pytanie o dostępne zasoby i cechy urządzenia
+	\item tworzenie kontekstu (ang. context) (składającego się m.in. z konkretnego urządzenia (na przykład GPU) na konkretnej platformie (na przykład AMD oraz kolejki wykonywania (and. command queue))
+	\item budowanie jąder i zarządzanie ich uruchamianiem
 	\end{itemize}
 	
 	\subsubsection{Uruchamianie jąder}
@@ -165,7 +165,7 @@
 		Pisząc kod stosowaliśmy się do idiomu C++ RAII (Resource Acquisition Is Initialization). W całym kodzie słowo kluczowe delete praktycznie nie występuje ponieważ wszystkie zmienne są inicjalizowane w taki sposób, aby kiedy nie są potrzebne same się usuwały. Wykorzystujemy do tego takie dodatki w C++11 jak shared\_ptr, unique\_ptr czy std::array zamist zwykłych wskaźników i wskaźników na tablice. Korzystamy też z nowowprowadzonych lambd oraz słowa kluczowego auto.
 
 \section{Sposób implementacji metody SPH}
-Nasza implementacja metody SPH składa się z dziewięciu jąder i wykorzystujemy 10 globalnych buforów. Dodatkowo korzystamy z biblioteki clpp, która dostarcza nam optymalnych implementacji sortowań na kartę graficzną algorytmem Radix Sort.
+Nasza implementacja metody SPH składa się z 9 jąder i wykorzystujemy 10 globalnych buforów. Dodatkowo korzystamy z biblioteki clpp, która dostarcza nam optymalnych implementacji sortowań na kartę graficzną algorytmem Radix Sort.
 
 \noindent Przebieg algorytmu wygląda następująco:
 			\begin{enumerate}
@@ -562,7 +562,7 @@ Nasza implementacja metody SPH składa się z dziewięciu jąder i wykorzystujem
 				\hline
 					hash\_particles & Przypisanie cząstek do cel \\
 				\hline
-					clpp\_sort & Posortowanie mapowania z cząstki na celę aby zamieniło się w mapowanie celi na cząstkę\\
+					clpp\_sort & Posortowanie mapowania z czątki na celę aby zamieniło się w mapowanie celi na cząstkę\\
 				\hline
 					sort\_post\_pass & Przepisanie buforów position i velocity by były w kolejności posortowanej\\
 				\hline
@@ -618,17 +618,17 @@ Nasza implementacja metody SPH składa się z dziewięciu jąder i wykorzystujem
 
 \section{Sposób implementacji wizualizacji metody SPH}
 
-	Do implementacji wizualizacji metody SPH wykorzystaliśmy bibliotekę OpenGL. Zdecydowaliśmy się na nią, ponieważ alternatywny DirectX nie działałby na systemach unixowych, a zależało nam, aby nasza aplikacja była wieloplatformowa.
+	Do implementacji wizualizacji metody SPH wykorzystaliśmy bibliotekę OpenGL. Zdecydowaliśmy się na nią ponieważ alternatywny DirectX nie działałby na systemach unixowych, a zależało nam, aby nasza aplikacja była możliwie wieloplatformowa.
 	
 	\subsection{Podejście naiwne}
 		Początkowo, aby renderować ciecz, dla każdej cząstki rysowaliśmy sferę o ustalonym promieniu i środku w punkcie w którym znajdowała się cząstka. Przy małych ilościach cząstek dawało to zadowalające wyniki. Sfery, które rysowaliśmy bywały kanciaste, ale nie sprawiało to większych problemów i symulacja wyglądała zadowalająco.
 		
-		Niestety kiedy przekroczyliśmy 1'000'000 cząstek w symulacji, rysowanie sfer stało się głównym wąskim gardłem aplikacji ze względu na dużą ilość trójkątów. Jednym rozwiązaniem tego problemu byłoby zastosowanie algorytmu usuwania niewidocznych przestrzeni (ang. occlusion culling). Zdecydowaliśmy się na inne, prostsze w implementacji rozwiązanie.
+		Niestety kiedy przekroczyliśmy 1'000'000 cząstek w symulacji rysowanie sfer stało się głównym wąskim gardłem aplikacji ze względu na dużą ilość trójkątów. Jednym rozwiązaniem tego problemu byłoby zastosowanie algorytmu usuwania niewidocznych przestrzeni (ang. occlusion culling). Zdecydowaliśmy się na inne, prostsze w implementacji rozwiązanie.
 		
 	\subsection{Wykorzystanie bilboardów}
 		Bilboardy to technika polegająca na wykorzystaniu cieniowania geometrycznego (ang. geometry shader) do wygenerowania w trakcie rysowania dodatkowych trójkątów. W naszym przypadku generowaliśmy prostokąt (2 trójkąty) zwrócony zawsze w kierunku kamery. 
 		
-		Następnie w trakcie cieniowania pikseli na tym bilboardzie rysowaliśmy koło. Porównanie efektów techniki naiwnej z techniką wykorzystania bilboardów można zobaczyć na rysunku \ref{fig:impostor_image}
+		Następnie w trakcie cieniowania pikseli na tym bilboardzie rysowaliśmy koło. Porównanie efektów techniki naiwnej z techniką wykorzystania bilboardów można zobaczyć w rysunku \ref{fig:impostor_image}
 		
 		\begin{figure}[h!]
     	\centering
@@ -645,7 +645,7 @@ Nasza implementacja metody SPH składa się z dziewięciu jąder i wykorzystujem
 		Obszerny opis znajduje się w sekcji 1.
 
 	\subsubsection*{OpenGL}
-			Jest to specyfikacja otwartego i uniwersalnego API do tworzenia grafiki. Ciekawym rezultatem uniwersalności bibliotek typu OpenGL i OpenCL jest to, że de facto OpenCL i OpenGL same w sobie są jedynie specyfikacjami API a nie implementacjami. W gestii producentów leży implementacja danego API na dostarczane urządzenie.
+			Jest to specyfikacja otwartego i uniwersalnego API do tworzenia grafiki. Ciekawym resultatem uniwersalności bibliotek typu OpenGL i OpenCL jest to, że de facto OpenCL i OpenGL same w sobie są jedynie specyfikacjami API a nie implementacjami. W gestii producentów leży implementacja danego API na dostarczane urządzenie.
 
 	\subsubsection*{CLPP}
 				 Jest to ogólnodostępna biblioteka do sortowania z wykorzystaniem OpenCL. Wykorzystaliśmy ją w projekcie ponieważ sortowanie było kluczowym elementem algorytmu, a clpp oferowało wysoce zoptymalizowaną, w stosunku do naszej, implementację radix sorta działająca na GPU.
@@ -654,7 +654,7 @@ Nasza implementacja metody SPH składa się z dziewięciu jąder i wykorzystujem
 				 Jest to jedna z najlżejszych wieloplatformowych bibliotek do tworzenia i obsługi okien, dostępnych w C++. W naszym projekcie klasy Window i InputManager są wrapperami na funkcjonalności GLFW. Ma ona tę wadę, że nie umożliwia łatwego wyświetlania tekstu czy prostych obiektów geometrycznych w oknie tak jak konkurencyjne biblioteki SFML, SDL czy FreeGLUT. 
 
 	\subsubsection*{Boost.Signals2}
-				 Biblioteka boost jest przez wielu uważana za drugi standard C++, oczywiście po libstdc++. Boost.Signals2 udostępnia funkcjonalność sygnałów i slotów, zbliżoną na przykład do systemu eventów w językach takich jak C\#. Została ona wykorzystana do stworzenia globalnego systemu zdarzeń, dzięki któremu trywialnym stało się pisanie mapowania działań użytkownika na funkcje wewnątrz programu. 
+				 Biblioteka boost jest przez wielu uważana za drugi standard C++, oczywiśćie po libstdc++. Boost.Signals2 udostępnia funkcjonalność sygnałów i slotów, zbliżoną na przykład do systemu eventów w językach takich jak C\#. Została ona wykorzystana do stworzenia globalnego systemu zdarzeń, dzięki któremu trywialnym stało się pisanie mapowania działań użytkownika na funkcje wewnątrz programu. 
 
 
 	\clearpage
