@@ -9,7 +9,7 @@
 \newcommand*{\LangFaculty}{Wydzia{\l} Informatyki, Elektroniki i Telekomunikacji\\[2mm] Katedra Informatyki}
 \newcommand*{\LangSupervisor}{Opiekun:}
 \newcommand*{\LangStatementHead}{O\'SWIADCZENIE AUTORA PRACY}
-\newcommand*{\LangStatementBody}{O\'swiadczam, \'swiadomy(-a) odpowiedzialno\'sci karnej za po\'swiadczenie nieprawdy, \.ze niniejszy projekt wykona{\l}em(-am) osobi\'scie i samodzielnie w zakresie opisanym w dalszej cz\k{e}\'sci dokumentu  i \.ze nie korzysta{\l}em(-am) ze \'zr\'ode{\l} innych ni\.z wymienione w dalszej cz\k{e}\'sci dokumentu.}
+\newcommand*{\LangStatementBody}{O\'swiadczamy, \'swiadomi odpowiedzialno\'sci karnej za po\'swiadczenie nieprawdy, \.ze niniejszy projekt wykonali\'smy osobi\'scie i samodzielnie w zakresie opisanym w dalszej cz\k{e}\'sci dokumentu  i \.ze nie korzystali\'smy ze \'zr\'ode{\l} innych ni\.z wymienione w dalszej cz\k{e}\'sci dokumentu.}
 \newcommand*{\LangSignature}{PODPIS}
 \newcommand*{\LangThesisType}{Projekt in\.zynierski}
 }
