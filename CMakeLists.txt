@@ -7,8 +7,6 @@ find_package( OpenCL REQUIRED )
 find_package( Boost 1.54 REQUIRED )
 find_package( Assimp REQUIRED )
 find_package( OpenGL REQUIRED )
-find_package( GLU REQUIRED )
-find_package( Freetype REQUIRED )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)

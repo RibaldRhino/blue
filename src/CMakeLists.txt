@@ -6,7 +6,6 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/glfw/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/glew/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/glm)
 include_directories(${PROJECT_SOURCE_DIR}/lib/clpp)
-include_directories(${FREETYPE_INCLUDE_DIR_freetype2})
 
 link_directories(${GLEW_LIBRARY_DIRS})
 add_definitions(${GLEW_DEFINITIONS})
@@ -29,11 +28,10 @@ Event/Game/Window/Up/OnLMBReleased.cpp Event/Game/Window/Up/OnRMBReleased.cpp
 Game/World/Actor/Components/Basic/BasicRendererComponent.cpp Game/World/Actor/Components/TransformComponentt.cpp
 Game/World/Actor/Components/Basic/BasicModelComponent.cpp Game/World/Actor/Components/Camera/CameraModelComponent.cpp Game/World/Actor/Components/IComponent.cpp
 Game/World/Actor/Components/Camera/CameraLogicComponent.cpp Game/World/Actor/Components/TransformComponent.hpp Game/World/Actor/Components/Background/BackgroundRendererComponent.cpp
-Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Components/Water/WaterRendererComponent.cpp Game/World/Actor/Components/Water/WaterModelComponent.cpp
-Game/World/Actor/Components/UI/UIRendererComponent.cpp)
+Game/World/Actor/Components/Water/WaterLogicComponent.cpp Game/World/Actor/Components/Water/WaterRendererComponent.cpp Game/World/Actor/Components/Water/WaterModelComponent.cpp)
 
 add_executable(blue ${SOURCE_FILES})
-target_link_libraries(blue libglew_shared glfw clpp ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE} glu32 ${FREETYPE_LIBRARY})
+target_link_libraries(blue libglew_shared glfw clpp ${GLFW_LIBRARIES} ${OPENCL_LIBRARIES} ${BOOST_LIBRARIES} ${ASSIMP_LIBRARY_RELEASE} ${FREETYPE_LIBRARY})
 
 add_custom_target(copy_kernels)
 set(KERNEL_FILES sph.cl)

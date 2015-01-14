@@ -65,7 +65,7 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
 
     cl_float4 lbf{0,0,0,0};
-    cl_float4 rtb{4,4,4,0};
+    cl_float4 rtb{2,2,1,0};
 
     cl_float h{0.1};
     //cl_float ro0 = 12;

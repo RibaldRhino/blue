@@ -13,7 +13,6 @@
 #include <Game/World/Actor/Components/Water/WaterModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterRendererComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterLogicComponent.hpp>
-#include <Game/World/Actor/Components/UI/UIRendererComponent.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <Event/EventManager.hpp>
 
@@ -68,7 +67,7 @@ namespace game {
             _waterSPtr = std::make_shared<Actor>();
             auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
             waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
-            auto waterModelSPtr = std::make_shared<WaterModelComponent>(32, 2, 2, 0.25);
+            auto waterModelSPtr = std::make_shared<WaterModelComponent>(32, 0.5, 2, 1);
             auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
             _waterSPtr->AddComponent(waterTransformSPtr);
             _waterSPtr->AddComponent(waterModelSPtr);

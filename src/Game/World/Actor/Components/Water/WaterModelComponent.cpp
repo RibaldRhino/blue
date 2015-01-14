@@ -11,9 +11,9 @@ game::WaterModelComponent::WaterModelComponent(GLuint resolution, float width, f
     for(int i=0;i<resolution*width;i++) {
         for(int j=0;j<resolution*height;j++) {
             for(int k = 0; k< resolution*depth;k++) {
-                points.push_back((i*width)/resolution);
-                points.push_back((j*width)/resolution);
-                points.push_back((k*width)/resolution);
+                points.push_back((float)i/resolution);
+                points.push_back((float)j/resolution);
+                points.push_back((float)k/resolution);
                 points.push_back(0);
                 auto minDim = std::min(width, std::min(height, depth));
                 radius.push_back(1.0/(resolution*3.0));
