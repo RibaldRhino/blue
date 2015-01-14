@@ -59,7 +59,7 @@
 	
 	Drugim typem użytkownika jest osoba korzystająca z zaimplementowanego systemu w celu zobaczenia jego możliwości oraz lepszego zrozumienia metody hydrodynamiki cząstek wygładzanych poprzez manipulację parametrów układu przy użyciu interfejsu użytkownika, oraz obserwację wpływu dokonywanych zmian dzięki modułowi graficznemu aplikacji.
 	
-	\subsection{Początkowy opis wymagań}
+	\subsection{Opis wymagań}
 	
 		\subsubsection{Wymagania funkcjonalne}
 		
@@ -203,10 +203,38 @@
 			\end{itemize}
 		
 		\subsubsection*{08.10.2014 - Spotkanie z klientem}
+			
+			Spotkanie z klientem w celu pokazania postępu prac po wakacjach. 
+			
+			\begin{itemize}
+			\item Stanu projektu
+				\begin{itemize}
+					\item Istnieją błędy w implementacji przez które symulacja nie działała zgodnie z oczekiwaniami.
+					\item Usunięcie wizualizacji pudła obliczeniowego, ponieważ zmniejszało przejrzystość symulacji.
+					\item Zmiana sposoby wizualizacji czątek z ładowanego modelu sfery na blibordy opisane w dokumentacji technicznej.
+				\end{itemize}
+			\end{itemize}
+			
 		
-		\subsubsection*{02.12.2014 - Spotkanie z klientem}
+		\subsubsection*{15.12.2014 - Spotkanie z klientem}
+		
+			Spotkanie z klientem w celu pokazania w większości gotowej pracy.
+			
+			\begin{itemize}
+			\item Stanu projektu
+				\begin{itemize}
+					\item Symulacja przebiega w sposób zadowalający.
+					\item Model lepkości wymaga poprawy.
+					\item Nie ma możliwości dobierania stałych symulacji, ale wybrane przez nas stałe dają zadowalające efekty.
+				\end{itemize}
+			\end{itemize}
+			
+			Po tym spotkaniu, ustalono z klientem że stan projektu jest zadowalający i można przejść do fazy pisania dokumentacji.
 			
 		\subsubsection*{05.01.2015 - Spotkanie z prowadzącym pracownię projektową}
+		
+		Spotkanie z prowadzącym pracownię projektową w celu omówienia pisanej dokumentacji. Pojawiło się wiele sugestii oraz poprawek w stosunku do obecnej na tamten czas jej formy. Wnioski z omawianych tematów są odzwierciedlone w strukturze oraz treści dokumentów.
+		
 
 \section{Podsumowanie}
 
@@ -263,7 +291,17 @@
 			\item Komunikatory internetowe (np. Google Hangouts), były głównie używane w trakcie zdalnej pracy członków zespołu do rozmowy o obecnie realizowanych zadaniach.
 		
 		\end{itemize}
-		
+	
+	\subsection{Sposób testowania tworzonego oprogramowania}
+	
+	Przeprowadzana symulacja w dużej mierze była czymś dla nas nieprzewidywalnym. Nie byliśmy w stanie obliczyć przykładowych poprawnych rozwiązań metody SPH, które później wykorzystalibyśmy do testów jednostkowych, ponieważ najmniejsza zmiana w metodzie mogła całkowicie zaburzyć wyniki. Część systemu odpowiedzialna za grafikę także mogła być testowana tylko naocznie. Postanowiliśmy więc porzucić pomysł stosowania testów automatycznych, ze względu na brak oczywistego i użytecznego sposobu na wdrożenie ich w kluczowych miejscach wytwarzanego przez nas systemu.
+	 
+	 Stosowane przez nas techniki testowania naszego systemu polegały w dużej mierze na tworzeniu przejrzystych i precyzyjnych logów aplikacji oraz na naocznym sprawdzaniu rezultatów działania symulacji. 
+	 
+	 Logi okazały się szczególnie przydatne kiedy implementowaliśmy samą metodę SPH w OpenCL. Zapisywaliśmy do nich wyniki kompilacji jąder OpenCL, dzięki czemu ominęliśmy wiele godzin szukania drobnych błędów składniowych w tychże jądrach. 
+	 
+	 Naoczne sprawdzanie rezultatów działania aplikacji było jedyną możliwą opcją w kwestii potwierdzenia poprawności zaimplementowanej metody ponieważ głównym testem naszej aplikacji było to, czy uzyskany rezultat przypomina w swoim zachowaniu rzeczywisą ciecz. Zachowanie się cząstek w sposób przypominający ciecz jest rzeczą na tyle złożoną, że uzyskanie takiego efektu w dużej mierze potwierdza poprawność zaimplementowanych algorytmów. 
+	 
 	\subsection{Podział prac}
 	
 		\subsubsection*{Dawid Romanowski} 
