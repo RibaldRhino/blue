@@ -28,11 +28,15 @@
 
 	\subsection{Opis problemu}
 	
-	Symulacja zjawisk fizycznych przy użyciu komputerów możliwa jest jedynie z taką dokładnością na jaką pozwala nam moc obliczeniowa maszyny. W wielu przypadkach jednak dokładność numeryczna nie jest kluczowym kryterium, za to tym co tak naprawdę chce się uzyskać jest dokładność wizualna. Dlatego też przy wizualizacji symulacji modeli fizycznych stosuje się uproszczenia mające na celu naśladowanie poprawnych wyników pod względem wyglądu. W przypadku symulacji zachowania płynów nie jest możliwa wizualizacja wyników w czasie wykonywania obliczeń, gdy obliczenia uwzględniają wszystkie oddziaływania pomiędzy elementami modelu fizycznego. Konieczna jest zatem dyskretyzacja problemu oraz przyjęcie uproszczonych zjawisk lub zastąpienie ich prostszymi rozwiązaniami aproksymującymi ich zachowania. Takim podejściem jest właśnie metoda SPH, będąca uproszczeniem praw hydrodynamiki opisanym przez równania Naviera-Stokesa.
+	Symulacja czasu rzeczywistego zjawisk fizycznych jest zagadnieniem złożonym zarówno od strony teoretycznej jak i od strony implementacyjnej. Aby uzyskać realistycznie wyglądający efekt wymagane jest opracowanie szczegółowego modelu fizycznego danego zjawiska, zapisanie go w taki sposób aby umożliwić jego implementację i na końcu olbrzymia moc obliczeniowa, aby móc podziwiać efekty działania modelu w czasie rzeczywistym. Pierwsze dwa kroki są zależne od nas i możemy je do woli szlifować, jednak w obliczu zbyt małej mocy procesorów jedyny możliwy efekt końcowy to zbiór danych wyjściowych otrzymywany po wykonaniu wszystkich obliczeń - rzecz bezużyteczna w symulacjach czasu rzeczywistego takich jak na przykład gry komputerowe.
+
+	W symulacji zjawisk fizycznych często występuje konieczność wykonywania dużej ilości prostych, powtarzalnych obliczeń dla różnych elementów układu. Przykładem może być symulacja zachowania żdźbeł trawy w szerokim polu. Mogą być ich miliony, a dla każdego z nich musimy wykonać podobne obliczenia zależne od takich czynników jak kierunek wiatru, nacisk otaczających elementów czy ukształtowanie podłoża. CPU nie będzie w stanie nadążyć przy tak olbrzymiej liczbie elementów nawet jeśli odpowienio wykorzystamy wszystkie dostępne rdzenie. 
 	
-	$\,$
-	
-	Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym. Zwłaszcza gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, coraz popularniejsze staje się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. Sprawdzenie wyników realizacji obliczeń metody SPH w ten właśnie sposób jest jednym z głównych założeń naszej pracy.
+		Gdy procesory przestały znacząco zwiększać swoją prędkość taktowania, a zaczęła rosnąć ich koegzystentna ilość, popularniejsze stało się przeprowadzanie niezależnych, zrównoleglonych obliczeń w celu pełnego wykorzystania potencjału sprzętu. GPGPU (general purpose computation on graphics processing unit) to technika wykonywania równoległych obliczeń na procesorach graficznych, która zyskuje na popularnośći w ostatnich latach. Wynika to z tego, że w nowoczesnych GPU wykorzystywany jest model obliczeniowy SIMT (single instruction, multiple threads), który w połączeniu z ogromną (w stosunku do CPU) ilością rdzeni (setki, czy nawet tysiące) sprawia, że implementacje pewnych algorytmów mogą uzyskać olbrzymie przyspieszenie.
+
+	Zjawisko fizyczne, które będzie nas interesować w naszej pracy to zachowanie cieczy znajdującej się za tamą w zamkniętym zbiorniku, w przypadku przerwania tejże tamy i wylewania się cieczy do zbiornika. W przypadku symulacji zachowania płynów nie jest możliwa wizualizacja wyników w czasie wykonywania obliczeń, gdy obliczenia uwzględniają wszystkie oddziaływania pomiędzy elementami modelu fizycznego. Konieczna jest zatem dyskretyzacja problemu oraz przyjęcie uproszczonych zjawisk lub zastąpienie ich prostszymi rozwiązaniami aproksymującymi ich zachowania. Istnieje wiele metod symulowania cieczy - DPD (dissipative particle dynamics), SPH (smoothed particle hydrodynamics) czy SDPD (smoothed dissipative particle dynamics), każda mająca swoje zalety i wady.
+
+	Zadaniem naszej pracy jest implementacja metody SPH w technice GPGPU oraz stworzenie aplikacji, która umożliwi wizualizację zachowania cieczy w trakcie wykonywania symulacji przerwania tamy. Pomimo iż metoda ta została pierwszy raz zaproponowana w roku 1977, to dopiero od niedawna możliwe jest jej wykorzystanie do zaprezentowania wyników w czasie rzeczywistym.
 	
 	\subsection{Cele projektu}
 	
@@ -42,11 +46,11 @@
 	
 	\begin{itemize}
 	
-		\item Przeprowadzenie wszystkich obliczeń wymaganych do ostatecznego zasymulowania zachowania płynu metodą SPH na wielordzeniowej architekturze przy użyciu zestawu narzędzi OpenCL lub CUDA
+		\item Przeprowadzenie wszystkich obliczeń wymaganych do ostatecznego zasymulowania zachowania płynu metodą SPH na wielordzeniowej architekturze przy użyciu zestawu narzędzi OpenCL lub CUDA.
 				
-		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najpłynniejszej animacji uzyskanych wyników (przyjęto, że $\sim 30$ klatek na sekundę jest wystarczającym osiągnięciem)
+		\item Optymalizacja wydajności użytych rozwiązań w celu uzyskania możliwie najpłynniejszej animacji uzyskanych wyników (przyjęto, że $\sim 30$ klatek na sekundę jest wystarczającym osiągnięciem).
 		
-		\item Graficzna prezentacja wyników w czasie rzeczywistym
+		\item Graficzna prezentacja wyników w czasie rzeczywistym.
 		
 	\end{itemize}
 	
