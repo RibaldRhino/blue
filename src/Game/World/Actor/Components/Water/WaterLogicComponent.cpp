@@ -65,16 +65,16 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
 
     cl_float4 lbf{0,0,0,0};
-    cl_float4 rtb{2,2,2,0};
+    cl_float4 rtb{2,2,1,0};
 
     cl_float h{0.1};
-    cl_float ro0 = 65;
+    cl_float ro0 = 90;
     cl_float m = 0.02;
 
 
     cl_float4 g{0,-20,0,0};
-    cl_float mi{6};
-    cl_float k{6};
+    cl_float mi{8};
+    cl_float k{4};
     cl_float speed_loss{1};
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
