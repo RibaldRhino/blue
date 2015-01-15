@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <Event/EventManager.hpp>
 #include <Event/Game/Window/OnWindowClose.hpp>
+#include <System/ConfigSystem.hpp>
 
 #ifdef _WIN32   // Windows version
 #include <windows.h>
@@ -63,18 +64,19 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
 
     _particle_count = model->particle_count();
 
+    auto& config = gamesystem::ConfigSystem::getInstance();
 
     cl_float4 lbf{0,0,0,0};
-    cl_float4 rtb{2,2,1,0};
+    cl_float4 rtb{2,2,2,0};
 
-    cl_float h{0.1};
-    cl_float ro0 = 90;
+    cl_float h = ::atof(config["h"].get().c_str());
+    cl_float ro0 = ::atof(config["ro0"].get().c_str());
     cl_float m = 0.02;
 
 
     cl_float4 g{0,-20,0,0};
     cl_float mi{8};
-    cl_float k{4};
+    cl_float k{2};
     cl_float speed_loss{1};
 
     unsigned int voxelsX = (unsigned int) (fabs((float)((rtb.s[0] - lbf.s[0])/(2*h))) + 0.5);
