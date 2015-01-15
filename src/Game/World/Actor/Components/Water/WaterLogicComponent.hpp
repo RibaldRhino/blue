@@ -47,7 +47,7 @@ namespace game {
         std::vector<cl_float2> _density_pressure;
         cl_mem _density_pressure_cl;
 
-        int neighbour_count{55};
+        int neighbour_count{32};
 
         unsigned int _particle_count;
 

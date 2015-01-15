@@ -13,7 +13,6 @@
 #include <Game/World/Actor/Components/Water/WaterModelComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterRendererComponent.hpp>
 #include <Game/World/Actor/Components/Water/WaterLogicComponent.hpp>
-#include <Game/World/Actor/Components/UI/UIRendererComponent.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <Event/EventManager.hpp>
 
@@ -68,7 +67,7 @@ namespace game {
             _waterSPtr = std::make_shared<Actor>();
             auto waterTransformSPtr = std::make_shared<TransformComponent>(_waterSPtr);
             waterTransformSPtr->MoveBy(glm::vec3(0, 0.5f, 0));
-            auto waterModelSPtr = std::make_shared<WaterModelComponent>(32, 2, 2, 0.25);
+            auto waterModelSPtr = std::make_shared<WaterModelComponent>(32, 0.5, 2, 1);
             auto waterRendererSPtr = std::make_shared<WaterRendererComponent>(_waterSPtr, waterShaderProgram);
             _waterSPtr->AddComponent(waterTransformSPtr);
             _waterSPtr->AddComponent(waterModelSPtr);
@@ -170,31 +169,6 @@ namespace game {
         _boxSPtr->AddComponent(boxRendererSPtr);*/
 
         _waterSPtr = std::make_shared<Actor>();
-
-//        vert = get_file_contents("Shader/v3f-t2f-c4f.vert");
-//        frag = get_file_contents("Shader/v3f-t2f-c4f.frag");
-//        const char* uiVertexShader = vert.c_str();
-//        const char* uiFragmentShader = frag.c_str();
-//
-//        GLuint uvs = glCreateShader (GL_VERTEX_SHADER);
-//        glShaderSource (uvs, 1, &uiVertexShader, NULL);
-//        glCompileShader (uvs);
-//        GetShaderCompileLog(uvs);
-//
-//        GLuint ufs = glCreateShader (GL_FRAGMENT_SHADER);
-//        glShaderSource (ufs, 1, &uiFragmentShader, NULL);
-//        glCompileShader (ufs);
-//        GetShaderCompileLog(ufs);
-//
-//        GLuint uiShaderProgram = glCreateProgram ();
-//        glAttachShader (uiShaderProgram, ufs);
-//        glAttachShader (uiShaderProgram, uvs);
-//        glLinkProgram (uiShaderProgram);
-//        GetProgramLinkLog(uiShaderProgram);
-
-//        _uiSPtr = std::make_shared<Actor>();
-//        auto uiRendererSPtr = std::make_shared<UIRendererComponent>(_uiSPtr, uiShaderProgram);
-//        _uiSPtr->AddComponent(uiRendererSPtr);
     }
 
     void World::Render() {
@@ -208,8 +182,6 @@ namespace game {
             auto waterRenderComponent = std::dynamic_pointer_cast<WaterRendererComponent>(_waterSPtr->getComponent(ComponentType::RENDER_COMPONENT));
             waterRenderComponent->Render();
         }
-//        auto uiRenderComponent = std::dynamic_pointer_cast<UIRendererComponent>(_uiSPtr->getComponent(ComponentType::RENDER_COMPONENT));
-//        uiRenderComponent->Render();
     }
 
     void World::Update(double deltaTime) {
