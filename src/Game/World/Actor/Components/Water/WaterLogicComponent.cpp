@@ -74,7 +74,7 @@ game::WaterLogicComponent::WaterLogicComponent(game::ActorWPtr actorWPtr) {
     cl_float m = 0.02;
 
 
-    cl_float4 g{0,-20,0,0};
+    cl_float4 g{0,-10,0,0};
     cl_float mi{8};
     cl_float k{2};
     cl_float speed_loss{1};

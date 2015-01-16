@@ -36,7 +36,14 @@
 
 	$\,$
 
-	Przedmiotem naszych zainteresowań jest efektywna symulacja zachowania cieczy newtonowskiej, co może być wykorzystane np. w grach wideo. Do testowania realności symulacji posłużył nam benchmark, którym jest obserwacja zachowania cieczy znajdującej się za tamą w zamkniętym zbiorniku, w przypadku przerwania tejże tamy i wylewania się cieczy do zbiornika. 
+		Przedmiotem naszych zainteresowań jest efektywna symulacja zachowania cieczy newtonowskiej, co może być wykorzystane np. w grach wideo. Do sprawdzenia poprawności wykonywanej symulacji służy nam benchmark o nazwie "przerwanie tamy". Polega on na początkowym umiejscowieniu cząstek w pozycji podobnej do przedstawionej na rysunku (\ref{img:przerwanie_tamy}), a następnie rozpoczęciu symulacji. 
+		
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.8\textwidth]{starting_position.png}
+		\caption{Przykładowa pozycja początkowa benchmarku "przerwanie tamy"}
+		\label{img:przerwanie_tamy}
+	\end{figure}
 	
 	W przypadku symulacji zachowania płynów nie jest możliwa wizualizacja wyników w czasie wykonywania obliczeń, gdy obliczenia uwzględniają wszystkie oddziaływania pomiędzy elementami modelu fizycznego. Konieczna jest zatem dyskretyzacja problemu oraz przyjęcie uproszczonych zjawisk lub zastąpienie ich prostszymi rozwiązaniami aproksymującymi ich zachowania. Istnieje wiele metod symulowania cieczy - DPD (dissipative particle dynamics), SPH (smoothed particle hydrodynamics) czy SDPD (smoothed dissipative particle dynamics), każda z nich ma swoje zalety i wady.
 
@@ -293,7 +300,16 @@ Bardzo ciężko jest znaleźć w internecie poprawną implementację metody SPH 
 				\hline
 			\end{tabular}
 
+\section{Sposób testowania tworzonego oprogramowania}
 
+	Przeprowadzana symulacja w dużej mierze była czymś dla nas nieprzewidywalnym. Nie byliśmy w stanie obliczyć przykładowych poprawnych rozwiązań metody SPH, które później wykorzystalibyśmy do testów jednostkowych, ponieważ najmniejsza zmiana w metodzie mogła całkowicie zaburzyć wyniki. Część systemu odpowiedzialna za grafikę także mogła być testowana tylko naocznie. Postanowiliśmy więc porzucić pomysł stosowania testów automatycznych, ze względu na brak oczywistego i użytecznego sposobu na wdrożenie ich w kluczowych miejscach wytwarzanego przez nas systemu.
+	 
+	 Stosowane przez nas techniki testowania naszego systemu polegały w dużej mierze na tworzeniu przejrzystych i precyzyjnych logów aplikacji oraz na naocznym sprawdzaniu rezultatów działania symulacji. 
+	 
+	 Logi okazały się szczególnie przydatne kiedy implementowaliśmy samą metodę SPH w OpenCL. Zapisywaliśmy do nich wyniki kompilacji jąder OpenCL, dzięki czemu ominęliśmy wiele godzin szukania drobnych błędów składniowych w tychże jądrach. 
+	 
+	 Naoczne sprawdzanie rezultatów działania aplikacji było jedyną możliwą opcją w kwestii potwierdzenia poprawności zaimplementowanej metody ponieważ głównym testem naszej aplikacji było to, czy uzyskany rezultat przypomina w swoim zachowaniu rzeczywistą ciecz. Zachowanie się cząstek w sposób przypominający ciecz jest rzeczą na tyle złożoną, że uzyskanie takiego efektu w dużej mierze potwierdza poprawność zaimplementowanych algorytmów. 
+	 
 
 \section{Organizacja pracy}
 
@@ -381,8 +397,24 @@ Bardzo ciężko jest znaleźć w internecie poprawną implementację metody SPH 
 
 \section{Wyniki projektu}
 
-Udało się stworzyć aplikację będącą PoC (Proof of Concept, ang. dowód koncepcji) badanego problemu. Aplikacja ta przeprowadza symulację zachowania płynu przy użyciu metody SPH zaimplementowanej jako seria jąder OpenCL. Wyniki przeprowadzanej symulacji wizualizowane są w czasie rzeczywistym przy użyciu OpenGL. Płynność uzyskanej animacji zależy oczywiście od ilości symulowanych cząstek, jednak zdaniem naszym i klienta jest ona zadowalająca. Przy ilościach cząstek rzędu milion uzyskujemy ponad 30 fps (frames per second, ang. klatki na sekundę).
+Udało się stworzyć aplikację będącą PoC (Proof of Concept, ang. dowód koncepcji) badanego problemu. Aplikacja ta przeprowadza symulację zachowania płynu przy użyciu metody SPH zaimplementowanej jako seria jąder OpenCL. Wyniki przeprowadzanej symulacji wizualizowane są w czasie rzeczywistym przy użyciu OpenGL. Płynność uzyskanej animacji zależy oczywiście od ilości symulowanych cząstek, jednak zdaniem naszym i klienta jest ona zadowalająca. Przy ilościach cząstek rzędu milion uzyskujemy ponad 30 fps (frames per second, ang. klatki na sekundę). Przykładowa sekwencja klatek wykonywanej symulacji została zaprezentowana na rysunku (\ref{img:screen}). Użyte parametry to $g=-10$, $h=0.05$, $m=0.02$ oraz $\rho_0=450$.
+
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.49\textwidth]{1.png}
+		\includegraphics[width=0.49\textwidth]{2.png}
+		\includegraphics[width=0.49\textwidth]{3.png}
+		\includegraphics[width=0.49\textwidth]{4.png}
+		\includegraphics[width=0.49\textwidth]{5.png}
+		\includegraphics[width=0.49\textwidth]{6.png}
+		\includegraphics[width=0.49\textwidth]{7.png}
+		\includegraphics[width=0.49\textwidth]{8.png}
+		\caption{Screenshoty z działania aplikacji}
+		\label{img:screen}
+	\end{figure}
 		
+	$\,$		
+	
 		Poniższe elementy nie zostały zrealizowane w pełni bądź pominięte, głównie z powodu braku czasu. Nie są to elementy niezbędne do poprawnego działania projektu, jednakże ich realizacja bardzo pomogłaby w dalszym rozwoju stworzonego oprogramowania.
 		
 		\begin{itemize}
